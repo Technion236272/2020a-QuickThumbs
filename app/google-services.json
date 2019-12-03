@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "318163594770",
+    "firebase_url": "https://quickthumbs-2683e.firebaseio.com",
+    "project_id": "quickthumbs-2683e",
+    "storage_bucket": "quickthumbs-2683e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:318163594770:android:49079985bb0e5aafeaf2cb",
+        "android_client_info": {
+          "package_name": "android.technion.quickthumbs"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "318163594770-4dlmpbaji57n83hdql6bn09uv4fbtb2q.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB4U3l1hmZ7-mcgG9WaMX5DXKYGhvZKjqI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "318163594770-4dlmpbaji57n83hdql6bn09uv4fbtb2q.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
