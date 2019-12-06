@@ -23,6 +23,26 @@ public class MainUserActivity extends AppCompatActivity {
 
         fireBaseAuth = FirebaseAuth.getInstance();
 
+        Button gameBtn = ((Button) findViewById(R.id.startGameButton));
+        gameBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+              Intent i = new Intent(getApplicationContext(), GameActivity.class);
+              startActivityForResult(i, 2);
+            }
+        }
+        );
+
+        Button addTxtBtn = ((Button) findViewById(R.id.textAdderButton));
+        addTxtBtn.setOnClickListener(new View.OnClickListener() {
+                                       @Override
+                                       public void onClick(View v) {
+                                           Intent i = new Intent(getApplicationContext(), AddTextActivity.class);
+                                           startActivityForResult(i, 2);
+                                       }
+                                   }
+        );
+
         setButtonListener((Button) findViewById(R.id.themeSelectorButton), ThemeSelectorActivity.class);
     }
 
