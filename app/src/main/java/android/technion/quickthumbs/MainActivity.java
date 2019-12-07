@@ -2,6 +2,7 @@ package android.technion.quickthumbs;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -35,12 +36,12 @@ public class MainActivity extends AppCompatActivity {
         setButtonListener((Button) findViewById(R.id.sign_in_button), MainUserActivity.class);
 
         setButtonListener((Button) findViewById(R.id.create_account_button), CreateAccountActivity.class);
+
+        setActionBar();
     }
 
-    @Override
-    protected void onStart(){
-        super.onStart();
-        moveToMainUserActivityIfAlreadyLoggedIn();
+    private void setActionBar() {
+        setSupportActionBar((Toolbar)findViewById(R.id.signInToolbar));
     }
 
     private void moveToMainUserActivityIfAlreadyLoggedIn() {

@@ -1,6 +1,8 @@
 package android.technion.quickthumbs;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -16,6 +18,7 @@ public class AddTextActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_text);
+
         final TextView titleHeadline = (TextView) findViewById(R.id.titleHeadline);
         titleHeadline.setTextColor(Color.GRAY);
         final TextView titleValue = (TextView) findViewById(R.id.titleValue);
@@ -25,5 +28,13 @@ public class AddTextActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             titleValue.setShowSoftInputOnFocus(true);
         }
+
+        setActionBar();
+    }
+
+    private void setActionBar() {
+        setSupportActionBar((Toolbar)findViewById(R.id.AddTextToolbar));
+        ActionBar ab = getSupportActionBar();
+        ab.setDisplayHomeAsUpEnabled(true);
     }
 }

@@ -1,6 +1,8 @@
 package android.technion.quickthumbs;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Context;
 import android.os.Build;
@@ -37,6 +39,13 @@ public class GameActivity extends AppCompatActivity {
 //                return true;
 //            }
 //        });
+        setActionBar();
+    }
+
+    private void setActionBar() {
+        setSupportActionBar((Toolbar)findViewById(R.id.GameToolbar));
+        ActionBar ab = getSupportActionBar();
+        ab.setDisplayHomeAsUpEnabled(true);
     }
 
 }

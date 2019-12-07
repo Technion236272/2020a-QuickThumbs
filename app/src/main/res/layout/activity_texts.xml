@@ -1,22 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".theme.ThemeSelectorActivity">
+    android:orientation="vertical"
+    tools:context=".TextsActivity">
 
     <include
-        android:id="@+id/themeSelectorToolbar"
         layout= "@layout/toolbar"
+        android:id="@+id/textsToolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/themeRecycleView"
+        android:id="@+id/texts_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/themeSelectorToolbar"
+        android:layout_below="@id/textsToolbar"
         android:scrollbars="vertical" />
-
 </RelativeLayout>

@@ -4,19 +4,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".theme.ThemeSelectorActivity">
+    android:orientation="vertical"
+    tools:context=".FriendsActivity">
 
     <include
-        android:id="@+id/themeSelectorToolbar"
         layout= "@layout/toolbar"
+        android:id="@+id/friendsToolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/themeRecycleView"
+        android:id="@+id/texts_recycler_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/themeSelectorToolbar"
-        android:scrollbars="vertical" />
+        android:layout_below="@id/friendsToolbar"
+        android:scrollbars="vertical"/>
 
 </RelativeLayout>

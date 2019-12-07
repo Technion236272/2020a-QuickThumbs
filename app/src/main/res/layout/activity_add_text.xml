@@ -12,53 +12,29 @@
         android:gravity="center|top"
         android:orientation="horizontal">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        <include
+            layout= "@layout/toolbar"
+            android:id="@+id/AddTextToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:id="@+id/topRightToolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@color/primaryColor"
-            android:minHeight="?attr/actionBarSize"
-            android:theme="?attr/actionBarTheme" >
+            android:layout_toRightOf="@+id/topLeftToolbar"
+            android:orientation="horizontal">
 
-            <RelativeLayout
-                android:id="@+id/topRightToolbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/topLeftToolbar"
-                android:orientation="horizontal">
-                <ImageButton
-                    android:id="@+id/backwards"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBaseline="@id/iconButton"
-                    android:paddingLeft="0dp"
-                    app:srcCompat="?attr/homeAsUpIndicator" />
-
-                <ImageView
-                    android:id="@+id/iconButton"
-                    android:layout_width="200dip"
-                    android:layout_height="50dip"
-                    android:layout_marginStart="71dp"
-                    android:layout_marginLeft="71dp"
-                    android:layout_toEndOf="@id/backwards"
-                    android:layout_toRightOf="@id/backwards"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/name_icon" />
-
-                <ImageButton
-                    android:id="@+id/imageButton"
-                    android:layout_width="55dp"
-                    android:layout_height="55dp"
-                    android:layout_alignBaseline="@id/iconButton"
-                    android:layout_marginStart="46dp"
-                    android:layout_marginLeft="46dp"
-                    android:layout_toEndOf="@id/iconButton"
-                    android:layout_toRightOf="@id/iconButton"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@android:drawable/checkbox_on_background" />
-                />
-            </RelativeLayout>
-        </androidx.appcompat.widget.Toolbar>
+            <ImageView
+                android:id="@+id/iconButton"
+                android:layout_width="200dip"
+                android:layout_height="50dip"
+                android:layout_marginStart="71dp"
+                android:layout_marginLeft="71dp"
+                android:scaleType="fitXY"
+                app:srcCompat="@drawable/name_icon" />
+        </RelativeLayout>
+        </include>
 
     </RelativeLayout>
     <TextView

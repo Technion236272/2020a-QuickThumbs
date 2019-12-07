@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ProfileActivity">
+
+    <include
+        android:id="@+id/profileToolbar"
+        layout= "@layout/toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <ImageView
+        android:id="@+id/achievementBadge"
+        android:layout_width="103dp"
+        android:layout_height="80dp"
+        android:layout_below="@id/profileToolbar"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginLeft="15dp"
+        android:contentDescription="@string/AchievementBadge"
+        app:srcCompat="@drawable/placeholder" />
+
+    <TextView
+        android:id="@+id/WPM"
+        style="@style/BlackTextHeader"
+        android:layout_below="@id/profileToolbar"
+        android:layout_marginTop="5dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginLeft="15dp"
+        android:layout_toRightOf="@id/achievementBadge"
+        android:layout_toEndOf="@id/achievementBadge"
+        android:text="@string/WPM"/>
+
+    <TextView
+        android:id="@+id/WPMValue"
+        style="@style/BlackTextHeader"
+        android:layout_below="@id/profileToolbar"
+        android:layout_toRightOf="@id/WPM"
+        android:layout_toEndOf="@id/WPM"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginStart="5dp"
+        android:text="--" />
+
+    <TextView
+        android:id="@+id/Score"
+        style="@style/BlackTextHeader"
+        android:layout_below="@id/WPM"
+        android:layout_marginTop="5dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginLeft="15dp"
+        android:layout_toRightOf="@id/achievementBadge"
+        android:layout_toEndOf="@id/achievementBadge"
+        android:text="@string/Score" />
+
+    <TextView
+        android:id="@+id/ScoreValue"
+        style="@style/BlackTextHeader"
+        android:layout_below="@id/WPM"
+        android:layout_toRightOf="@id/Score"
+        android:layout_toEndOf="@id/Score"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginStart="5dp"
+        android:text="--" />
+
+    <TextView
+        android:id="@+id/ScoreRanking"
+        style="@style/BlackTextHeader"
+        android:layout_below="@id/Score"
+        android:layout_marginTop="5dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginLeft="15dp"
+        android:layout_toRightOf="@id/achievementBadge"
+        android:layout_toEndOf="@id/achievementBadge"
+        android:text="@string/CurrentScoreRanking" />
+
+    <TextView
+        android:id="@+id/ScoreRankingValue"
+        style="@style/BlackTextHeader"
+        android:layout_below="@id/Score"
+        android:layout_toRightOf="@id/ScoreRanking"
+        android:layout_toEndOf="@id/ScoreRanking"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginStart="5dp"
+        android:text="--" />
+
+    <Button
+        android:id="@+id/FriendsButton"
+        style="@style/LightPrimaryRoundedButton"
+        android:layout_below="@id/achievementBadge"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
+        android:layout_toStartOf="@+id/space"
+        android:layout_toLeftOf="@+id/space"
+        android:onClick="moveToFriendsActivity"
+        android:text="@string/Friends" />
+    <TextView
+        android:id="@+id/space"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"/>
+
+    <Button
+        android:id="@+id/TextsButton"
+        style="@style/LightPrimaryRoundedButton"
+        android:layout_below="@id/achievementBadge"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_toEndOf="@id/FriendsButton"
+        android:layout_toRightOf="@id/FriendsButton"
+        android:onClick="moveToTextsActivity"
+        android:text="@string/Texts" />
+</RelativeLayout>
