@@ -37,6 +37,12 @@ public class MainActivity extends AppCompatActivity {
         setButtonListener((Button) findViewById(R.id.create_account_button), CreateAccountActivity.class);
     }
 
+    @Override
+    protected void onStart(){
+        super.onStart();
+        moveToMainUserActivityIfAlreadyLoggedIn();
+    }
+
     private void moveToMainUserActivityIfAlreadyLoggedIn() {
         FirebaseUser currentUser = fireBaseAuth.getCurrentUser();
 

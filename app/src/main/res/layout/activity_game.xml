@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/all"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:weightSum="3"
+    tools:context=".GameActivity">
+    <RelativeLayout
+        android:id="@+id/first"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center|top"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/primaryColor"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme" >
+
+            <RelativeLayout
+                android:id="@+id/topRightToolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/topLeftToolbar"
+                android:orientation="horizontal">
+            <ImageButton
+                android:id="@+id/backwards"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="0dp"
+                app:srcCompat="?attr/homeAsUpIndicator" />
+
+                <ImageView
+                    android:id="@+id/iconButton"
+                    android:layout_width="200dip"
+                    android:layout_height="50dip"
+                    android:layout_marginStart="71dp"
+                    android:layout_marginLeft="71dp"
+                    android:layout_toEndOf="@id/backwards"
+                    android:layout_toRightOf="@id/backwards"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/name_icon" />
+                />
+            </RelativeLayout>
+        </androidx.appcompat.widget.Toolbar>
+
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/second"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_below="@+id/first">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/statsBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/primaryLightColor"
+            android:minHeight="?attr/actionBarSize"
+            android:theme="?attr/actionBarTheme" >
+
+                    <TextView
+                        android:id="@+id/pointsHeadline"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="#FFFFFF"
+                        android:text="Points: "
+                        android:paddingLeft="10dp"
+                        android:textSize="20dp"/>
+                    <TextView
+                        android:id="@+id/pointsValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@id/pointsHeadline"
+                        android:layout_alignBaseline="@id/pointsHeadline"
+                        android:ems="3"
+                        android:textColor="#FFFFFF"
+                        android:text="0"
+                        android:textSize="20sp" />
+                    <TextView
+                        android:id="@+id/WPMHeadline"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@id/pointsValue"
+                        android:layout_alignBaseline="@id/pointsValue"
+                        android:textColor="#FFFFFF"
+                        android:textSize="20dp"
+                        android:text="WPM: " />
+                    <TextView
+                        android:id="@+id/WPMValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@id/WPMHeadline"
+                        android:layout_alignBaseline="@id/WPMHeadline"
+                        android:ems="3"
+                        android:textColor="#FFFFFF"
+                        android:text="0"
+                        android:textSize="20dp" />
+                    <TextView
+                        android:id="@+id/CPMHeadline"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@id/WPMValue"
+                        android:layout_alignBaseline="@id/WPMValue"
+                        android:textColor="#FFFFFF"
+                        android:textSize="20dp"
+                        android:text="CPM: " />
+                    <TextView
+                        android:id="@+id/CPMValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_toRightOf="@id/CPMHeadline"
+                        android:layout_toEndOf="@id/CPMHeadline"
+                        android:layout_alignBaseline="@id/CPMHeadline"
+                        android:ems="3"
+                        android:textColor="#FFFFFF"
+                        android:textSize="20dp"
+                        android:text="0"
+                        />
+        </androidx.appcompat.widget.Toolbar>
+    </RelativeLayout>
+    <TextView
+        android:id="@+id/displayText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textSize="17sp"
+        android:textColor="@color/primaryTextColor"
+        android:layout_below="@id/second"
+        android:layout_above="@id/currentWord"
+        android:background="@color/primaryDarkColor"
+        android:text="Remember when you were young\n  You shone like the Sun\n   Shine on, you crazy diamond\n    Now there's a look in your eyes\n     Like black holes in the sky\n      Shine on, you crazy diamond">
+
+    </TextView>
+
+        <EditText
+            android:id="@+id/currentWord"
+            android:background="@color/primaryTextColor"
+            android:textColor="@color/secondaryTextColor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textVisiblePassword"
+            android:layout_alignParentBottom="true"
+            android:singleLine="true"
+            />
+    </RelativeLayout>
