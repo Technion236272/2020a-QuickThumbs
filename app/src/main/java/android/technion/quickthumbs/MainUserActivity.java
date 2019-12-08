@@ -2,9 +2,14 @@ package android.technion.quickthumbs;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.technion.quickthumbs.settings.UserSettingActivity;
+import android.technion.quickthumbs.theme.ThemeSelectorActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -17,6 +22,8 @@ public class MainUserActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main_user);
 
         fireBaseAuth = FirebaseAuth.getInstance();
+
+        setButtonListener((Button) findViewById(R.id.themeSelectorButton), ThemeSelectorActivity.class);
     }
 
     @Override
@@ -44,6 +51,27 @@ public class MainUserActivity extends AppCompatActivity {
             // TODO: implement me!
         }
 
+        if (id == R.id.settingsButton) {
+            Intent intent = new Intent(MainUserActivity.this, UserSettingActivity.class);
+            startActivity(intent);
+        }
+
         return super.onOptionsItemSelected(item);
+    }
+
+    private void setButtonListener(Button button, final Class<? extends AppCompatActivity> moveToActivityClass) {
+        button.setOnClickListener(new View.OnClickListener() {
+                                      @Override
+                                      public void onClick(View v) {
+                                          switch (v.getId()) {
+                                              case R.id.themeSelectorButton:
+                                                  Intent intent = new Intent(MainUserActivity.this, moveToActivityClass);
+                                                  startActivity(intent);
+
+                                                  break;
+                                          }
+                                      }
+                                  }
+        );
     }
 }
