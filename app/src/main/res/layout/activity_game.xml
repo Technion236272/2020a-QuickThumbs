@@ -14,13 +14,11 @@
         android:gravity="center|top"
         android:orientation="horizontal">
 
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/toolbar"
+        <include
+            layout= "@layout/toolbar"
+            android:id="@+id/GameToolbar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/primaryColor"
-            android:minHeight="?attr/actionBarSize"
-            android:theme="?attr/actionBarTheme" >
+            android:layout_height="wrap_content">
 
             <RelativeLayout
                 android:id="@+id/topRightToolbar"
@@ -28,12 +26,6 @@
                 android:layout_height="wrap_content"
                 android:layout_toRightOf="@+id/topLeftToolbar"
                 android:orientation="horizontal">
-            <ImageButton
-                android:id="@+id/backwards"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingLeft="0dp"
-                app:srcCompat="?attr/homeAsUpIndicator" />
 
                 <ImageView
                     android:id="@+id/iconButton"
@@ -41,13 +33,10 @@
                     android:layout_height="50dip"
                     android:layout_marginStart="71dp"
                     android:layout_marginLeft="71dp"
-                    android:layout_toEndOf="@id/backwards"
-                    android:layout_toRightOf="@id/backwards"
                     android:scaleType="fitXY"
                     app:srcCompat="@drawable/name_icon" />
-                />
             </RelativeLayout>
-        </androidx.appcompat.widget.Toolbar>
+        </include>
 
     </RelativeLayout>
 

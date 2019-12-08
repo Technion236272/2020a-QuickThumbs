@@ -1,6 +1,8 @@
 package android.technion.quickthumbs.theme;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -17,6 +19,7 @@ public class ThemeSelectorActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_theme_selector);
 
+        setActionBar();
         RecyclerView recyclerView = findViewById(R.id.themeRecycleView);
 
         List<ThemeDataRow> data = fillWithData();
@@ -24,6 +27,12 @@ public class ThemeSelectorActivity extends AppCompatActivity {
 
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+    }
+
+    private void setActionBar() {
+        setSupportActionBar((Toolbar)findViewById(R.id.themeSelectorToolbar));
+        ActionBar ab = getSupportActionBar();
+        ab.setDisplayHomeAsUpEnabled(true);
     }
 
     public List<ThemeDataRow> fillWithData() {

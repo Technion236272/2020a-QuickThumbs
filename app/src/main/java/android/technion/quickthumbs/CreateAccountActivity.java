@@ -1,7 +1,9 @@
 package android.technion.quickthumbs;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -28,6 +30,14 @@ public class CreateAccountActivity extends AppCompatActivity {
         initializeDbSingletons();
 
         setSignUpButton();
+        setActionBar();
+    }
+
+    private void setActionBar() {
+        setSupportActionBar((Toolbar)findViewById(R.id.createAccountToolbar));
+        ActionBar ab = getSupportActionBar();
+        ab.setDisplayHomeAsUpEnabled(true);
+        ab.setDisplayShowTitleEnabled(true);
     }
 
     private void initializeDbSingletons() {

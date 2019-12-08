@@ -10,7 +10,7 @@
         android:id="@+id/addFriendButton"
         android:title=" + Add Friends"
         app:showAsAction="never" />
-<item
+    <item
         android:id="@+id/settingsButton"
         android:title="Settings"
         app:showAsAction="never" />

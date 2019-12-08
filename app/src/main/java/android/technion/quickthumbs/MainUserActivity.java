@@ -1,6 +1,7 @@
 package android.technion.quickthumbs;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -44,11 +45,16 @@ public class MainUserActivity extends AppCompatActivity {
         );
 
         setButtonListener((Button) findViewById(R.id.themeSelectorButton), ThemeSelectorActivity.class);
+        setActionBar();
+    }
+
+    private void setActionBar() {
+        setSupportActionBar((Toolbar)findViewById(R.id.MainUserToolbar));
     }
 
     @Override
     protected void onStop() {
-        fireBaseAuth.signOut();
+       fireBaseAuth.signOut();
         super.onStop();
     }
 
@@ -68,7 +74,8 @@ public class MainUserActivity extends AppCompatActivity {
         int id = item.getItemId();
 
         if (id == R.id.goToPersonalAreaButton) {
-            // TODO: implement me!
+            Intent intent = new Intent(MainUserActivity.this, ProfileActivity.class);
+            startActivity(intent);
         }
 
         if (id == R.id.settingsButton) {
