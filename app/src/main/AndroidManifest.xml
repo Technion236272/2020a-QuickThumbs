@@ -22,8 +22,6 @@
             android:label="@string/Profile"
             android:parentActivityName=".MainUserActivity" />
         <activity android:name=".MainUserActivity" />
-        <activity android:name=".CreateAccountActivity"
-                  android:parentActivityName=".MainActivity"  />
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity android:name=".settings.UserSettingActivity"></activity>
         <activity android:name=".theme.ThemeSelectorActivity"
@@ -35,6 +33,9 @@
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize"
             android:parentActivityName=".MainUserActivity"/>
         <activity
+            android:name=".game.GameActivity"
+            android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
+        <activity android:name=".CreateAccountActivity" />
             android:name=".GameActivity"
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize"
             android:parentActivityName=".MainUserActivity"/>

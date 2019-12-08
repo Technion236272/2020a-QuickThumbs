@@ -5,6 +5,7 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.technion.quickthumbs.game.GameActivity;
 import android.technion.quickthumbs.settings.UserSettingActivity;
 import android.technion.quickthumbs.theme.ThemeSelectorActivity;
 import android.view.Menu;
@@ -24,43 +25,63 @@ public class MainUserActivity extends AppCompatActivity {
 
         fireBaseAuth = FirebaseAuth.getInstance();
 
-        Button gameBtn = ((Button) findViewById(R.id.startGameButton));
-        gameBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-              Intent i = new Intent(getApplicationContext(), GameActivity.class);
-              startActivityForResult(i, 2);
-            }
-        }
-        );
 
-        Button addTxtBtn = ((Button) findViewById(R.id.textAdderButton));
-        addTxtBtn.setOnClickListener(new View.OnClickListener() {
+        Button gameBtn = findViewById(R.id.startGameButton);
+        gameBtn.setOnClickListener(new View.OnClickListener() {
                                        @Override
                                        public void onClick(View v) {
-                                           Intent i = new Intent(getApplicationContext(), AddTextActivity.class);
+                                           Intent i = new Intent(getApplicationContext(), GameActivity.class);
                                            startActivityForResult(i, 2);
                                        }
                                    }
         );
 
+        Button addTxtBtn = findViewById(R.id.textAdderButton);
+        addTxtBtn.setOnClickListener(new View.OnClickListener() {
+                                         @Override
+                                         public void onClick(View v) {
+                                             Intent i = new Intent(getApplicationContext(), AddTextActivity.class);
+                                             startActivityForResult(i, 3);
+                                         }
+                                     }
+        );
+
+        setButtonListener((Button) findViewById(R.id.startGameButton), GameActivity.class);
+
+        setButtonListener((Button) findViewById(R.id.textAdderButton), AddTextActivity.class);
+
         setButtonListener((Button) findViewById(R.id.themeSelectorButton), ThemeSelectorActivity.class);
+
         setActionBar();
     }
 
+    private void setButtonListener(Button button, final Class<? extends AppCompatActivity> moveToActivityClass) {
+        button.setOnClickListener(new View.OnClickListener() {
+                                      @Override
+                                      public void onClick(View v) {
+                                          switch (v.getId()) {
+                                              case R.id.themeSelectorButton:
+                                              case R.id.startGameButton:
+                                              case R.id.textAdderButton:
+                                                  startActivity(new Intent(getApplicationContext(), moveToActivityClass));
+
+                                                  break;
+
+                                          }
+                                      }
+                                  }
+        );
+    }
+
     private void setActionBar() {
-        setSupportActionBar((Toolbar)findViewById(R.id.MainUserToolbar));
+        setSupportActionBar((Toolbar) findViewById(R.id.MainUserToolbar));
     }
 
     @Override
     protected void onStop() {
-       fireBaseAuth.signOut();
         super.onStop();
     }
-
-    /* Menu Overrider methods */
-
-    // create an action bar button
+    
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.user_main_menu, menu);
@@ -68,7 +89,6 @@ public class MainUserActivity extends AppCompatActivity {
         return super.onCreateOptionsMenu(menu);
     }
 
-    // handle button activities
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -84,21 +104,5 @@ public class MainUserActivity extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private void setButtonListener(Button button, final Class<? extends AppCompatActivity> moveToActivityClass) {
-        button.setOnClickListener(new View.OnClickListener() {
-                                      @Override
-                                      public void onClick(View v) {
-                                          switch (v.getId()) {
-                                              case R.id.themeSelectorButton:
-                                                  Intent intent = new Intent(MainUserActivity.this, moveToActivityClass);
-                                                  startActivity(intent);
-
-                                                  break;
-                                          }
-                                      }
-                                  }
-        );
     }
 }

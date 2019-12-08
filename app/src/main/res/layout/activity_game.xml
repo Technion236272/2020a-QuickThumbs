@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:weightSum="3"
-    tools:context=".GameActivity">
+    tools:context=".game.GameActivity">
     <RelativeLayout
         android:id="@+id/first"
         android:layout_width="match_parent"
@@ -139,5 +139,6 @@
             android:inputType="textVisiblePassword"
             android:layout_alignParentBottom="true"
             android:singleLine="true"
+            android:cursorVisible="false"
             />
     </RelativeLayout>
