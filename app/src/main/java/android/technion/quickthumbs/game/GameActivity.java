@@ -22,14 +22,21 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class GameActivity extends AppCompatActivity {
     private EditText currentWordEditor;
     private Boolean needClearance;
-    private boolean forwardCommand;
     private TextView gameTextView;
+    private TextView pointTextView;
+    private TextView wpmTextView;
+    private TextView cpmTextView;
     private SpannableString ss;
-    private int gameTextWordStart = 0;
+
+    private boolean forwardCommand;
+
+    private int gameTextWordStart;
 
     private List<Pair<String, Integer>> wordsMapper;
     private int currentWordIndex;
@@ -38,6 +45,12 @@ public class GameActivity extends AppCompatActivity {
     private int gameTextWordOffset;
 
     private final BackgroundColorSpan colorBackGround = new BackgroundColorSpan(Color.rgb(255, 102, 0));
+
+    private long gameStartTimeStamp;    //changing, don't trust this value if you wish to get real starting time.
+    private long gameStopTimeStamp;
+    private Timer gameTimer;
+
+    private int correctKeysAmount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,11 +64,6 @@ public class GameActivity extends AppCompatActivity {
         setEditorLogic();
 
         setGameText(gameTextView);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
 
         CharSequence text = gameTextView.getText();
 
@@ -70,6 +78,45 @@ public class GameActivity extends AppCompatActivity {
 
         initializeWordFlagsDefaultValue(words[0]);
         gameTextWordOffset = 0;
+
+        setTimerUpdateGameStatsPresentation();
+    }
+
+    private void setTimerUpdateGameStatsPresentation() {
+        gameTimer = new Timer();
+        gameTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                long timePassedFromStartGame = System.currentTimeMillis() - gameStartTimeStamp;
+
+                int cpm = (int) (((double) correctKeysAmount / (double) timePassedFromStartGame) * 1000d * 60d);
+                String cpmString = String.valueOf(cpm);
+
+                pointTextView.setText("alot");
+                wpmTextView.setText(String.valueOf(cpm / 5));
+                cpmTextView.setText(cpmString);
+            }
+        }, 1000, 1000);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        long inactiveDeltaTime = System.currentTimeMillis() - gameStopTimeStamp;
+
+        gameStartTimeStamp += inactiveDeltaTime;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        gameStopTimeStamp = System.currentTimeMillis();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        gameStopTimeStamp = System.currentTimeMillis();
     }
 
     private List<Pair<String, Integer>> setWordsMapper(String[] words) {
@@ -98,10 +145,17 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void initializeFields() {
+        correctKeysAmount = 0;
+        gameTextWordStart = 0;
+        gameStartTimeStamp = 0;
+        gameStopTimeStamp = 0;
         needClearance = false;
         forwardCommand = true;
         currentWordEditor = findViewById(R.id.currentWord);
         gameTextView = findViewById(R.id.displayText);
+        pointTextView = findViewById(R.id.pointsValue);
+        wpmTextView = findViewById(R.id.WPMValue);
+        cpmTextView = findViewById(R.id.CPMValue);
     }
 
     private void setEditorLogic() {
@@ -193,12 +247,18 @@ public class GameActivity extends AppCompatActivity {
                     break;
             }
         }
-        
+
         gameTextView.setText(ss);
     }
 
     private void logicOnRemovingKey() {
         if (gameTextWordOffset < wordFlags.length) {
+            GameWordStatus wordFlag = wordFlags[gameTextWordOffset - 1];
+
+            if (wordFlag == GameWordStatus.CORRECT || wordFlag == GameWordStatus.CORRECT_BUT_BEEN_HERE_BEFORE) {
+                correctKeysAmount--;
+            }
+
             wordFlags[gameTextWordOffset - 1] = GameWordStatus.ALREADY_SEEN;
         }
     }
@@ -310,8 +370,10 @@ public class GameActivity extends AppCompatActivity {
         if (pressedKey.equals(expectedKey)) {
             if (wordFlags[gameTextWordOffset].equals(GameWordStatus.NO_STATUS)) {
                 wordFlags[gameTextWordOffset] = GameWordStatus.CORRECT;
+                correctKeysAmount++;
             } else {
                 wordFlags[gameTextWordOffset] = GameWordStatus.CORRECT_BUT_BEEN_HERE_BEFORE;
+                correctKeysAmount++;
             }
         } else {
             wordFlags[gameTextWordOffset] = GameWordStatus.WRONG;
@@ -366,7 +428,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void setActionBar() {
-        setSupportActionBar((Toolbar)findViewById(R.id.GameToolbar));
+        setSupportActionBar((Toolbar) findViewById(R.id.GameToolbar));
         ActionBar ab = getSupportActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
     }
