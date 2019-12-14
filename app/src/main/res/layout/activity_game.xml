@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
+
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/all"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+
+    android:id="@+id/gameLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:weightSum="3"
     tools:context=".game.GameActivity">
+
     <RelativeLayout
         android:id="@+id/first"
         android:layout_width="match_parent"
@@ -15,8 +19,8 @@
         android:orientation="horizontal">
 
         <include
-            layout= "@layout/toolbar"
             android:id="@+id/GameToolbar"
+            layout="@layout/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -44,8 +48,8 @@
         android:id="@+id/second"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_below="@+id/first">
+        android:layout_below="@+id/first"
+        android:orientation="horizontal">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/statsBar"
@@ -53,92 +57,211 @@
             android:layout_height="wrap_content"
             android:background="@color/primaryLightColor"
             android:minHeight="?attr/actionBarSize"
-            android:theme="?attr/actionBarTheme" >
+            android:theme="?attr/actionBarTheme">
 
-                    <TextView
-                        android:id="@+id/pointsHeadline"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="#FFFFFF"
-                        android:text="Points: "
-                        android:paddingLeft="10dp"
-                        android:textSize="20dp"/>
-                    <TextView
-                        android:id="@+id/pointsValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_toRightOf="@id/pointsHeadline"
-                        android:layout_alignBaseline="@id/pointsHeadline"
-                        android:ems="3"
-                        android:textColor="#FFFFFF"
-                        android:text="0"
-                        android:textSize="20sp" />
-                    <TextView
-                        android:id="@+id/WPMHeadline"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_toRightOf="@id/pointsValue"
-                        android:layout_alignBaseline="@id/pointsValue"
-                        android:textColor="#FFFFFF"
-                        android:textSize="20dp"
-                        android:text="WPM: " />
-                    <TextView
-                        android:id="@+id/WPMValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_toRightOf="@id/WPMHeadline"
-                        android:layout_alignBaseline="@id/WPMHeadline"
-                        android:ems="3"
-                        android:textColor="#FFFFFF"
-                        android:text="0"
-                        android:textSize="20dp" />
-                    <TextView
-                        android:id="@+id/CPMHeadline"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_toRightOf="@id/WPMValue"
-                        android:layout_alignBaseline="@id/WPMValue"
-                        android:textColor="#FFFFFF"
-                        android:textSize="20dp"
-                        android:text="CPM: " />
-                    <TextView
-                        android:id="@+id/CPMValue"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_toRightOf="@id/CPMHeadline"
-                        android:layout_toEndOf="@id/CPMHeadline"
-                        android:layout_alignBaseline="@id/CPMHeadline"
-                        android:ems="3"
-                        android:textColor="#FFFFFF"
-                        android:textSize="20dp"
-                        android:text="0"
-                        />
+            <TextView
+                android:id="@+id/pointsHeadline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingLeft="10dp"
+                android:text="Points: "
+                android:textColor="#FFFFFF"
+                android:textSize="20dp" />
+
+            <TextView
+                android:id="@+id/pointsValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@id/pointsHeadline"
+                android:layout_toRightOf="@id/pointsHeadline"
+                android:ems="3"
+                android:text="0"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/WPMHeadline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@id/pointsValue"
+                android:layout_toRightOf="@id/pointsValue"
+                android:text="WPM: "
+                android:textColor="#FFFFFF"
+                android:textSize="20dp" />
+
+            <TextView
+                android:id="@+id/WPMValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@id/WPMHeadline"
+                android:layout_toRightOf="@id/WPMHeadline"
+                android:ems="3"
+                android:text="0"
+                android:textColor="#FFFFFF"
+                android:textSize="20dp" />
+
+            <TextView
+                android:id="@+id/CPMHeadline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@id/WPMValue"
+                android:layout_toRightOf="@id/WPMValue"
+                android:text="CPM: "
+                android:textColor="#FFFFFF"
+                android:textSize="20dp" />
+
+            <TextView
+                android:id="@+id/CPMValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@id/CPMHeadline"
+                android:layout_toEndOf="@id/CPMHeadline"
+                android:layout_toRightOf="@id/CPMHeadline"
+                android:ems="3"
+                android:text="0"
+                android:textColor="#FFFFFF"
+                android:textSize="20dp" />
         </androidx.appcompat.widget.Toolbar>
     </RelativeLayout>
-    <TextView
-        android:id="@+id/displayText"
+
+
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textSize="17sp"
-        android:textColor="@color/primaryTextColor"
+        android:layout_height="match_parent"
         android:layout_below="@id/second"
-        android:layout_above="@id/currentWord"
-        android:background="@color/primaryDarkColor"
-        android:text="Remember when you were young\n  You shone like the Sun\n   Shine on, you crazy diamond\n    Now there's a look in your eyes\n     Like black holes in the sky\n      Shine on, you crazy diamond">
+        android:layout_alignParentBottom="true">
 
-    </TextView>
-
-        <EditText
-            android:id="@+id/currentWord"
-            android:background="@color/primaryTextColor"
-            android:textColor="@color/secondaryTextColor"
+        <RelativeLayout
+            android:id="@+id/gameReportLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ems="10"
-            android:inputType="textVisiblePassword"
-            android:layout_alignParentBottom="true"
-            android:singleLine="true"
-            android:cursorVisible="false"
-            />
-    </RelativeLayout>
+            android:layout_height="match_parent"
+            android:background="@color/secondaryLightColor"
+            android:visibility="invisible">
+
+            <TextView
+                android:id="@+id/gameReportHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:padding="10sp"
+                android:text="GAME OVER"
+                android:textColor="@color/secondaryDarkColor"
+                android:textSize="30sp"
+                android:textStyle="bold|italic" />
+
+            <TextView
+                android:id="@+id/correctAmountTitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:layout_below="@id/gameReportHeader"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:padding="10sp"
+                android:text="correct/total:"
+                android:textSize="19sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/correctOutOfTotalTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@id/correctAmountTitle"
+                android:layout_toRightOf="@id/correctAmountTitle"
+                android:padding="10sp"
+                android:text="94/100"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/correctOutOfTotalPercentageTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@id/correctOutOfTotalTextView"
+                android:layout_toRightOf="@id/gameReportHeader"
+                android:padding="10sp"
+                android:text="94%"
+                android:textColor="@color/primaryDarkColor"
+                android:textSize="25sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/generalTipHeaderText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@id/relativeCenterGameReport"
+                android:layout_alignParentLeft="true"
+                android:padding="8sp"
+                android:text="TIP: "
+                android:textColor="@color/secondaryTextColor"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/generalTipText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@id/generalTipHeaderText"
+                android:layout_toRightOf="@id/generalTipHeaderText"
+                android:padding="8sp"
+                android:text="The less mistakes you'll do, the better score you'll get"
+                android:textColor="@color/secondaryTextColor"
+                android:textSize="12sp" />
+
+
+            <RelativeLayout
+                android:id="@+id/relativeCenterGameReport"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true" />
+
+
+            <TextView
+                android:id="@+id/gameReportTextLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignTop="@id/relativeCenterGameReport"
+                android:layout_alignParentBottom="true"
+                android:background="@color/primaryDarkColor"
+                android:gravity="center"
+                android:padding="5sp"
+                android:text="Remember when you were young\n  You shone like the Sun\n   Shine on, you crazy diamond\n    Now there's a look in your eyes\n     Like black holes in the sky\n      Shine on, you crazy diamond"
+                android:textColor="@color/primaryTextColor"
+                android:textSize="17sp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/gameTextLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <TextView
+                android:id="@+id/displayText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_above="@id/currentWord"
+                android:background="@color/primaryDarkColor"
+                android:gravity="center"
+                android:text="Remember when you were young\n  You shone like the Sun\n   Shine on, you crazy diamond\n    Now there's a look in your eyes\n     Like black holes in the sky\n      Shine on, you crazy diamond"
+                android:textColor="@color/primaryTextColor"
+                android:textSize="17sp">
+
+            </TextView>
+
+            <EditText
+                android:id="@+id/currentWord"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:background="@color/primaryTextColor"
+                android:cursorVisible="false"
+                android:ems="10"
+                android:inputType="textVisiblePassword"
+                android:singleLine="true"
+                android:textColor="@color/secondaryTextColor" />
+        </RelativeLayout>
+    </FrameLayout>
+</RelativeLayout>
