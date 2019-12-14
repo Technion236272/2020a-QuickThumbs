@@ -12,7 +12,7 @@
         <activity
             android:name=".TextsActivity"
             android:label="@string/Texts"
-            android:parentActivityName=".ProfileActivity"/>
+            android:parentActivityName=".ProfileActivity" />
         <activity
             android:name=".FriendsActivity"
             android:label="@string/Friends"
@@ -23,24 +23,19 @@
             android:parentActivityName=".MainUserActivity" />
 
         <activity android:name=".MainUserActivity" />
-
-        <activity android:name=".settings.UserSettingActivity"></activity>
-
-        <activity android:name=".theme.ThemeSelectorActivity"
-                  android:parentActivityName=".MainUserActivity"
-                  />
+        <activity android:name=".settings.UserSettingActivity" />
+        <activity
+            android:name=".theme.ThemeSelectorActivity"
+            android:parentActivityName=".MainUserActivity" />
         <activity
             android:name=".AddTextActivity"
-            android:windowSoftInputMode="stateAlwaysVisible|adjustResize"
-            android:parentActivityName=".MainUserActivity"/>
-
+            android:parentActivityName=".MainUserActivity"
+            android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
         <activity
             android:name=".game.GameActivity"
-            android:windowSoftInputMode="stateAlwaysVisible|adjustResize"
-            android:parentActivityName=".MainUserActivity" />
-
+            android:parentActivityName=".MainUserActivity"
+            android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
         <activity android:name=".CreateAccountActivity" />
-
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

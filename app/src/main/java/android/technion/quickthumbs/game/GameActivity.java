@@ -4,6 +4,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,7 +17,10 @@ import android.text.TextWatcher;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
 import android.util.Pair;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -33,6 +37,11 @@ public class GameActivity extends AppCompatActivity {
     private TextView wpmTextView;
     private TextView cpmTextView;
     private SpannableString ss;
+    private RelativeLayout gamePlayingLayout;
+    private RelativeLayout gameReportLayout;
+    private TextView gameReportText;
+    private TextView correctOutOfTotalTextView;
+    private TextView correctOutOfTotalPercentageTextView;
 
     private boolean forwardCommand;
 
@@ -51,6 +60,8 @@ public class GameActivity extends AppCompatActivity {
     private Timer gameTimer;
 
     private int correctKeysAmount;
+
+    private boolean shouldStartTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -73,13 +84,11 @@ public class GameActivity extends AppCompatActivity {
         wordsMapper = setWordsMapper(words);
 
         currentWordIndex = -1;
-        moveMarkerToNextWord(gameText, colorBackGround);
+        moveMarkerToNextWord(colorBackGround);
         currentWordIndex = 0;
 
         initializeWordFlagsDefaultValue(words[0]);
         gameTextWordOffset = 0;
-
-        setTimerUpdateGameStatsPresentation();
     }
 
     private void setTimerUpdateGameStatsPresentation() {
@@ -92,7 +101,7 @@ public class GameActivity extends AppCompatActivity {
                 int cpm = (int) (((double) correctKeysAmount / (double) timePassedFromStartGame) * 1000d * 60d);
                 String cpmString = String.valueOf(cpm);
 
-                pointTextView.setText("alot");
+                pointTextView.setText(String.valueOf(cpm * correctKeysAmount / 10));
                 wpmTextView.setText(String.valueOf(cpm / 5));
                 cpmTextView.setText(cpmString);
             }
@@ -145,6 +154,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void initializeFields() {
+        shouldStartTimer = true;
         correctKeysAmount = 0;
         gameTextWordStart = 0;
         gameStartTimeStamp = 0;
@@ -156,12 +166,21 @@ public class GameActivity extends AppCompatActivity {
         pointTextView = findViewById(R.id.pointsValue);
         wpmTextView = findViewById(R.id.WPMValue);
         cpmTextView = findViewById(R.id.CPMValue);
+        gamePlayingLayout = findViewById(R.id.gameTextLayout);
+        gameReportLayout = findViewById(R.id.gameReportLayout);
+        gameReportText = findViewById(R.id.gameReportTextLayout);
+        correctOutOfTotalTextView = findViewById(R.id.correctOutOfTotalTextView);
+        correctOutOfTotalPercentageTextView = findViewById(R.id.correctOutOfTotalPercentageTextView);
     }
 
     private void setEditorLogic() {
         currentWordEditor.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                if (shouldStartTimer) {
+                    setTimerUpdateGameStatsPresentation();
+                    shouldStartTimer = false;
+                }
             }
 
             @Override
@@ -194,6 +213,10 @@ public class GameActivity extends AppCompatActivity {
                 currentWordEditor.addTextChangedListener(this);
 
                 if (needClearance) {
+                    if (currentWordIndex + 1 != wordsMapper.size()) {
+                        spaceKeyIncreaseCorrectKeysWhenFullyCorrectWordTyped();
+                    }
+
                     currentWordEditor.removeTextChangedListener(this);
                     currentWordEditor.getText().clear();
                     currentWordEditor.setSelection(0);
@@ -217,6 +240,19 @@ public class GameActivity extends AppCompatActivity {
             }
 
         });
+    }
+
+    private void spaceKeyIncreaseCorrectKeysWhenFullyCorrectWordTyped() {
+        boolean giveExtraCorrectCharacterForSpacePress = true;
+        for (GameWordStatus status : wordFlags) {
+            if (!status.equals(GameWordStatus.CORRECT) && !status.equals(GameWordStatus.CORRECT_BUT_BEEN_HERE_BEFORE)) {
+                giveExtraCorrectCharacterForSpacePress = false;
+            }
+        }
+
+        if (giveExtraCorrectCharacterForSpacePress) {
+            correctKeysAmount++;
+        }
     }
 
     private void paintGameTextBasedOnWordFlags() {
@@ -269,10 +305,10 @@ public class GameActivity extends AppCompatActivity {
         String currentExpectedWord = wordsMapper.get(currentWordIndex).first;
 
         if (pressedKey.equals(" ")) {
-            String gameText = String.valueOf(gameTextView.getText());
-
             if (currentWordIndex + 1 != wordsMapper.size()) {
-                moveMarkerToNextWord(gameText, colorBackGround);
+                moveMarkerToNextWord(colorBackGround);
+            } else {
+                ss.removeSpan(colorBackGround);
             }
 
             needClearance = true;
@@ -290,7 +326,30 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void finishGame() {
-        finish();
+        gameTimer.cancel();
+
+        closeKeyboard();
+
+        gameReportLayout.setVisibility(View.VISIBLE);
+        gamePlayingLayout.setVisibility(View.INVISIBLE);
+
+        gameReportText.setText(gameTextView.getText());
+
+        int totalCharacters = gameTextView.getText().toString().length();
+
+        correctOutOfTotalTextView.setText(String.format("%s/%s", correctKeysAmount, totalCharacters));
+
+        int correctPercentage = (int) (((float) correctKeysAmount / (float) totalCharacters) * 100f);
+
+        correctOutOfTotalPercentageTextView.setText(String.valueOf(correctPercentage) + "%");
+    }
+
+    private void closeKeyboard() {
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 
     private void paintEditorTextBasedOnWordFlags(boolean isForwardTyping) {
@@ -385,7 +444,7 @@ public class GameActivity extends AppCompatActivity {
         Arrays.fill(wordFlags, GameWordStatus.NO_STATUS);
     }
 
-    private void moveMarkerToNextWord(String gameText, BackgroundColorSpan color) {
+    private void moveMarkerToNextWord(BackgroundColorSpan color) {
         Pair<String, Integer> pair = wordsMapper.get(currentWordIndex + 1);
         Integer nextWordStartIndex = pair.second;
         String nextWord = pair.first;
@@ -414,16 +473,7 @@ public class GameActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             editText.setShowSoftInputOnFocus(true);
         }
-//        editText.setOnEditorActionListener(new EditText.OnEditorActionListener(){
-//            @Override
-//            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-//                String value = editText.getText().toString();
-//                //TODO .. write your respective logic to add data to your textView
-//
-//                editText.setText(""); // clear the text in your editText
-//                return true;
-//            }
-//        });
+
         setActionBar();
     }
 
