@@ -4,103 +4,131 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context=".AddTextActivity">
     <RelativeLayout
         android:id="@+id/first"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center|top"
-        android:orientation="horizontal">
+        android:gravity="center|top">
 
         <include
-            layout= "@layout/toolbar"
             android:id="@+id/AddTextToolbar"
+            layout="@layout/toolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-        <RelativeLayout
-            android:id="@+id/topRightToolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/topLeftToolbar"
-            android:orientation="horizontal">
+            <RelativeLayout
+                android:id="@+id/topRightToolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_toRightOf="@+id/topLeftToolbar"
+                android:orientation="horizontal">
 
-            <ImageView
-                android:id="@+id/iconButton"
-                android:layout_width="200dip"
-                android:layout_height="50dip"
-                android:layout_marginStart="71dp"
-                android:layout_marginLeft="71dp"
-                android:scaleType="fitXY"
-                app:srcCompat="@drawable/name_icon" />
-        </RelativeLayout>
+                <ImageView
+                    android:id="@+id/iconButton"
+                    android:layout_width="200dip"
+                    android:layout_height="50dip"
+                    android:layout_marginStart="71dp"
+                    android:layout_marginLeft="71dp"
+                    android:scaleType="fitXY"
+                    app:srcCompat="@drawable/name_icon" />
+            </RelativeLayout>
         </include>
 
     </RelativeLayout>
-    <TextView
-        android:id="@+id/titleHeadline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@color/secondaryColor"
-        android:textColor="@color/secondaryTextColor"
-        android:gravity="center"
-        android:layout_below="@id/first"
-        android:text="Text title: "
-        android:paddingLeft="50dp"
-        android:textSize="20dp"/>
-    <EditText
-        android:id="@+id/titleValue"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/secondaryColor"
-        android:textColor="@color/secondaryTextColor"
-        android:gravity="center"
-        android:layout_alignBaseline="@id/titleHeadline"
-        android:layout_toRightOf="@id/titleHeadline"
-        android:layout_toEndOf="@id/titleHeadline"
-        android:ems="10"
-        android:textSize="20sp"
-        android:hint="Type here..."
-        android:textColorHint="@color/secondaryTextColor"
-        android:inputType="textAutoComplete"
-        android:layout_alignParentBottom="true"
-        android:singleLine="true"
-        />
+        android:layout_height="match_parent"
+        android:layout_below="@+id/first"
+        android:weightSum="1"
+        android:orientation="vertical">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.10"
+            android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/addedText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/primaryDarkColor"
-        android:textColor="@color/primaryTextColor"
-        android:gravity="center"
-        android:textSize="17sp"
-        android:layout_below="@id/titleHeadline"
-        android:layout_above="@id/addedWord"
-        android:text="Remember when you were young\n  You shone like the Sun\n   Shine on, you crazy diamond\n    Now there's a look in your eyes\n     Like black holes in the sky\n      Shine on, you crazy diamond"/>
-    <EditText
-        android:id="@+id/addedWord"
-        android:layout_width="wrap_content"
-        android:layout_height="62dp"
-        android:background="@color/primaryTextColor"
-        android:textColor="@color/secondaryTextColor"
-        android:ems="18"
-        android:hint="Type here..."
-        android:inputType="textAutoComplete"
-        android:layout_alignParentBottom="true"
+            <EditText
+                android:id="@+id/titleValue"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/secondaryColor"
+                android:ems="10"
+                android:gravity="center"
+                android:hint="Type here the Text title..."
+                android:inputType="textVisiblePassword"
+                android:singleLine="true"
+                android:textColor="@color/secondaryTextColor"
+                android:textColorHint="@color/secondaryTextColor"
+                android:textSize="20sp" />
+        </LinearLayout>
 
-        android:singleLine="true"
-        />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.10">
 
-    <ImageButton
-        android:id="@+id/imageButton2"
-        android:layout_width="62dp"
-        android:layout_height="62dp"
-        android:layout_below="@id/addedText"
-        android:layout_alignEnd="@id/addedWord"
-        android:layout_alignRight="@id/addedWord"
-        android:layout_marginTop="0dp"
-        android:layout_marginRight="-30dp"
-        android:background="@color/primaryDarkColor"
-        app:srcCompat="@android:drawable/ic_input_add" />
+            <Spinner
+                android:id="@+id/themeSelectorspinner"
+                android:layout_width="match_parent"
+                android:layout_height="fill_parent"
+                android:background="@color/secondaryLightColor"
+                android:textAlignment="center"
+                android:spinnerMode="dropdown"
+                android:completionHint="Type here the Text title..."
+                />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.70"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/addedText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/primaryDarkColor"
+                android:gravity="center"
+                android:hint="Every word that you will insert in the bottom text will be shown here\n (up to 300 characters)"
+                android:textColor="@color/primaryTextColor"
+                android:textSize="17sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.10"
+            android:weightSum="1"
+            android:orientation="horizontal">
+
+            <EditText
+                android:id="@+id/addedWord"
+                android:layout_width="0dp"
+                android:layout_weight="0.80"
+                android:layout_height="match_parent"
+                android:background="@color/primaryTextColor"
+                android:ems="10"
+                android:gravity="center"
+                android:hint="Insert the text here..."
+                android:inputType="textVisiblePassword"
+                android:singleLine="true"
+                android:textColor="@color/secondaryTextColor"
+                android:textSize="20sp"/>
+
+            <ImageButton
+                android:id="@+id/addButton"
+                android:layout_width="0dp"
+                android:layout_weight="0.20"
+                android:layout_height="match_parent"
+                android:layout_below="@id/addedText"
+                android:layout_alignEnd="@id/addedWord"
+                android:layout_alignRight="@id/addedWord"
+                android:layout_alignBaseline="@id/addedWord"
+                android:background="@color/primaryDarkColor"
+                app:srcCompat="@android:drawable/ic_input_add" />
+        </LinearLayout>
+    </LinearLayout>
 </RelativeLayout>
