@@ -23,6 +23,8 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.common.collect.ImmutableList;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,6 +44,7 @@ public class GameActivity extends AppCompatActivity {
     private TextView gameReportText;
     private TextView correctOutOfTotalTextView;
     private TextView correctOutOfTotalPercentageTextView;
+    private TextView comboDisplayer;
 
     private boolean forwardCommand;
 
@@ -61,7 +64,14 @@ public class GameActivity extends AppCompatActivity {
 
     private int correctKeysAmount;
 
+    private int collectedPoints;
+    private Integer[] wordPoints;
+    private List<Integer> comboOptions;
+    private int currentComboIndex;
+    private int comboCounter;
+
     private boolean shouldStartTimer;
+    private final int comboThreshold = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,6 +86,8 @@ public class GameActivity extends AppCompatActivity {
 
         setGameText(gameTextView);
 
+        comboDisplayChange();
+
         CharSequence text = gameTextView.getText();
 
         String gameText = String.valueOf(text);
@@ -87,8 +99,12 @@ public class GameActivity extends AppCompatActivity {
         moveMarkerToNextWord(colorBackGround);
         currentWordIndex = 0;
 
-        initializeWordFlagsDefaultValue(words[0]);
+        initializeWordFlagsAndPointsDefaultValue(words[0]);
         gameTextWordOffset = 0;
+    }
+
+    private void comboDisplayChange() {
+        comboDisplayer.setText("X" + comboOptions.get(currentComboIndex));
     }
 
     private void setTimerUpdateGameStatsPresentation() {
@@ -101,11 +117,11 @@ public class GameActivity extends AppCompatActivity {
                 int cpm = (int) (((double) correctKeysAmount / (double) timePassedFromStartGame) * 1000d * 60d);
                 String cpmString = String.valueOf(cpm);
 
-                pointTextView.setText(String.valueOf(cpm * correctKeysAmount / 10));
+                pointTextView.setText(String.valueOf(collectedPoints));
                 wpmTextView.setText(String.valueOf(cpm / 5));
                 cpmTextView.setText(cpmString);
             }
-        }, 1000, 1000);
+        }, 500, 500);
     }
 
     @Override
@@ -154,6 +170,10 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void initializeFields() {
+        comboCounter = 0;
+        collectedPoints = 0;
+        comboOptions = ImmutableList.of(1, 2, 4, 8, 10);
+        currentComboIndex = 0;
         shouldStartTimer = true;
         correctKeysAmount = 0;
         gameTextWordStart = 0;
@@ -171,6 +191,7 @@ public class GameActivity extends AppCompatActivity {
         gameReportText = findViewById(R.id.gameReportTextLayout);
         correctOutOfTotalTextView = findViewById(R.id.correctOutOfTotalTextView);
         correctOutOfTotalPercentageTextView = findViewById(R.id.correctOutOfTotalPercentageTextView);
+        comboDisplayer = findViewById(R.id.comboDisplayer);
     }
 
     private void setEditorLogic() {
@@ -207,6 +228,7 @@ public class GameActivity extends AppCompatActivity {
                     }
 
                     paintEditorTextBasedOnWordFlags(false);
+
                     forwardCommand = true;
                 }
 
@@ -230,7 +252,7 @@ public class GameActivity extends AppCompatActivity {
 
                     if (gameTextWordStart != -1) {
                         String currentExpectedWord = wordsMapper.get(currentWordIndex).first;
-                        initializeWordFlagsDefaultValue(currentExpectedWord);
+                        initializeWordFlagsAndPointsDefaultValue(currentExpectedWord);
 
                         needClearance = false;
                     } else {
@@ -252,7 +274,32 @@ public class GameActivity extends AppCompatActivity {
 
         if (giveExtraCorrectCharacterForSpacePress) {
             correctKeysAmount++;
+            increaseCombo();
+            increasePoints(gameTextWordOffset - 1, false);
         }
+    }
+
+    private void increasePoints(int gameTextWordOffsetLocal, boolean shouldRememberPoints) {
+        Integer combo = comboOptions.get(currentComboIndex);
+        int pointsToAdd = combo * 10;
+
+        if (shouldRememberPoints) {
+            wordPoints[gameTextWordOffsetLocal] = pointsToAdd;
+        }
+
+        collectedPoints += pointsToAdd;
+    }
+
+    private void increaseCombo() {
+        if (comboCounter++ == comboThreshold) {
+            comboCounter = 0;
+
+            if (currentComboIndex < comboOptions.size() - 1) {
+                currentComboIndex++;
+                comboDisplayChange();
+            }
+        }
+
     }
 
     private void paintGameTextBasedOnWordFlags() {
@@ -288,15 +335,27 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void logicOnRemovingKey() {
-        if (gameTextWordOffset < wordFlags.length) {
+        resetCombo();
+
+        if (gameTextWordOffset < wordFlags.length) {    //will not!! get here if position in EditText is 0 and tries to remove.
             GameWordStatus wordFlag = wordFlags[gameTextWordOffset - 1];
+
+            reducePointsBasedOnPreviousEarnings();
 
             if (wordFlag == GameWordStatus.CORRECT || wordFlag == GameWordStatus.CORRECT_BUT_BEEN_HERE_BEFORE) {
                 correctKeysAmount--;
             }
 
             wordFlags[gameTextWordOffset - 1] = GameWordStatus.ALREADY_SEEN;
+
+
         }
+    }
+
+    private void reducePointsBasedOnPreviousEarnings() {
+        int pointsEarnedForThisCharacterPreviously = wordPoints[gameTextWordOffset - 1];
+        collectedPoints -= pointsEarnedForThisCharacterPreviously;
+        wordPoints[gameTextWordOffset - 1] = 0;
     }
 
     private void logicOnAddedKey(CharSequence s, int start) {
@@ -318,11 +377,18 @@ public class GameActivity extends AppCompatActivity {
             if (gameTextWordOffset < currentExpectedWord.length()) {
                 expectedKey = String.valueOf(currentExpectedWord.charAt(gameTextWordOffset));
             } else {
+                resetCombo();
                 expectedKey = null;
             }
 
             updateWordFlags(pressedKey, expectedKey);
         }
+    }
+
+    private void resetCombo() {
+        comboCounter = 0;
+        currentComboIndex = 0;
+        comboDisplayChange();
     }
 
     private void finishGame() {
@@ -427,6 +493,8 @@ public class GameActivity extends AppCompatActivity {
         }
 
         if (pressedKey.equals(expectedKey)) {
+            increaseCombo();
+
             if (wordFlags[gameTextWordOffset].equals(GameWordStatus.NO_STATUS)) {
                 wordFlags[gameTextWordOffset] = GameWordStatus.CORRECT;
                 correctKeysAmount++;
@@ -434,14 +502,20 @@ public class GameActivity extends AppCompatActivity {
                 wordFlags[gameTextWordOffset] = GameWordStatus.CORRECT_BUT_BEEN_HERE_BEFORE;
                 correctKeysAmount++;
             }
+
+            increasePoints(gameTextWordOffset, true);
         } else {
+            resetCombo();
             wordFlags[gameTextWordOffset] = GameWordStatus.WRONG;
         }
     }
 
-    private void initializeWordFlagsDefaultValue(String currentWord) {
-        wordFlags = new GameWordStatus[currentWord.length()];
+    private void initializeWordFlagsAndPointsDefaultValue(String currentWord) {
+        int length = currentWord.length();
+        wordFlags = new GameWordStatus[length];
+        wordPoints = new Integer[length];
         Arrays.fill(wordFlags, GameWordStatus.NO_STATUS);
+        Arrays.fill(wordPoints, 0);
     }
 
     private void moveMarkerToNextWord(BackgroundColorSpan color) {
