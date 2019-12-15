@@ -88,8 +88,8 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
     }
 
     private void updateUserTexts(final String textAddedId) {
-        DocumentReference docRef = db.collection("users").document(mAuth.getUid());
-        docRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        db.collection("users").document(mAuth.getUid()).
+                get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
@@ -102,9 +102,11 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
                         changeUserData(userTextsAmount,textAddedId);
                     } else {
                         Log.d(TAG, "No such document");
+                        changeUserData(0,textAddedId);
                     }
                 } else {
                     Log.d(TAG, "get failed with ", task.getException());
+                    changeUserData(0,textAddedId);
                 }
             }
         });
