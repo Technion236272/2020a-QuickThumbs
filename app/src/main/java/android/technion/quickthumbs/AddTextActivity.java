@@ -239,7 +239,6 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
         setSpinnerValues();
         needClearance = false;
         backwardsCommand = false;
-        userTextsAmount = 0;
         currentWordEditor = findViewById(R.id.addedWord);
         textTitle = findViewById(R.id.titleValue);
         addedTextSoFar = findViewById(R.id.addedText);
