@@ -249,7 +249,6 @@ public class GameActivity extends AppCompatActivity {
                     gameTextWordOffset = 0;
                     gameTextWordStart = getNextStartWordIndex();
 
-
                     if (gameTextWordStart != -1) {
                         String currentExpectedWord = wordsMapper.get(currentWordIndex).first;
                         initializeWordFlagsAndPointsDefaultValue(currentExpectedWord);
@@ -266,6 +265,7 @@ public class GameActivity extends AppCompatActivity {
 
     private void spaceKeyIncreaseCorrectKeysWhenFullyCorrectWordTyped() {
         boolean giveExtraCorrectCharacterForSpacePress = true;
+
         for (GameWordStatus status : wordFlags) {
             if (!status.equals(GameWordStatus.CORRECT) && !status.equals(GameWordStatus.CORRECT_BUT_BEEN_HERE_BEFORE)) {
                 giveExtraCorrectCharacterForSpacePress = false;
@@ -276,6 +276,8 @@ public class GameActivity extends AppCompatActivity {
             correctKeysAmount++;
             increaseCombo();
             increasePoints(gameTextWordOffset - 1, false);
+        } else {
+            resetCombo();
         }
     }
 
@@ -337,18 +339,18 @@ public class GameActivity extends AppCompatActivity {
     private void logicOnRemovingKey() {
         resetCombo();
 
-        if (gameTextWordOffset < wordFlags.length) {    //will not!! get here if position in EditText is 0 and tries to remove.
-            GameWordStatus wordFlag = wordFlags[gameTextWordOffset - 1];
-
+        if (gameTextWordOffset <= wordFlags.length) { //will not!! get here if position in EditText is 0 and tries to remove.
             reducePointsBasedOnPreviousEarnings();
 
-            if (wordFlag == GameWordStatus.CORRECT || wordFlag == GameWordStatus.CORRECT_BUT_BEEN_HERE_BEFORE) {
-                correctKeysAmount--;
+            if (gameTextWordOffset != wordFlags.length) {
+                GameWordStatus wordFlag = wordFlags[gameTextWordOffset - 1];
+
+                if (wordFlag == GameWordStatus.CORRECT || wordFlag == GameWordStatus.CORRECT_BUT_BEEN_HERE_BEFORE) {
+                    correctKeysAmount--;
+                }
+
+                wordFlags[gameTextWordOffset - 1] = GameWordStatus.ALREADY_SEEN;
             }
-
-            wordFlags[gameTextWordOffset - 1] = GameWordStatus.ALREADY_SEEN;
-
-
         }
     }
 
