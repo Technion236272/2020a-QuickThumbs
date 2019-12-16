@@ -201,7 +201,6 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
                         currentWordEditor.addTextChangedListener(this);
                         return;
                     }
-                    Toast.makeText(getApplicationContext(), "new one: " + s, Toast.LENGTH_LONG).show();
                 } else if (needClearance) {
                     if (s.toString().equals(" ")) {
                         Toast.makeText(getApplicationContext(), "Please insert a non empty word!", Toast.LENGTH_LONG).show();
