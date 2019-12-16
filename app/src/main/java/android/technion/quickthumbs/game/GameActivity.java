@@ -1,5 +1,6 @@
 package android.technion.quickthumbs.game;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -16,6 +17,7 @@ import android.text.Spanned;
 import android.text.TextWatcher;
 import android.text.style.BackgroundColorSpan;
 import android.text.style.ForegroundColorSpan;
+import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -23,13 +25,39 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.common.collect.ImmutableList;
+import com.google.firebase.Timestamp;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import static android.technion.quickthumbs.FirestoreConstants.accuracyField;
+import static android.technion.quickthumbs.FirestoreConstants.CPMField;
+import static android.technion.quickthumbs.FirestoreConstants.WPMField;
+import static android.technion.quickthumbs.FirestoreConstants.emailField;
+import static android.technion.quickthumbs.FirestoreConstants.gameResultsCollection;
+import static android.technion.quickthumbs.FirestoreConstants.dateField;
+import static android.technion.quickthumbs.FirestoreConstants.numOfGamesField;
+import static android.technion.quickthumbs.FirestoreConstants.statisticsDocument;
+import static android.technion.quickthumbs.FirestoreConstants.statsCollection;
+import static android.technion.quickthumbs.FirestoreConstants.totalScoreField;
+import static android.technion.quickthumbs.FirestoreConstants.uidField;
+import static android.technion.quickthumbs.FirestoreConstants.usersCollection;
 
 public class GameActivity extends AppCompatActivity {
     private EditText currentWordEditor;
@@ -72,6 +100,11 @@ public class GameActivity extends AppCompatActivity {
 
     private boolean shouldStartTimer;
     private final int comboThreshold = 2;
+
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
+    private static final String TAG = GameActivity.class.getSimpleName();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -192,6 +225,8 @@ public class GameActivity extends AppCompatActivity {
         correctOutOfTotalTextView = findViewById(R.id.correctOutOfTotalTextView);
         correctOutOfTotalPercentageTextView = findViewById(R.id.correctOutOfTotalPercentageTextView);
         comboDisplayer = findViewById(R.id.comboDisplayer);
+        db = FirebaseFirestore.getInstance();
+        mAuth = FirebaseAuth.getInstance();
     }
 
     private void setEditorLogic() {
@@ -409,7 +444,110 @@ public class GameActivity extends AppCompatActivity {
 
         int correctPercentage = (int) (((float) correctKeysAmount / (float) totalCharacters) * 100f);
 
-        correctOutOfTotalPercentageTextView.setText(String.valueOf(correctPercentage) + "%");
+        correctOutOfTotalPercentageTextView.setText(correctPercentage + "%");
+
+        updateUserStats(Double.valueOf(correctPercentage),
+                Double.valueOf(wpmTextView.getText().toString()),
+                Double.valueOf(cpmTextView.getText().toString()),
+                Double.valueOf(pointTextView.getText().toString()));
+    }
+
+    private Double calcNewAvgAfterAddingElement(Double oldAvg,Long oldCount,Double element){
+        return (oldAvg*oldCount+element)/(oldCount+1.0);
+    }
+
+    private void updateUserStats(final Double accuracy, final Double wpm, final Double cpm, final Double points){
+        getUserStatsCollection().document("statistics").get()
+            .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                        Long numOfGames = document.getLong("numOfGames");
+                        Double newAvgAccuracy =
+                                calcNewAvgAfterAddingElement(document.getDouble("avgAccuracy"),numOfGames,accuracy);
+                        Double newAvgWPM =
+                                calcNewAvgAfterAddingElement(document.getDouble("avgWPM"),numOfGames,wpm);
+                        Double newAvgCPM =
+                                calcNewAvgAfterAddingElement(document.getDouble("avgCPM"),numOfGames,cpm);
+                        Double newTotalScore =
+                                document.getDouble("TotalScore") +points;
+                        writeToUserStatistics(numOfGames+1,newAvgAccuracy,newAvgWPM,newAvgCPM,newTotalScore);
+                        writeGameResult(numOfGames+1,wpm,cpm,accuracy,points);
+                    } else {
+                        Log.d(TAG, "No such document");
+                        writeToUserStatistics(1,accuracy,wpm,cpm,points);
+                        writeGameResult(1,wpm,cpm,accuracy,points);
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                    writeToUserStatistics(1,accuracy,wpm,cpm,points);
+                    writeGameResult(1,wpm,cpm,accuracy,points);
+                }
+            }
+        });
+    }
+
+    private void writeGameResult(long numOfGames,Double WPM, Double CPM, Double accuracy, Double points){
+        Map<String, Object> updatedStatistics = new HashMap<>();
+        updatedStatistics.put(uidField, mAuth.getUid());
+        updatedStatistics.put(emailField, mAuth.getCurrentUser().getEmail());
+        updatedStatistics.put(dateField,new Timestamp(new Date()));
+        updatedStatistics.put(CPMField,CPM);
+        updatedStatistics.put(accuracyField, accuracy);
+        updatedStatistics.put(WPMField,WPM);
+        updatedStatistics.put(totalScoreField,points);
+
+        getUserStatsCollection().document(statisticsDocument).collection(gameResultsCollection)
+                .add(updatedStatistics)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Log.d(TAG, "game result written with ID: " + documentReference.getId());
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing game result to database", e);
+                    }
+                });
+    }
+
+    private void writeToUserStatistics(long numOfGames, Double newAvgAccuracy, Double newAvgWPM,
+                                       Double newAvgCPM, Double newTotalScore){
+        Map<String, Object> updatedStatistics = new HashMap<>();
+        updatedStatistics.put(uidField, mAuth.getUid());
+        updatedStatistics.put(emailField, mAuth.getCurrentUser().getEmail());
+        updatedStatistics.put(dateField,new Timestamp(new Date()));
+        updatedStatistics.put(numOfGamesField, numOfGames);
+        updatedStatistics.put(CPMField,newAvgCPM);
+        updatedStatistics.put(accuracyField, newAvgAccuracy);
+        updatedStatistics.put(WPMField,newAvgWPM);
+        updatedStatistics.put(totalScoreField,newTotalScore);
+
+        getUserStatsCollection().document(statisticsDocument).set(updatedStatistics)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "user average statistics successfully written!");
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing average statistics", e);
+                    }
+        });
+    }
+
+    private CollectionReference getUserStatsCollection() {
+        if(mAuth.getCurrentUser() != null){
+            return db.collection(usersCollection)
+                    .document(mAuth.getUid()).collection(statsCollection);
+        }
+        return null;
     }
 
     private void closeKeyboard() {

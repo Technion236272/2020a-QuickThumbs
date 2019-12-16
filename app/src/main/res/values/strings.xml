@@ -19,5 +19,7 @@
     <string name="Profile">Profile</string>
     <string name="starsIcon">stars Icon</string>
     <string name="dropDownArrowIcon">drop down arrow icon</string>
+    <string name="CPM">Average CPM:</string>
+    <string name="Accuracy">Average Accuracy:</string>
 
 </resources>

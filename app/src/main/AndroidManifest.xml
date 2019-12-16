@@ -10,15 +10,15 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
         <activity
-            android:name=".TextsActivity"
+            android:name=".personalArea.TextsActivity"
             android:label="@string/Texts"
-            android:parentActivityName=".ProfileActivity" />
+            android:parentActivityName=".personalArea.ProfileActivity" />
         <activity
-            android:name=".FriendsActivity"
+            android:name=".personalArea.FriendsActivity"
             android:label="@string/Friends"
-            android:parentActivityName=".ProfileActivity" />
+            android:parentActivityName=".personalArea.ProfileActivity" />
         <activity
-            android:name=".ProfileActivity"
+            android:name=".personalArea.ProfileActivity"
             android:label="@string/Profile"
             android:parentActivityName=".MainUserActivity" />
 
