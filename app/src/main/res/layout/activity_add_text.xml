@@ -93,6 +93,7 @@
                 android:background="@color/primaryDarkColor"
                 android:gravity="center"
                 android:hint="Every word that you will insert in the bottom text will be shown here\n (up to 300 characters)"
+                android:textColorHint="@color/primaryTextColor"
                 android:textColor="@color/primaryTextColor"
                 android:textSize="17sp" />
         </LinearLayout>
