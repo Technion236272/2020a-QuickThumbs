@@ -301,22 +301,16 @@
             android:orientation="vertical"
             android:visibility="visible">
 
-            <FrameLayout
+            <TextView
+                android:id="@+id/gameLoadingText"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="match_parent"
+                android:text="Loading the text..."
+                android:background="@color/primaryDarkColor"
+                android:gravity="center"
+                android:textColor="@color/primaryTextColor"
+                android:textSize="17sp" />
 
-
-                <TextView
-                    android:id="@+id/gameLoadingText"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:text="Loading the text..."
-                    android:background="@color/primaryDarkColor"
-                    android:gravity="center"
-                    android:textColor="@color/primaryTextColor"
-                    android:textSize="17sp" />
-
-            </FrameLayout>
 
 
         </RelativeLayout>
