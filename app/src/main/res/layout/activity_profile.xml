@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".ProfileActivity">
+    tools:context=".personalArea.ProfileActivity">
 
     <include
         android:id="@+id/profileToolbar"
@@ -26,9 +26,31 @@
         app:srcCompat="@drawable/placeholder" />
 
     <TextView
-        android:id="@+id/WPM"
+        android:id="@+id/Accuracy"
         style="@style/BlackTextHeader"
         android:layout_below="@id/profileToolbar"
+        android:layout_marginTop="5dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginLeft="15dp"
+        android:layout_toRightOf="@id/achievementBadge"
+        android:layout_toEndOf="@id/achievementBadge"
+        android:text="@string/Accuracy"/>
+
+    <TextView
+        android:id="@+id/AccuracyValue"
+        style="@style/BlackTextHeader"
+        android:layout_below="@id/profileToolbar"
+        android:layout_toRightOf="@id/Accuracy"
+        android:layout_toEndOf="@id/Accuracy"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginStart="5dp"
+        android:text="--" />
+
+    <TextView
+        android:id="@+id/WPM"
+        style="@style/BlackTextHeader"
+        android:layout_below="@id/Accuracy"
         android:layout_marginTop="5dp"
         android:layout_marginStart="15dp"
         android:layout_marginLeft="15dp"
@@ -39,7 +61,29 @@
     <TextView
         android:id="@+id/WPMValue"
         style="@style/BlackTextHeader"
-        android:layout_below="@id/profileToolbar"
+        android:layout_below="@id/Accuracy"
+        android:layout_toRightOf="@id/WPM"
+        android:layout_toEndOf="@id/WPM"
+        android:layout_marginTop="5dp"
+        android:layout_marginLeft="5dp"
+        android:layout_marginStart="5dp"
+        android:text="--" />
+
+    <TextView
+        android:id="@+id/CPM"
+        style="@style/BlackTextHeader"
+        android:layout_below="@id/WPM"
+        android:layout_marginTop="5dp"
+        android:layout_marginStart="15dp"
+        android:layout_marginLeft="15dp"
+        android:layout_toRightOf="@id/achievementBadge"
+        android:layout_toEndOf="@id/achievementBadge"
+        android:text="@string/CPM"/>
+
+    <TextView
+        android:id="@+id/CPMValue"
+        style="@style/BlackTextHeader"
+        android:layout_below="@id/WPM"
         android:layout_toRightOf="@id/WPM"
         android:layout_toEndOf="@id/WPM"
         android:layout_marginTop="5dp"
@@ -50,7 +94,7 @@
     <TextView
         android:id="@+id/Score"
         style="@style/BlackTextHeader"
-        android:layout_below="@id/WPM"
+        android:layout_below="@id/CPM"
         android:layout_marginTop="5dp"
         android:layout_marginStart="15dp"
         android:layout_marginLeft="15dp"
@@ -61,7 +105,7 @@
     <TextView
         android:id="@+id/ScoreValue"
         style="@style/BlackTextHeader"
-        android:layout_below="@id/WPM"
+        android:layout_below="@id/CPM"
         android:layout_toRightOf="@id/Score"
         android:layout_toEndOf="@id/Score"
         android:layout_marginTop="5dp"
@@ -94,7 +138,7 @@
     <Button
         android:id="@+id/FriendsButton"
         style="@style/LightPrimaryRoundedButton"
-        android:layout_below="@id/achievementBadge"
+        android:layout_below="@id/ScoreRankingValue"
         android:layout_alignParentStart="true"
         android:layout_alignParentLeft="true"
         android:layout_toStartOf="@+id/space"
@@ -110,7 +154,7 @@
     <Button
         android:id="@+id/TextsButton"
         style="@style/LightPrimaryRoundedButton"
-        android:layout_below="@id/achievementBadge"
+        android:layout_below="@id/ScoreRankingValue"
         android:layout_alignParentEnd="true"
         android:layout_alignParentRight="true"
         android:layout_toEndOf="@id/FriendsButton"

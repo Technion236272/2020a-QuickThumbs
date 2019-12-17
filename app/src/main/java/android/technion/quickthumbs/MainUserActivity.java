@@ -6,6 +6,7 @@ import androidx.appcompat.widget.Toolbar;
 import android.content.Intent;
 import android.os.Bundle;
 import android.technion.quickthumbs.game.GameActivity;
+import android.technion.quickthumbs.personalArea.ProfileActivity;
 import android.technion.quickthumbs.settings.UserSettingActivity;
 import android.technion.quickthumbs.theme.ThemeSelectorActivity;
 import android.view.Menu;
