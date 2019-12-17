@@ -87,7 +87,7 @@
                     android:layout_alignBaseline="@id/pointsHeadline"
                     android:layout_toRightOf="@id/pointsHeadline"
                     android:ems="3"
-                    android:text="10000"
+                    android:text="0"
                     android:textColor="#FFFFFF"
                     android:textSize="20sp" />
 
