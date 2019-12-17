@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
 import android.technion.quickthumbs.R;
+import android.technion.quickthumbs.TextPoll;
 import android.text.Editable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -37,6 +38,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -45,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Callable;
 
 import static android.technion.quickthumbs.FirestoreConstants.accuracyField;
 import static android.technion.quickthumbs.FirestoreConstants.CPMField;
@@ -67,8 +70,10 @@ public class GameActivity extends AppCompatActivity {
     private TextView wpmTextView;
     private TextView cpmTextView;
     private SpannableString ss;
+    private RelativeLayout gameLoadingLayout;
     private RelativeLayout gamePlayingLayout;
     private RelativeLayout gameReportLayout;
+    private TextView gameLoadingText;
     private TextView gameReportText;
     private TextView correctOutOfTotalTextView;
     private TextView correctOutOfTotalPercentageTextView;
@@ -112,12 +117,29 @@ public class GameActivity extends AppCompatActivity {
         setContentView(R.layout.activity_game);
 
         initializeFields();
+        currentWordEditor.setActivated(false);
+        closeKeyboard();
+
+        gameLoadingLayout.setVisibility(View.VISIBLE);
+        gamePlayingLayout.setVisibility(View.INVISIBLE);
+
+
+        setGameText(gameTextView);
+
+    }
+
+    public void gameCreationSequence() {
+
+        ss = new SpannableString(gameTextView.getText().toString());
+
+        gamePlayingLayout.setVisibility(View.VISIBLE);
+        gameLoadingLayout.setVisibility(View.INVISIBLE);
 
         keyboardConfiguration(currentWordEditor);
 
         setEditorLogic();
 
-        setGameText(gameTextView);
+//        setGameText(gameTextView);
 
         comboDisplayChange();
 
@@ -134,6 +156,8 @@ public class GameActivity extends AppCompatActivity {
 
         initializeWordFlagsAndPointsDefaultValue(words[0]);
         gameTextWordOffset = 0;
+
+//        currentWordEditor.setActivated(true);
     }
 
     private void comboDisplayChange() {
@@ -191,15 +215,12 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void setGameText(TextView gameTextView) {
-        String gameText = fetchText();
-
-        ss = new SpannableString(gameText);
-
-        gameTextView.setText(ss);
+        String gameText = fetchText(gameTextView);
     }
 
-    private String fetchText() {
-        return "Remember when you were young You shone like the Sun Shine on, you crazy diamond Now there's a look in your eyes Like black holes in the sky Shine on, you crazy diamond";
+    private String fetchText(TextView gameTextView) {
+        TextPoll.fetchRandomText(gameTextView,this);
+        return gameTextView.getText().toString();
     }
 
     private void initializeFields() {
@@ -219,8 +240,10 @@ public class GameActivity extends AppCompatActivity {
         pointTextView = findViewById(R.id.pointsValue);
         wpmTextView = findViewById(R.id.WPMValue);
         cpmTextView = findViewById(R.id.CPMValue);
+        gameLoadingLayout = findViewById(R.id.gameLoadingLayout);
         gamePlayingLayout = findViewById(R.id.gameTextLayout);
         gameReportLayout = findViewById(R.id.gameReportLayout);
+        gameLoadingText = findViewById(R.id.gameLoadingText);
         gameReportText = findViewById(R.id.gameReportTextLayout);
         correctOutOfTotalTextView = findViewById(R.id.correctOutOfTotalTextView);
         correctOutOfTotalPercentageTextView = findViewById(R.id.correctOutOfTotalPercentageTextView);
