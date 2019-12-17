@@ -242,7 +242,6 @@
                 android:background="@color/primaryDarkColor"
                 android:gravity="center"
                 android:padding="5sp"
-                android:text="Remember when you were young\n  You shone like the Sun\n   Shine on, you crazy diamond\n    Now there's a look in your eyes\n     Like black holes in the sky\n      Shine on, you crazy diamond"
                 android:textColor="@color/primaryTextColor"
                 android:textSize="17sp" />
         </RelativeLayout>
@@ -267,7 +266,6 @@
 
                     android:background="@color/primaryDarkColor"
                     android:gravity="center"
-                    android:text="Remember when you were young\n  You shone like the Sun\n   Shine on, you crazy diamond\n    Now there's a look in your eyes\n     Like black holes in the sky\n      Shine on, you crazy diamond"
                     android:textColor="@color/primaryTextColor"
                     android:textSize="17sp" />
 
@@ -295,5 +293,33 @@
                 android:singleLine="true"
                 android:textColor="@color/secondaryTextColor" />
         </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/gameLoadingLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:visibility="visible">
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+
+                <TextView
+                    android:id="@+id/gameLoadingText"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Loading the text..."
+                    android:background="@color/primaryDarkColor"
+                    android:gravity="center"
+                    android:textColor="@color/primaryTextColor"
+                    android:textSize="17sp" />
+
+            </FrameLayout>
+
+
+        </RelativeLayout>
+
     </FrameLayout>
 </RelativeLayout>
