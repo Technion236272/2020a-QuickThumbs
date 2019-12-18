@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-
+import android.content.Intent;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
@@ -488,15 +488,15 @@ public class GameActivity extends AppCompatActivity {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
                         Log.d(TAG, "DocumentSnapshot data: " + document.getData());
-                        Long numOfGames = document.getLong("numOfGames");
+                        Long numOfGames = document.getLong(numOfGamesField);
                         Double newAvgAccuracy =
-                                calcNewAvgAfterAddingElement(document.getDouble("avgAccuracy"),numOfGames,accuracy);
+                                calcNewAvgAfterAddingElement(document.getDouble(accuracyField),numOfGames,accuracy);
                         Double newAvgWPM =
-                                calcNewAvgAfterAddingElement(document.getDouble("avgWPM"),numOfGames,wpm);
+                                calcNewAvgAfterAddingElement(document.getDouble(WPMField),numOfGames,wpm);
                         Double newAvgCPM =
-                                calcNewAvgAfterAddingElement(document.getDouble("avgCPM"),numOfGames,cpm);
+                                calcNewAvgAfterAddingElement(document.getDouble(CPMField),numOfGames,cpm);
                         Double newTotalScore =
-                                document.getDouble("TotalScore") +points;
+                                document.getDouble(totalScoreField) +points;
                         writeToUserStatistics(numOfGames+1,newAvgAccuracy,newAvgWPM,newAvgCPM,newTotalScore);
                         writeGameResult(numOfGames+1,wpm,cpm,accuracy,points);
                     } else {
@@ -718,5 +718,11 @@ public class GameActivity extends AppCompatActivity {
         setSupportActionBar((Toolbar) findViewById(R.id.GameToolbar));
         ActionBar ab = getSupportActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
+    }
+
+    public void playAgain(View view){
+        finish();
+        Intent intent = new Intent(GameActivity.this,GameActivity.class);
+        startActivity(intent);
     }
 }
