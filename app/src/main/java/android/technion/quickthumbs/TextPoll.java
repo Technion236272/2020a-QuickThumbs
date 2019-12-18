@@ -19,27 +19,32 @@ import java.util.List;
 import java.util.Random;
 
 public class TextPoll {
-private static final String TAG = AddTextActivity.class.getSimpleName();
+    private static final String TAG = AddTextActivity.class.getName();
 
-    public static String fetchRandomText(final TextView gameTextView,final GameActivity objectToInvokeOn){
-        final String selectedText="default text for usage";
-        FirebaseFirestore db  = FirebaseFirestore.getInstance();
+    public static String fetchRandomText(final TextView gameTextView, final GameActivity objectToInvokeOn) {
+        final String selectedText = "default text for usage";
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
         CollectionReference collection = db.collection("texts");
+
         collection.get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            List<String> textsList = new ArrayList<>();
+                            List<String> texts = new ArrayList<>();
+
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 Log.d(TAG, document.getId() + " => " + document.getData());
                                 String currentText = document.getString("text");
-                                textsList.add(currentText);
+                                texts.add(currentText);
                             }
-                            int textsListSize = textsList.size();
-                            String randomText = textsList.get(new Random().nextInt(textsListSize));
-                            Log.d(TAG,  "gottenText is: " + randomText);
+
+                            int textsListSize = texts.size();
+                            String randomText = texts.get(new Random().nextInt(textsListSize));
+                            Log.d(TAG, "gottenText is: " + randomText);
+
                             gameTextView.setText(randomText);
+
                             try {
                                 Class<?> c = GameActivity.class;
                                 Method method = c.getDeclaredMethod("gameCreationSequence", (Class<?>[]) null);
@@ -52,6 +57,7 @@ private static final String TAG = AddTextActivity.class.getSimpleName();
                         }
                     }
                 });
+
         return selectedText;
     }
 

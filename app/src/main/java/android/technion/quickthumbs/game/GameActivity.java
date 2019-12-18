@@ -4,9 +4,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
 import android.content.Intent;
 import android.content.Context;
 import android.graphics.Color;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.technion.quickthumbs.R;
@@ -40,7 +42,6 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -49,7 +50,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.Callable;
 
 import static android.technion.quickthumbs.FirestoreConstants.accuracyField;
 import static android.technion.quickthumbs.FirestoreConstants.CPMField;
@@ -110,8 +110,10 @@ public class GameActivity extends AppCompatActivity {
 
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-    private static final String TAG = GameActivity.class.getSimpleName();
+    private static final String TAG = GameActivity.class.getName();
 
+    MediaPlayer positiveMediaPlayer;
+    MediaPlayer negativeMediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,14 +122,14 @@ public class GameActivity extends AppCompatActivity {
 
         initializeFields();
         currentWordEditor.setActivated(false);
-        closeKeyboard();
-
         gameLoadingLayout.setVisibility(View.VISIBLE);
         gamePlayingLayout.setVisibility(View.INVISIBLE);
 
+        closeKeyboard();
 
-        setGameText(gameTextView);
+        setUpSounds();  //any future sound features should be added here;
 
+        setGameTextAndLogicAndEnding(gameTextView);
     }
 
     public void gameCreationSequence() {
@@ -140,8 +142,6 @@ public class GameActivity extends AppCompatActivity {
         keyboardConfiguration(currentWordEditor);
 
         setEditorLogic();
-
-//        setGameText(gameTextView);
 
         comboDisplayChange();
 
@@ -158,8 +158,6 @@ public class GameActivity extends AppCompatActivity {
 
         initializeWordFlagsAndPointsDefaultValue(words[0]);
         gameTextWordOffset = 0;
-
-//        currentWordEditor.setActivated(true);
     }
 
     private void comboDisplayChange() {
@@ -170,6 +168,22 @@ public class GameActivity extends AppCompatActivity {
         YoYo.with(Techniques.BounceIn)
                 .duration(500)
                 .playOn(comboDisplayer);
+    }
+
+    private void setUpSounds() {
+        supplyFreshMediaPlayers();
+
+        setUpSoundsOnComplete();
+    }
+
+    private void supplyFreshMediaPlayers() {
+        positiveMediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.typing_sound);
+        negativeMediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.annoying_cat);
+    }
+
+    private void setUpSoundsOnComplete() {
+        setUpSoundOnComplete(positiveMediaPlayer);
+        setUpSoundOnComplete(negativeMediaPlayer);
     }
 
     private void setTimerUpdateGameStatsPresentation() {
@@ -192,21 +206,29 @@ public class GameActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        long inactiveDeltaTime = System.currentTimeMillis() - gameStopTimeStamp;
 
+        long inactiveDeltaTime = System.currentTimeMillis() - gameStopTimeStamp;
         gameStartTimeStamp += inactiveDeltaTime;
+
+        setUpSounds();
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+
         gameStopTimeStamp = System.currentTimeMillis();
+
+//        positiveMediaPlayer.release();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+
         gameStopTimeStamp = System.currentTimeMillis();
+
+//        positiveMediaPlayer.release();
     }
 
     private List<Pair<String, Integer>> setWordsMapper(String[] words) {
@@ -219,16 +241,16 @@ public class GameActivity extends AppCompatActivity {
             wordsMapper.add(new Pair<>(currentWord, current));
             current += currentWord.length() + 1;
         }
+
         return wordsMapper;
     }
 
-    private void setGameText(TextView gameTextView) {
-        String gameText = fetchText(gameTextView);
+    private void setGameTextAndLogicAndEnding(TextView gameTextView) {
+        fetchText(gameTextView);
     }
 
-    private String fetchText(TextView gameTextView) {
-        TextPoll.fetchRandomText(gameTextView,this);
-        return gameTextView.getText().toString();
+    private void fetchText(TextView gameTextView) {
+        TextPoll.fetchRandomText(gameTextView, this);
     }
 
     private void initializeFields() {
@@ -339,35 +361,10 @@ public class GameActivity extends AppCompatActivity {
         }
 
         if (giveExtraCorrectCharacterForSpacePress) {
-            correctKeysAmount++;
-            increaseCombo();
-            increasePoints(gameTextWordOffset - 1, false);
+            positiveLogicOnSpaceKeyForCorrectWord();
         } else {
-            resetCombo();
+            resetCombo(false);
         }
-    }
-
-    private void increasePoints(int gameTextWordOffsetLocal, boolean shouldRememberPoints) {
-        Integer combo = comboOptions.get(currentComboIndex);
-        int pointsToAdd = combo * 10;
-
-        if (shouldRememberPoints) {
-            wordPoints[gameTextWordOffsetLocal] = pointsToAdd;
-        }
-
-        collectedPoints += pointsToAdd;
-    }
-
-    private void increaseCombo() {
-        if (comboCounter++ == comboThreshold) {
-            comboCounter = 0;
-
-            if (currentComboIndex < comboOptions.size() - 1) {
-                currentComboIndex++;
-                comboDisplayChange();
-            }
-        }
-
     }
 
     private void paintGameTextBasedOnWordFlags() {
@@ -403,7 +400,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void logicOnRemovingKey() {
-        resetCombo();
+        resetCombo(true);
 
         if (gameTextWordOffset <= wordFlags.length) { //will not!! get here if position in EditText is 0 and tries to remove.
             reducePointsBasedOnPreviousEarnings();
@@ -445,18 +442,12 @@ public class GameActivity extends AppCompatActivity {
             if (gameTextWordOffset < currentExpectedWord.length()) {
                 expectedKey = String.valueOf(currentExpectedWord.charAt(gameTextWordOffset));
             } else {
-                resetCombo();
+                resetCombo(false);
                 expectedKey = null;
             }
 
-            updateWordFlags(pressedKey, expectedKey);
+            logicOnCurrentWordAddedKey(pressedKey, expectedKey);
         }
-    }
-
-    private void resetCombo() {
-        comboCounter = 0;
-        currentComboIndex = 0;
-        comboDisplayChange();
     }
 
     private void finishGame() {
@@ -483,53 +474,53 @@ public class GameActivity extends AppCompatActivity {
                 Double.valueOf(pointTextView.getText().toString()));
     }
 
-    private Double calcNewAvgAfterAddingElement(Double oldAvg,Long oldCount,Double element){
-        return (oldAvg*oldCount+element)/(oldCount+1.0);
+    private Double calcNewAvgAfterAddingElement(Double oldAvg, Long oldCount, Double element) {
+        return (oldAvg * oldCount + element) / (oldCount + 1.0);
     }
 
-    private void updateUserStats(final Double accuracy, final Double wpm, final Double cpm, final Double points){
+    private void updateUserStats(final Double accuracy, final Double wpm, final Double cpm, final Double points) {
         getUserStatsCollection().document("statistics").get()
-            .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    DocumentSnapshot document = task.getResult();
-                    if (document.exists()) {
-                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
-                        Long numOfGames = document.getLong(numOfGamesField);
-                        Double newAvgAccuracy =
-                                calcNewAvgAfterAddingElement(document.getDouble(accuracyField),numOfGames,accuracy);
-                        Double newAvgWPM =
-                                calcNewAvgAfterAddingElement(document.getDouble(WPMField),numOfGames,wpm);
-                        Double newAvgCPM =
-                                calcNewAvgAfterAddingElement(document.getDouble(CPMField),numOfGames,cpm);
-                        Double newTotalScore =
-                                document.getDouble(totalScoreField) +points;
-                        writeToUserStatistics(numOfGames+1,newAvgAccuracy,newAvgWPM,newAvgCPM,newTotalScore);
-                        writeGameResult(numOfGames+1,wpm,cpm,accuracy,points);
-                    } else {
-                        Log.d(TAG, "No such document");
-                        writeToUserStatistics(1,accuracy,wpm,cpm,points);
-                        writeGameResult(1,wpm,cpm,accuracy,points);
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                                Long numOfGames = document.getLong(numOfGamesField);
+                                Double newAvgAccuracy =
+                                        calcNewAvgAfterAddingElement(document.getDouble(accuracyField), numOfGames, accuracy);
+                                Double newAvgWPM =
+                                        calcNewAvgAfterAddingElement(document.getDouble(WPMField), numOfGames, wpm);
+                                Double newAvgCPM =
+                                        calcNewAvgAfterAddingElement(document.getDouble(CPMField), numOfGames, cpm);
+                                Double newTotalScore =
+                                        document.getDouble(totalScoreField) + points;
+                                writeToUserStatistics(numOfGames + 1, newAvgAccuracy, newAvgWPM, newAvgCPM, newTotalScore);
+                                writeGameResult(wpm, cpm, accuracy, points);
+                            } else {
+                                Log.d(TAG, "No such document");
+                                writeToUserStatistics(1, accuracy, wpm, cpm, points);
+                                writeGameResult(wpm, cpm, accuracy, points);
+                            }
+                        } else {
+                            Log.d(TAG, "get failed with ", task.getException());
+                            writeToUserStatistics(1, accuracy, wpm, cpm, points);
+                            writeGameResult(wpm, cpm, accuracy, points);
+                        }
                     }
-                } else {
-                    Log.d(TAG, "get failed with ", task.getException());
-                    writeToUserStatistics(1,accuracy,wpm,cpm,points);
-                    writeGameResult(1,wpm,cpm,accuracy,points);
-                }
-            }
-        });
+                });
     }
 
-    private void writeGameResult(long numOfGames,Double WPM, Double CPM, Double accuracy, Double points){
+    private void writeGameResult(Double WPM, Double CPM, Double accuracy, Double points) {
         Map<String, Object> updatedStatistics = new HashMap<>();
         updatedStatistics.put(uidField, mAuth.getUid());
         updatedStatistics.put(emailField, mAuth.getCurrentUser().getEmail());
-        updatedStatistics.put(dateField,new Timestamp(new Date()));
-        updatedStatistics.put(CPMField,CPM);
+        updatedStatistics.put(dateField, new Timestamp(new Date()));
+        updatedStatistics.put(CPMField, CPM);
         updatedStatistics.put(accuracyField, accuracy);
-        updatedStatistics.put(WPMField,WPM);
-        updatedStatistics.put(totalScoreField,points);
+        updatedStatistics.put(WPMField, WPM);
+        updatedStatistics.put(totalScoreField, points);
 
         getUserStatsCollection().document(statisticsDocument).collection(gameResultsCollection)
                 .add(updatedStatistics)
@@ -547,17 +538,16 @@ public class GameActivity extends AppCompatActivity {
                 });
     }
 
-    private void writeToUserStatistics(long numOfGames, Double newAvgAccuracy, Double newAvgWPM,
-                                       Double newAvgCPM, Double newTotalScore){
+    private void writeToUserStatistics(long numOfGames, Double newAvgAccuracy, Double newAvgWPM, Double newAvgCPM, Double newTotalScore) {
         Map<String, Object> updatedStatistics = new HashMap<>();
         updatedStatistics.put(uidField, mAuth.getUid());
         updatedStatistics.put(emailField, mAuth.getCurrentUser().getEmail());
-        updatedStatistics.put(dateField,new Timestamp(new Date()));
+        updatedStatistics.put(dateField, new Timestamp(new Date()));
         updatedStatistics.put(numOfGamesField, numOfGames);
-        updatedStatistics.put(CPMField,newAvgCPM);
+        updatedStatistics.put(CPMField, newAvgCPM);
         updatedStatistics.put(accuracyField, newAvgAccuracy);
-        updatedStatistics.put(WPMField,newAvgWPM);
-        updatedStatistics.put(totalScoreField,newTotalScore);
+        updatedStatistics.put(WPMField, newAvgWPM);
+        updatedStatistics.put(totalScoreField, newTotalScore);
 
         getUserStatsCollection().document(statisticsDocument).set(updatedStatistics)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -566,15 +556,15 @@ public class GameActivity extends AppCompatActivity {
                         Log.d(TAG, "user average statistics successfully written!");
                     }
                 }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing average statistics", e);
-                    }
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.w(TAG, "Error writing average statistics", e);
+            }
         });
     }
 
     private CollectionReference getUserStatsCollection() {
-        if(mAuth.getCurrentUser() != null){
+        if (mAuth.getCurrentUser() != null) {
             return db.collection(usersCollection)
                     .document(mAuth.getUid()).collection(statsCollection);
         }
@@ -658,28 +648,101 @@ public class GameActivity extends AppCompatActivity {
         currentWordEditor.setSelection(index);
     }
 
-    private void updateWordFlags(String pressedKey, String expectedKey) {
+    private void logicOnCurrentWordAddedKey(String pressedKey, String expectedKey) {
         if (expectedKey == null) {
             return;
         }
 
         if (pressedKey.equals(expectedKey)) {
-            increaseCombo();
-
-            if (wordFlags[gameTextWordOffset].equals(GameWordStatus.NO_STATUS)) {
-                wordFlags[gameTextWordOffset] = GameWordStatus.CORRECT;
-                correctKeysAmount++;
-            } else {
-                wordFlags[gameTextWordOffset] = GameWordStatus.CORRECT_BUT_BEEN_HERE_BEFORE;
-                correctKeysAmount++;
-            }
-
-            increasePoints(gameTextWordOffset, true);
+            positiveLogicOnAddedCorrectKeyToWord();
         } else {
-            resetCombo();
+            resetCombo(false);
             wordFlags[gameTextWordOffset] = GameWordStatus.WRONG;
         }
     }
+
+    private void positiveLogicOnSpaceKeyForCorrectWord() {
+        correctKeysAmount++;
+        increaseCombo();
+        increasePoints(gameTextWordOffset - 1, false);
+        comboMakePositiveSound();
+    }
+
+    private void positiveLogicOnAddedCorrectKeyToWord() {
+        increaseCombo();
+
+        if (wordFlags[gameTextWordOffset].equals(GameWordStatus.NO_STATUS)) {
+            wordFlags[gameTextWordOffset] = GameWordStatus.CORRECT;
+            correctKeysAmount++;
+        } else {
+            wordFlags[gameTextWordOffset] = GameWordStatus.CORRECT_BUT_BEEN_HERE_BEFORE;
+            correctKeysAmount++;
+        }
+
+        increasePoints(gameTextWordOffset, true);
+
+        comboMakePositiveSound();
+    }
+
+    private void increasePoints(int gameTextWordOffsetLocal, boolean shouldRememberPoints) {
+        Integer combo = comboOptions.get(currentComboIndex);
+        int pointsToAdd = combo * 10;
+
+        if (shouldRememberPoints) {
+            wordPoints[gameTextWordOffsetLocal] = pointsToAdd;
+        }
+
+        collectedPoints += pointsToAdd;
+    }
+
+    private void increaseCombo() {
+        if (comboCounter++ == comboThreshold) {
+            comboCounter = 0;
+
+            if (currentComboIndex < comboOptions.size() - 1) {
+                currentComboIndex++;
+                comboDisplayChange();
+            }
+        }
+    }
+
+    private void resetCombo(boolean isRemoveKey) {
+        comboCounter = 0;
+        currentComboIndex = 0;
+        comboDisplayChange();
+
+        if (!isRemoveKey) {
+            comboMakeNegativeSound();
+        }
+    }
+
+    private void comboMakePositiveSound() {
+        comboMakeSound(positiveMediaPlayer);
+    }
+
+    private void comboMakeNegativeSound() {
+        comboMakeSound(negativeMediaPlayer);
+    }
+
+    private void comboMakeSound(MediaPlayer positiveMediaPlayer) {
+        positiveMediaPlayer.start();
+        setUpSounds();
+    }
+
+    private void setUpSoundOnComplete(MediaPlayer positiveMediaPlayer) {
+        positiveMediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mediaPlayer) {
+                mediaPlayer.stop();
+                mediaPlayer.release();
+            }
+        });
+    }
+
+    //........................................................../
+    // http://soundbible.com/tags-meow.html for more cat voices
+
+    //........................................................../
 
     private void initializeWordFlagsAndPointsDefaultValue(String currentWord) {
         int length = currentWord.length();
@@ -728,9 +791,9 @@ public class GameActivity extends AppCompatActivity {
         ab.setDisplayHomeAsUpEnabled(true);
     }
 
-    public void playAgain(View view){
+    public void playAgain(View view) {
         finish();
-        Intent intent = new Intent(GameActivity.this,GameActivity.class);
+        Intent intent = new Intent(GameActivity.this, GameActivity.class);
         startActivity(intent);
     }
 }
