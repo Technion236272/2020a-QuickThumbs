@@ -26,6 +26,8 @@ import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.daimajia.androidanimations.library.Techniques;
+import com.daimajia.androidanimations.library.YoYo;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -104,7 +106,7 @@ public class GameActivity extends AppCompatActivity {
     private int comboCounter;
 
     private boolean shouldStartTimer;
-    private final int comboThreshold = 2;
+    private final int comboThreshold = 4;
 
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
@@ -161,7 +163,13 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void comboDisplayChange() {
-        comboDisplayer.setText("X" + comboOptions.get(currentComboIndex));
+        String comboString = String.valueOf(comboOptions.get(currentComboIndex));
+
+        comboDisplayer.setText("X" + comboString);
+
+        YoYo.with(Techniques.BounceIn)
+                .duration(500)
+                .playOn(comboDisplayer);
     }
 
     private void setTimerUpdateGameStatsPresentation() {
