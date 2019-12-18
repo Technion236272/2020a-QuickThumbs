@@ -21,5 +21,6 @@
     <string name="dropDownArrowIcon">drop down arrow icon</string>
     <string name="CPM">Average CPM:</string>
     <string name="Accuracy">Average Accuracy:</string>
+    <string name="playAgain">Play Again</string>
 
 </resources>

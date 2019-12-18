@@ -230,20 +230,35 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true" />
+                android:background="@color/primaryDarkColor"
+                android:layout_alignParentBottom="true"
+                android:layout_centerVertical="true">
 
 
             <TextView
                 android:id="@+id/gameReportTextLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignTop="@id/relativeCenterGameReport"
-                android:layout_alignParentBottom="true"
                 android:background="@color/primaryDarkColor"
-                android:gravity="center"
+                android:gravity="top"
                 android:padding="5sp"
                 android:textColor="@color/primaryTextColor"
                 android:textSize="17sp" />
+
+            <Button
+                android:id="@+id/playAgainButton"
+                style= "@style/LightPrimaryRoundedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:layout_marginBottom= "15dp"
+                android:layout_gravity="center"
+                android:layout_below="@id/gameReportTextLayout"
+                android:text="@string/playAgain" />
+
+            </RelativeLayout>
+
+
         </RelativeLayout>
 
         <RelativeLayout
