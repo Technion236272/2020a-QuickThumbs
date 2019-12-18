@@ -4,7 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-
+import android.content.Intent;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
@@ -718,5 +718,11 @@ public class GameActivity extends AppCompatActivity {
         setSupportActionBar((Toolbar) findViewById(R.id.GameToolbar));
         ActionBar ab = getSupportActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
+    }
+
+    public void playAgain(View view){
+        finish();
+        Intent intent = new Intent(GameActivity.this,GameActivity.class);
+        startActivity(intent);
     }
 }

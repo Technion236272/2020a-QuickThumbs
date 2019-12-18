@@ -245,16 +245,17 @@
                 android:textColor="@color/primaryTextColor"
                 android:textSize="17sp" />
 
-            <Button
-                android:id="@+id/playAgainButton"
-                style= "@style/LightPrimaryRoundedButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="5dp"
-                android:layout_marginBottom= "15dp"
-                android:layout_gravity="center"
-                android:layout_below="@id/gameReportTextLayout"
-                android:text="@string/playAgain" />
+                <Button
+                    android:id="@+id/playAgainButton"
+                    style="@style/LightPrimaryRoundedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/gameReportTextLayout"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="15dp"
+                    android:onClick="playAgain"
+                    android:padding="5dp"
+                    android:text="@string/playAgain" />
 
             </RelativeLayout>
 
