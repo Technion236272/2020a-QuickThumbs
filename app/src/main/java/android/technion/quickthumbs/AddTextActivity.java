@@ -26,6 +26,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -76,9 +77,9 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
                 }
 
                 uploadText.setActivated(false);
-                String textAddedId = AddTextToCollection(titleText, mainText, themesSelect);
+//                String textAddedId = AddTextToCollection(titleText, mainText, themesSelect);
+                getCurrentThemeCount(titleText, mainText, themesSelect);
 
-                updateUserTexts(textAddedId);
 
 
                 finish();
@@ -118,7 +119,7 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
         changedUser.put("email", mAuth.getCurrentUser().getEmail());
         changedUser.put("textsAdded", value + 1);
         db.collection("users").document(mAuth.getUid())
-                .set(changedUser)
+                .set(changedUser, SetOptions.merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -133,14 +134,59 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
                 });
         Map<String, Object> currentText = new HashMap<>();
         currentText.put("name", textAddedId);
-        db.collection("users/" + mAuth.getUid() + "/texts").document().set(currentText);
+        db.collection("users/" + mAuth.getUid() + "/texts").document(textAddedId).set(currentText);
     }
 
+    private void getCurrentThemeCount(final String titleText, final String mainText, final String themesSelect) {
+        db.collection("themes").document(themesSelect).
+                get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
 
-    private String AddTextToCollection(String titleText, String mainText, String themesSelect) {
+                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+
+                        int currentThemeCount = document.getLong("textsCount").intValue();
+                        changeThemeData(titleText, mainText, themesSelect, currentThemeCount);
+                    } else {
+                        Log.d(TAG, "No such document");
+                        changeThemeData(titleText, mainText, themesSelect, 0);
+                    }
+                } else {
+                    Log.d(TAG, "get failed with ", task.getException());
+                    changeThemeData(titleText, mainText, themesSelect, 0);
+                }
+            }
+        });
+    }
+
+    private void changeThemeData(final String titleText, final String mainText, final String themesSelect, final int currentThemeCount) {
+        Map<String, Object> currentTheme = new HashMap<>();
+        currentTheme.put("themeName", themesSelect);
+        currentTheme.put("textsCount", currentThemeCount+1);
+        db.collection("themes").document(themesSelect).set(currentTheme, SetOptions.merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "DocumentSnapshot successfully written!");
+                        AddTextToCollection(titleText,mainText,themesSelect,currentThemeCount);
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing document", e);
+                    }
+                });
+    }
+
+    private void AddTextToCollection(String titleText, String mainText, String themesSelect, int currentThemeTextsCount) {
         Map<String, Object> newText = new HashMap<>();
         newText.put("title", titleText);
         newText.put("theme", themesSelect);
+        newText.put("mainThemeID", currentThemeTextsCount + 1);
         newText.put("text", mainText);
         newText.put("composer", mAuth.getUid());
         newText.put("playCount", 0);
@@ -151,13 +197,14 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
         String formattedDate = df.format(c.getTime());
         newText.put("date", formattedDate);
         newText.put("best", 10e6);
-        String textDocumentName = db.collection("texts").document().getId();
-        db.collection("texts").document(textDocumentName)
+        final String textDocumentName = db.collection("themes").document(themesSelect).collection("texts").document().getId();
+        db.collection("themes").document(themesSelect).collection("texts").document(textDocumentName)
                 .set(newText)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Log.d(TAG, "DocumentSnapshot successfully written!");
+                        updateUserTexts(textDocumentName);
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -166,7 +213,8 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
                         Log.w(TAG, "Error writing document", e);
                     }
                 });
-        return textDocumentName;
+        db.collection("texts/").document(textDocumentName).set(newText);
+//        return textDocumentName;
     }
 
     private void moveWordToText() {

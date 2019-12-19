@@ -1,5 +1,6 @@
 package android.technion.quickthumbs.theme;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -7,24 +8,95 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
+import android.technion.quickthumbs.AddTextActivity;
 import android.technion.quickthumbs.R;
+import android.technion.quickthumbs.game.GameActivity;
+import android.util.Log;
+import android.view.View;
+import android.widget.RelativeLayout;
+
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ThemeSelectorActivity extends AppCompatActivity {
-
+    private static final String TAG = AddTextActivity.class.getSimpleName();
+    String[] themesNames={"Comedy","Music","Movies","Science","Games","Literature"};
+    private FirebaseFirestore db;
+    private FirebaseAuth mAuth;
+    Map<String,Boolean> selectedThemes ;
+    RecyclerView recyclerView;
+    private RelativeLayout themeLoadingLayout;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_theme_selector);
+        themeLoadingLayout = findViewById(R.id.themeLoadingLayout);
+        recyclerView = findViewById(R.id.themeRecycleView);
+
+        themeLoadingLayout.setVisibility(View.VISIBLE);
+        recyclerView.setVisibility(View.INVISIBLE);
 
         setActionBar();
-        RecyclerView recyclerView = findViewById(R.id.themeRecycleView);
 
-        List<ThemeDataRow> data = fillWithData();
-        ThemeAdaptor adapter = new ThemeAdaptor(data, getApplication());
+        final List<ThemeDataRow> data = fillWithData();
 
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+        selectedThemes = new HashMap<>();
+        for (int i=0 ; i<themesNames.length ; i++){
+            //this is for the layout show
+            selectedThemes.put(themesNames[i],false);
+            //this is for the db
+        }
+
+        getPersonalThemesData(data);
+
+    }
+
+    private void getPersonalThemesData(final List<ThemeDataRow> data) {
+        db.collection("users").document(mAuth.getUid()).collection("themes").get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d(TAG, document.getId() + " => " + document.getData());
+                                Boolean currentText = document.getBoolean("isChosen");
+                                selectedThemes.put(document.getId(),currentText);
+                            }
+                            themeAdaptorSet(data);
+                            themeLoadingLayout.setVisibility(View.INVISIBLE);
+                            recyclerView.setVisibility(View.VISIBLE);
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                            for (int i=0 ; i<themesNames.length ; i++){
+                                //this is for the layout show
+                                selectedThemes.put(themesNames[i],true);
+                                //this is for the db
+                                Map<String, Object> currentTheme = new HashMap<>();
+                                currentTheme.put("isChosen", true);
+                                db.collection("users/" + mAuth.getUid() + "/themes").document(themesNames[i]).set(currentTheme, SetOptions.merge());
+                            }
+                            themeAdaptorSet(data);
+                            themeLoadingLayout.setVisibility(View.INVISIBLE);
+                            recyclerView.setVisibility(View.VISIBLE);
+                        }
+                    }
+                });
+    }
+
+    private void themeAdaptorSet(List<ThemeDataRow> data) {
+        ThemeAdaptor adapter = new ThemeAdaptor(data, getApplication(), selectedThemes);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
     }
