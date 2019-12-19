@@ -194,14 +194,19 @@ public class GameActivity extends AppCompatActivity {
         gameTimer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                long timePassedFromStartGame = System.currentTimeMillis() - gameStartTimeStamp;
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        long timePassedFromStartGame = System.currentTimeMillis() - gameStartTimeStamp;
 
-                int cpm = (int) (((double) correctKeysAmount / (double) timePassedFromStartGame) * 1000d * 60d);
-                String cpmString = String.valueOf(cpm);
+                        int cpm = (int) (((double) correctKeysAmount / (double) timePassedFromStartGame) * 1000d * 60d);
+                        String cpmString = String.valueOf(cpm);
 
-                pointTextView.setText(String.valueOf(collectedPoints));
-                wpmTextView.setText(String.valueOf(cpm / 5));
-                cpmTextView.setText(cpmString);
+                        pointTextView.setText(String.valueOf(collectedPoints));
+                        wpmTextView.setText(String.valueOf(cpm / 5));
+                        cpmTextView.setText(cpmString);
+                    }
+                });
             }
         }, 500, 500);
     }
