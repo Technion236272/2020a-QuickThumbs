@@ -42,6 +42,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -50,6 +51,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.Callable;
 
 import static android.technion.quickthumbs.FirestoreConstants.accuracyField;
 import static android.technion.quickthumbs.FirestoreConstants.CPMField;
@@ -158,6 +160,10 @@ public class GameActivity extends AppCompatActivity {
 
         initializeWordFlagsAndPointsDefaultValue(words[0]);
         gameTextWordOffset = 0;
+
+        setUpSounds();  //any future sound features should be added here;
+
+        setGameTextAndLogicAndEnding(gameTextView);
     }
 
     private void comboDisplayChange() {
@@ -250,7 +256,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void fetchText(TextView gameTextView) {
-        TextPoll.fetchRandomText(gameTextView, this);
+        TextPoll.initiateCustomizeTextFetch(gameTextView,this);
     }
 
     private void initializeFields() {
