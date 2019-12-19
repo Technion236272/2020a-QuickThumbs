@@ -46,6 +46,7 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
     private Spinner spin;
     private boolean needClearance;
     private boolean backwardsCommand;
+    private int textMinimalLength = 60;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,6 +73,10 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
                     return;
                 } else if (themesSelect.equals("Select Theme")) {
                     Toast.makeText(getApplicationContext(), "Please select a theme", Toast.LENGTH_SHORT).show();
+                    spin.requestFocus();
+                    return;
+                } else if (mainText.length() < textMinimalLength){
+                    Toast.makeText(getApplicationContext(), "The text is too short!\n please insert more words", Toast.LENGTH_SHORT).show();
                     spin.requestFocus();
                     return;
                 }
