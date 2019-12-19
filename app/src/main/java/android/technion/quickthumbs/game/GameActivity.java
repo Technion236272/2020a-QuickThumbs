@@ -869,6 +869,11 @@ public class GameActivity extends AppCompatActivity {
             editText.setShowSoftInputOnFocus(true);
         }
 
+        InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        if (inputMethodManager != null){
+            inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+        }
+
         setActionBar();
     }
 
