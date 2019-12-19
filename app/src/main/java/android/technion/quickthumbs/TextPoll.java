@@ -2,17 +2,13 @@ package android.technion.quickthumbs;
 
 import android.technion.quickthumbs.game.GameActivity;
 import android.util.Log;
-import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -20,7 +16,6 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -30,46 +25,11 @@ import java.util.Random;
 public class TextPoll {
     private static final String TAG = TextPoll.class.getSimpleName();
 
-    public static String fetchRandomText(final TextView gameTextView, final GameActivity objectToInvokeOn) {
-        final String selectedText = "default text for usage";
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        CollectionReference collection = db.collection("texts");
-        collection.get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            List<String> textsList = new ArrayList<>();
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                                String currentText = document.getString("text");
-                                textsList.add(currentText);
-                            }
-                            int textsListSize = textsList.size();
-                            String randomText = textsList.get(new Random().nextInt(textsListSize));
-                            Log.d(TAG, "gottenText is: " + randomText);
-                            gameTextView.setText(randomText);
-                            try {
-                                Class<?> c = GameActivity.class;
-                                Method method = c.getDeclaredMethod("gameCreationSequence", (Class<?>[]) null);
-                                method.invoke(objectToInvokeOn, (Object[]) null);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-        return selectedText;
-    }
-
 
     //very useful to copy data from one to another
     public static void copyDocumentFromThemesToTextCollection() {
         final FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
-//        db.collection("themes").document(mAuth.getUid()).collection("themes").get()
         String[] themesNames={"Comedy","Music","Movies","Science","Games","Literature"};
         for (String theme : themesNames){
             db.collection("themes").document(theme).collection("texts").get()
@@ -102,18 +62,14 @@ public class TextPoll {
 
 
     private static void getRandomText(final String choosenTheme, int textsAmount, final TextView gameTextView, final GameActivity objectToInvokeOn) {
-        final String selectedText = "default text for usage";
         final int chosenIndex = (new Random().nextInt(textsAmount)) + 1;
         //now reach for the theme texts and check the number of texts in there
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
         db.collection("themes").document(choosenTheme).collection("texts").whereEqualTo("mainThemeID", chosenIndex).
                 get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                Log.d(TAG, "getRandomText: "+ "hereeeeeeee"+ "chosen index is: "+chosenIndex);
                 if (task.isSuccessful()) {
-                    Log.d(TAG, "getRandomText: "+ "succcesssss :   "+task.getResult().size());
                     if (task.getResult().isEmpty()){
                         initiateCustomizeTextFetch(gameTextView,objectToInvokeOn);
                     }
@@ -161,7 +117,6 @@ public class TextPoll {
         final String choosenTheme = userChosenThemes.get(new Random().nextInt(themesListSize));
         //now reach for the theme texts and check the number of texts in there
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
         db.collection("themes").document(choosenTheme).
                 get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -175,7 +130,6 @@ public class TextPoll {
 
                         int textsAmount = document.getLong("textsCount").intValue();
 
-                        Log.d(TAG, "choosenTheme: "+choosenTheme + "textsAmount: "+textsAmount);
                         getRandomText(choosenTheme, textsAmount, gameTextView, objectToInvokeOn);
                     } else {
                         Log.d(TAG, "getRandomTheme:"+"No such document");
@@ -219,7 +173,6 @@ public class TextPoll {
     public static void getAllThemes(final TextView gameTextView, final GameActivity objectToInvokeOn) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
-//        db.collection("themes").document(mAuth.getUid()).collection("themes").get()
         db.collection("themes").get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -228,7 +181,6 @@ public class TextPoll {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 Log.d(TAG, "getAllThemes:"+ document.getId() + " => " + document.getData());
-//                                Boolean isChosen = document.getBoolean("isChosen");
                                 String currentThemeName = document.getId();
                                 allThemes.put(currentThemeName, true);
                             }
