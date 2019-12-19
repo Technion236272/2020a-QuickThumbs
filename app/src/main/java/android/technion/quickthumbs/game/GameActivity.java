@@ -163,7 +163,6 @@ public class GameActivity extends AppCompatActivity {
 
         setUpSounds();  //any future sound features should be added here;
 
-        setGameTextAndLogicAndEnding(gameTextView);
     }
 
     private void comboDisplayChange() {
