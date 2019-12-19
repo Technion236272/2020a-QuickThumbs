@@ -77,7 +77,7 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
                     return;
                 } else if (mainText.length() < textMinimalLength){
                     Toast.makeText(getApplicationContext(), "The text is too short!\n please insert more words", Toast.LENGTH_SHORT).show();
-                    spin.requestFocus();
+                    currentWordEditor.requestFocus();
                     return;
                 }
 
