@@ -86,10 +86,23 @@
                     android:layout_height="wrap_content"
                     android:layout_alignBaseline="@id/pointsHeadline"
                     android:layout_toRightOf="@id/pointsHeadline"
-                    android:ems="3"
                     android:text="0"
                     android:textColor="#FFFFFF"
                     android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/changeIndicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@id/pointsValue"
+                    android:layout_toRightOf="@id/pointsValue"
+                    android:layout_toLeftOf="@+id/relativeCenterToolbar"
+                    android:text=""
+                    android:padding="10dp"
+                    android:textColor="#FFFFFF"
+                    android:textSize="15sp" />
+
+
 
                 <TextView
                     android:id="@+id/WPMHeadline"

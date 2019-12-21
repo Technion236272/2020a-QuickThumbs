@@ -88,6 +88,7 @@ public class GameActivity extends AppCompatActivity {
     private TextView correctOutOfTotalTextView;
     private TextView correctOutOfTotalPercentageTextView;
     private TextView comboDisplayer;
+    private TextView pointsChangeIndicator;
 
     private boolean forwardCommand;
 
@@ -238,8 +239,6 @@ public class GameActivity extends AppCompatActivity {
         super.onStop();
 
         gameStopTimeStamp = System.currentTimeMillis();
-
-//        positiveMediaPlayer.release();
     }
 
     @Override
@@ -247,8 +246,6 @@ public class GameActivity extends AppCompatActivity {
         super.onPause();
 
         gameStopTimeStamp = System.currentTimeMillis();
-
-//        positiveMediaPlayer.release();
     }
 
     private List<Pair<String, Integer>> setWordsMapper(String[] words) {
@@ -266,6 +263,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void setGameTextAndLogicAndEnding(TextView gameTextView) {
+
         fetchText(gameTextView);
     }
 
@@ -285,6 +283,7 @@ public class GameActivity extends AppCompatActivity {
         gameStopTimeStamp = 0;
         needClearance = false;
         forwardCommand = true;
+
         currentWordEditor = findViewById(R.id.currentWord);
         gameTextView = findViewById(R.id.displayText);
         pointTextView = findViewById(R.id.pointsValue);
@@ -298,6 +297,8 @@ public class GameActivity extends AppCompatActivity {
         correctOutOfTotalTextView = findViewById(R.id.correctOutOfTotalTextView);
         correctOutOfTotalPercentageTextView = findViewById(R.id.correctOutOfTotalPercentageTextView);
         comboDisplayer = findViewById(R.id.comboDisplayer);
+        pointsChangeIndicator = findViewById(R.id.changeIndicator);
+
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
         gameTimeStamp = new Timestamp(new Date());
@@ -443,6 +444,8 @@ public class GameActivity extends AppCompatActivity {
         int pointsEarnedForThisCharacterPreviously = wordPoints[gameTextWordOffset - 1];
         collectedPoints -= pointsEarnedForThisCharacterPreviously;
         wordPoints[gameTextWordOffset - 1] = 0;
+
+        changePointsIndication(pointsEarnedForThisCharacterPreviously, false);
     }
 
     private void logicOnAddedKey(CharSequence s, int start) {
@@ -720,9 +723,50 @@ public class GameActivity extends AppCompatActivity {
 
         if (shouldRememberPoints) {
             wordPoints[gameTextWordOffsetLocal] = pointsToAdd;
+
+            changePointsIndication(pointsToAdd, true);
         }
 
         collectedPoints += pointsToAdd;
+    }
+
+    private void changePointsIndication(int amountOfChangedPoints, boolean isAddition) {
+        String previousAmountWithSign = pointsChangeIndicator.getText().toString();
+
+        String sign = isAddition ? "+" : "-";
+        String newIndication = sign + amountOfChangedPoints;
+
+        if (amountOfChangedPoints == 0 || newIndication.equals(previousAmountWithSign)) {   //there is no change...
+            return;
+        }
+
+        changePointsAmountAndColor(isAddition, newIndication);
+
+        animateChange(isAddition);
+    }
+
+    private void animateChange(boolean isAddition) {
+        Techniques animation;
+
+        if (isAddition) {
+            animation = Techniques.Flash;
+        } else {
+            animation = Techniques.FadeIn;
+        }
+
+        YoYo.with(animation)
+                .duration(250)
+                .playOn(pointsChangeIndicator);
+    }
+
+    private void changePointsAmountAndColor(boolean isAddition, String displayedIndication) {
+        int color = isAddition ? Color.GREEN : Color.RED;
+
+        ;
+        SpannableString coloredIndication = new SpannableString(displayedIndication);
+        coloredIndication.setSpan(new ForegroundColorSpan(color), 0, displayedIndication.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+
+        pointsChangeIndicator.setText(coloredIndication);
     }
 
     private void increaseCombo() {
