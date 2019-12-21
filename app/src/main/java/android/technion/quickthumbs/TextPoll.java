@@ -2,12 +2,14 @@ package android.technion.quickthumbs;
 
 import android.technion.quickthumbs.game.GameActivity;
 import android.util.Log;
+import android.util.Pair;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -61,7 +63,8 @@ public class TextPoll {
     }
 
 
-    private static void getRandomText(final String choosenTheme, int textsAmount, final TextView gameTextView, final GameActivity objectToInvokeOn) {
+    private static void getRandomText(final String choosenTheme, int textsAmount, final TextView gameTextView,
+                                      final GameActivity objectToInvokeOn, final List<Pair<Pair<String,Integer>, QueryDocumentSnapshot>> selectedThemeAndTextIndex) {
         final int chosenIndex = (new Random().nextInt(textsAmount)) + 1;
         //now reach for the theme texts and check the number of texts in there
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -71,7 +74,7 @@ public class TextPoll {
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
                     if (task.getResult().isEmpty()){
-                        initiateCustomizeTextFetch(gameTextView,objectToInvokeOn);
+                        initiateCustomizeTextFetch(gameTextView,objectToInvokeOn,selectedThemeAndTextIndex);
                     }
                     else{
                         for (QueryDocumentSnapshot document : task.getResult()) {
@@ -79,7 +82,9 @@ public class TextPoll {
 
                             String randomText = document.getString("text");
                             Log.d(TAG, "getRandomText: "+"gottenText is: " + randomText);
+
                             gameTextView.setText(randomText);
+                            selectedThemeAndTextIndex.add( Pair.create(Pair.create(choosenTheme,chosenIndex),document));
                             try {
                                 Class<?> c = GameActivity.class;
                                 Method method = c.getDeclaredMethod("gameCreationSequence", (Class<?>[]) null);
@@ -99,7 +104,9 @@ public class TextPoll {
         });
     }
 
-    private static void getRandomTheme(final Map<String, Boolean> allUserThemes, final TextView gameTextView, final GameActivity objectToInvokeOn) {
+    private static void getRandomTheme(final Map<String, Boolean> allUserThemes, final TextView gameTextView,
+                                       final GameActivity objectToInvokeOn, final List<Pair<Pair<String,Integer>, QueryDocumentSnapshot>>
+                                               selectedThemeAndTextIndex) {
         List<String> userChosenThemes = new LinkedList<>();
         for (String theme : allUserThemes.keySet()) {
             if (allUserThemes.get(theme)) {
@@ -130,7 +137,7 @@ public class TextPoll {
 
                         int textsAmount = document.getLong("textsCount").intValue();
 
-                        getRandomText(choosenTheme, textsAmount, gameTextView, objectToInvokeOn);
+                        getRandomText(choosenTheme, textsAmount, gameTextView, objectToInvokeOn,selectedThemeAndTextIndex);
                     } else {
                         Log.d(TAG, "getRandomTheme:"+"No such document");
                         //TODO: is it possible that we will reach here?
@@ -143,7 +150,8 @@ public class TextPoll {
         });
     }
 
-    private static void getUserThemes(final Map<String, Boolean> allThemes, final TextView gameTextView, final GameActivity objectToInvokeOn) {
+    private static void getUserThemes(final Map<String, Boolean> allThemes, final TextView gameTextView,
+                                      final GameActivity objectToInvokeOn, final List<Pair<Pair<String,Integer>, QueryDocumentSnapshot>> selectedThemeAndTextIndex) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         db.collection("users").document(mAuth.getUid()).collection("themes").get()
@@ -157,12 +165,12 @@ public class TextPoll {
                                 String themeName = document.getId();
                                 allThemes.put(themeName, isChosen);
                             }
-                            getRandomTheme(allThemes, gameTextView, objectToInvokeOn);
+                            getRandomTheme(allThemes, gameTextView, objectToInvokeOn,selectedThemeAndTextIndex);
 
                         } else {
                             //there is no user prefences- take all -> don't change the themes
                             Log.d(TAG, "getUserThemes:"+ "Error getting documents: ", task.getException());
-                            getRandomTheme(allThemes, gameTextView, objectToInvokeOn);
+                            getRandomTheme(allThemes, gameTextView, objectToInvokeOn,selectedThemeAndTextIndex);
 
 
                         }
@@ -170,7 +178,8 @@ public class TextPoll {
                 });
     }
 
-    public static void getAllThemes(final TextView gameTextView, final GameActivity objectToInvokeOn) {
+    public static void getAllThemes(final TextView gameTextView, final GameActivity objectToInvokeOn,
+                                    final  List<Pair<Pair<String,Integer>, QueryDocumentSnapshot>> selectedThemeAndTextIndex ) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         db.collection("themes").get()
@@ -184,20 +193,21 @@ public class TextPoll {
                                 String currentThemeName = document.getId();
                                 allThemes.put(currentThemeName, true);
                             }
-                            getUserThemes(allThemes, gameTextView, objectToInvokeOn);
+                            getUserThemes(allThemes, gameTextView, objectToInvokeOn,selectedThemeAndTextIndex);
                         } else {
                             Log.d(TAG, "getAllThemes:"+  "Error getting documents: ", task.getException());
                             String[] basicThemes = {"Comedy", "Music", "Movies", "Science", "Games", "Literature"};
                             for (int i = 0; i < basicThemes.length; i++) {
                                 allThemes.put(basicThemes[i], true);
                             }
-                            getUserThemes(allThemes, gameTextView, objectToInvokeOn);
+                            getUserThemes(allThemes, gameTextView, objectToInvokeOn,selectedThemeAndTextIndex);
                         }
                     }
                 });
     }
 
-    public static void initiateCustomizeTextFetch(final TextView gameTextView, final GameActivity objectToInvokeOn) {
-        getAllThemes(gameTextView, objectToInvokeOn);
+    public static void initiateCustomizeTextFetch(final TextView gameTextView, final GameActivity objectToInvokeOn,
+                                                  List<Pair<Pair<String,Integer>, QueryDocumentSnapshot>> selectedThemeAndTextIndex) {
+        getAllThemes(gameTextView, objectToInvokeOn,selectedThemeAndTextIndex);
     }
 }

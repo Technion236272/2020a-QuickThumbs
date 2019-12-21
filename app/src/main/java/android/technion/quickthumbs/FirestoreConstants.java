@@ -16,4 +16,10 @@ public class FirestoreConstants {
     public static final String accuracyField ="avgAccuracy";
     public static final String WPMField ="avgWPM";
     public static final String totalScoreField = "TotalScore";
+    public static final String textRatingField = "rating";
+    public static final String themeField = "theme";
+    public static final String textIndexField = "textIndex";
+    public static final String textDateField = "date";
+    public static final String numOfRatingsField = "numOfRatings";
+
 }
