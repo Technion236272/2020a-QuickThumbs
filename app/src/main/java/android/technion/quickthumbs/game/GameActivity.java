@@ -108,11 +108,13 @@ public class GameActivity extends AppCompatActivity {
 
     private int correctKeysAmount;
 
+    List<Integer> catNoises = ImmutableList.of(R.raw.annoying_cat_0, R.raw.annoying_cat_1, R.raw.annoying_cat_2);
     private int collectedPoints;
     private Integer[] wordPoints;
     private List<Integer> comboOptions;
     private int currentComboIndex;
     private int comboCounter;
+    private boolean isPreviousActionIsCorrectOrGameJustStarted;
 
     private boolean shouldStartTimer;
     private final int comboThreshold = 4;
@@ -122,10 +124,11 @@ public class GameActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private static final String TAG = GameActivity.class.getName();
 
-    private List<Pair<Pair<String,Integer>, QueryDocumentSnapshot>> selectedThemeAndTextIndex; //is assigned in TextPoll
+    private List<Pair<Pair<String, Integer>, QueryDocumentSnapshot>> selectedThemeAndTextIndex; //is assigned in TextPoll
 
     MediaPlayer positiveMediaPlayer;
     MediaPlayer negativeMediaPlayer;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -193,8 +196,14 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void supplyFreshMediaPlayers() {
+        double randomDouble = Math.random();
+        randomDouble = randomDouble * 3;
+        int randomInt = (int) randomDouble;
+
+        assert (randomInt >= 0 && randomInt <= 2);
+
         positiveMediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.typing_sound);
-        negativeMediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.annoying_cat);
+        negativeMediaPlayer = MediaPlayer.create(getApplicationContext(), catNoises.get(randomInt));
     }
 
     private void setUpSoundsOnComplete() {
@@ -268,7 +277,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void fetchText(TextView gameTextView) {
-        TextPoll.initiateCustomizeTextFetch(gameTextView,this,selectedThemeAndTextIndex);
+        TextPoll.initiateCustomizeTextFetch(gameTextView, this, selectedThemeAndTextIndex);
     }
 
     private void initializeFields() {
@@ -283,6 +292,7 @@ public class GameActivity extends AppCompatActivity {
         gameStopTimeStamp = 0;
         needClearance = false;
         forwardCommand = true;
+        isPreviousActionIsCorrectOrGameJustStarted = true;
 
         currentWordEditor = findViewById(R.id.currentWord);
         gameTextView = findViewById(R.id.displayText);
@@ -550,13 +560,13 @@ public class GameActivity extends AppCompatActivity {
         updatedStatistics.put(accuracyField, accuracy);
         updatedStatistics.put(WPMField, WPM);
         updatedStatistics.put(totalScoreField, points);
-        updatedStatistics.put(themeField,theme);
-        updatedStatistics.put(textIndexField,index);
-        updatedStatistics.put(textDateField,timestamp);
+        updatedStatistics.put(themeField, theme);
+        updatedStatistics.put(textIndexField, index);
+        updatedStatistics.put(textDateField, timestamp);
 
         getUserStatsCollection().document(statisticsDocument).collection(gameResultsCollection)
-                .document(theme+"-"+index.toString()+"-"+gameTimeStamp.toString())
-                .set(updatedStatistics,merge())
+                .document(theme + "-" + index.toString() + "-" + gameTimeStamp.toString())
+                .set(updatedStatistics, merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -770,6 +780,8 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void increaseCombo() {
+        isPreviousActionIsCorrectOrGameJustStarted = true;
+
         if (comboCounter++ == comboThreshold) {
             comboCounter = 0;
 
@@ -785,8 +797,9 @@ public class GameActivity extends AppCompatActivity {
         currentComboIndex = 0;
         comboDisplayChange();
 
-        if (!isRemoveKey) {
+        if (!isRemoveKey && isPreviousActionIsCorrectOrGameJustStarted) {
             comboMakeNegativeSound();
+            isPreviousActionIsCorrectOrGameJustStarted = false;
         }
     }
 
@@ -798,8 +811,8 @@ public class GameActivity extends AppCompatActivity {
         comboMakeSound(negativeMediaPlayer);
     }
 
-    private void comboMakeSound(MediaPlayer positiveMediaPlayer) {
-        positiveMediaPlayer.start();
+    private void comboMakeSound(MediaPlayer mediaPlayer) {
+        mediaPlayer.start();
         setUpSounds();
     }
 
@@ -871,7 +884,7 @@ public class GameActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    private void setRatingBarListener(){
+    private void setRatingBarListener() {
         RatingBar ratingBar = findViewById(R.id.ratingBar);
         //if rating value is changed,
         ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
@@ -881,9 +894,9 @@ public class GameActivity extends AppCompatActivity {
                 Integer index = (selectedThemeAndTextIndex.get(0)).first.second;
                 String timestamp = (selectedThemeAndTextIndex.get(0)).second.getString("date");
                 getUserStatsCollection().document(statisticsDocument).collection(gameResultsCollection)
-                        .whereEqualTo(themeField,theme)
-                        .whereEqualTo(textIndexField,index)
-                        .whereEqualTo(textDateField,timestamp)
+                        .whereEqualTo(themeField, theme)
+                        .whereEqualTo(textIndexField, index)
+                        .whereEqualTo(textDateField, timestamp)
                         .get()
                         .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                             @Override
@@ -893,10 +906,10 @@ public class GameActivity extends AppCompatActivity {
                                     for (QueryDocumentSnapshot document : task.getResult()) {
                                         Log.d(TAG, document.getId() + " => " + document.getData());
                                         Double textRating = document.getDouble(textRatingField);
-                                        if(textRating != null)
+                                        if (textRating != null)
                                             ratedTextPreviously = true;
                                     }
-                                    if(!ratedTextPreviously){
+                                    if (!ratedTextPreviously) {
                                         writeRatingIntoUserGameResult(rating);
                                         updateTextRatingInDatabase(rating);
 
@@ -910,14 +923,14 @@ public class GameActivity extends AppCompatActivity {
         });
     }
 
-    private void writeRatingIntoUserGameResult(float rating){
+    private void writeRatingIntoUserGameResult(float rating) {
         Map<String, Object> ratingMap = new HashMap<>();
         ratingMap.put(textRatingField, rating);
         String theme = (selectedThemeAndTextIndex.get(0)).first.first;
         Integer index = (selectedThemeAndTextIndex.get(0)).first.second;
         getUserStatsCollection().document(statisticsDocument).collection(gameResultsCollection)
-                .document(theme+"-"+index.toString()+"-"+gameTimeStamp.toString())
-                .set(ratingMap,merge())
+                .document(theme + "-" + index.toString() + "-" + gameTimeStamp.toString())
+                .set(ratingMap, merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -933,12 +946,12 @@ public class GameActivity extends AppCompatActivity {
     }
 
 
-    private void updateTextRatingInDatabase(final float rating){
+    private void updateTextRatingInDatabase(final float rating) {
         String theme = (selectedThemeAndTextIndex.get(0)).first.first;
         Integer index = (selectedThemeAndTextIndex.get(0)).first.second;
         final String composerUid = selectedThemeAndTextIndex.get(0).second.getString("composer");
         db.collection("themes").document(theme).collection("texts")
-                .whereEqualTo("mainThemeID",index)
+                .whereEqualTo("mainThemeID", index)
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -948,15 +961,15 @@ public class GameActivity extends AppCompatActivity {
                                 Log.d(TAG, document.getId() + " => " + document.getData());
                                 Double textRating = document.getDouble(textRatingField);
                                 Long numOfRatings = document.getLong(numOfRatingsField);
-                                if(textRating != null && numOfRatings!=null){
-                                    Double newAvgRating = (numOfRatings*textRating+rating)/(numOfRatings+1);
-                                    writeTextRatingInThemesCollection(numOfRatings+1,newAvgRating,document.getId());
-                                    writeTextRatingInTextsCollection(numOfRatings+1,newAvgRating,document.getId());
-                                    writeTextRatingInComposerTextsCollection(numOfRatings+1,newAvgRating,document.getId(),composerUid);
-                                }else{
-                                    writeTextRatingInThemesCollection((long)1,(double)rating,document.getId());
-                                    writeTextRatingInTextsCollection((long)1,(double)rating,document.getId());
-                                    writeTextRatingInComposerTextsCollection((long)1,(double)rating,document.getId(),composerUid);
+                                if (textRating != null && numOfRatings != null) {
+                                    Double newAvgRating = (numOfRatings * textRating + rating) / (numOfRatings + 1);
+                                    writeTextRatingInThemesCollection(numOfRatings + 1, newAvgRating, document.getId());
+                                    writeTextRatingInTextsCollection(numOfRatings + 1, newAvgRating, document.getId());
+                                    writeTextRatingInComposerTextsCollection(numOfRatings + 1, newAvgRating, document.getId(), composerUid);
+                                } else {
+                                    writeTextRatingInThemesCollection((long) 1, (double) rating, document.getId());
+                                    writeTextRatingInTextsCollection((long) 1, (double) rating, document.getId());
+                                    writeTextRatingInComposerTextsCollection((long) 1, (double) rating, document.getId(), composerUid);
                                 }
                             }
                         } else {
@@ -966,12 +979,12 @@ public class GameActivity extends AppCompatActivity {
                 });
     }
 
-    private void writeTextRatingInComposerTextsCollection(Long numOfRatings, Double newAvgRating, String documentId, String composerUid){
+    private void writeTextRatingInComposerTextsCollection(Long numOfRatings, Double newAvgRating, String documentId, String composerUid) {
         int x = 1;
         db.collection("users").document(composerUid)
                 .collection("texts")
                 .document(documentId)
-                .set(getRatingMap(numOfRatings,newAvgRating),merge())
+                .set(getRatingMap(numOfRatings, newAvgRating), merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -988,18 +1001,18 @@ public class GameActivity extends AppCompatActivity {
 
     }
 
-    private Map<String, Object> getRatingMap(Long numOfRatings, Double newAvgRating){
+    private Map<String, Object> getRatingMap(Long numOfRatings, Double newAvgRating) {
         Map<String, Object> ratingMap = new HashMap<>();
         ratingMap.put(textRatingField, newAvgRating);
-        ratingMap.put(numOfRatingsField,numOfRatings);
+        ratingMap.put(numOfRatingsField, numOfRatings);
         return ratingMap;
     }
 
-    private void writeTextRatingInThemesCollection(Long numOfRatings, Double newAvgRating, String documentId){
+    private void writeTextRatingInThemesCollection(Long numOfRatings, Double newAvgRating, String documentId) {
         String theme = (selectedThemeAndTextIndex.get(0)).first.first;
         db.collection("themes").document(theme).collection("texts")
                 .document(documentId)
-                .set(getRatingMap(numOfRatings,newAvgRating),merge())
+                .set(getRatingMap(numOfRatings, newAvgRating), merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
@@ -1014,9 +1027,9 @@ public class GameActivity extends AppCompatActivity {
                 });
     }
 
-    private void writeTextRatingInTextsCollection(Long numOfRatings, Double newAvgRating, String documentId){
+    private void writeTextRatingInTextsCollection(Long numOfRatings, Double newAvgRating, String documentId) {
         db.collection("texts/").document(documentId)
-                .set(getRatingMap(numOfRatings,newAvgRating),merge())
+                .set(getRatingMap(numOfRatings, newAvgRating), merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
