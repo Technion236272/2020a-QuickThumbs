@@ -22,5 +22,6 @@
     <string name="CPM">Average CPM:</string>
     <string name="Accuracy">Average Accuracy:</string>
     <string name="playAgain">Play Again</string>
+    <string name="rateTheText">How would you rate this text?</string>
 
 </resources>

@@ -235,26 +235,48 @@
                 android:layout_centerVertical="true">
 
 
-            <TextView
-                android:id="@+id/gameReportTextLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@color/primaryDarkColor"
-                android:gravity="top"
-                android:padding="5sp"
-                android:textColor="@color/primaryTextColor"
-                android:textSize="17sp" />
+                <TextView
+                    android:id="@+id/gameReportTextLayout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/primaryDarkColor"
+                    android:gravity="top"
+                    android:padding="5sp"
+                    android:textColor="@color/primaryTextColor"
+                    android:textSize="17sp" />
+
+                <TextView
+                    android:id="@+id/rateText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:textColor="@color/primaryTextColor"
+                    android:layout_below = "@id/gameReportTextLayout"
+                    android:text="@string/rateTheText"
+                    android:padding="5sp"
+                    android:textSize="17sp"/>
+
+                <RatingBar
+                    android:id="@+id/ratingBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:numStars="5"
+                    android:padding="5sp"
+                    android:layout_below = "@id/rateText"
+                    android:stepSize="0.5"
+                    android:theme="@style/RatingBar"
+                    />
 
                 <Button
                     android:id="@+id/playAgainButton"
                     style="@style/LightPrimaryRoundedButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/gameReportTextLayout"
-                    android:layout_gravity="center"
+                    android:layout_below="@id/ratingBar"
+                    android:layout_centerHorizontal="true"
                     android:layout_marginBottom="15dp"
                     android:onClick="playAgain"
-                    android:padding="5dp"
+                    android:padding="10dp"
                     android:text="@string/playAgain" />
 
             </RelativeLayout>

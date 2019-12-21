@@ -25,6 +25,7 @@ import android.util.Pair;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.RatingBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -38,9 +39,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,11 +60,17 @@ import static android.technion.quickthumbs.FirestoreConstants.emailField;
 import static android.technion.quickthumbs.FirestoreConstants.gameResultsCollection;
 import static android.technion.quickthumbs.FirestoreConstants.dateField;
 import static android.technion.quickthumbs.FirestoreConstants.numOfGamesField;
+import static android.technion.quickthumbs.FirestoreConstants.numOfRatingsField;
 import static android.technion.quickthumbs.FirestoreConstants.statisticsDocument;
 import static android.technion.quickthumbs.FirestoreConstants.statsCollection;
+import static android.technion.quickthumbs.FirestoreConstants.textDateField;
+import static android.technion.quickthumbs.FirestoreConstants.textIndexField;
+import static android.technion.quickthumbs.FirestoreConstants.textRatingField;
+import static android.technion.quickthumbs.FirestoreConstants.themeField;
 import static android.technion.quickthumbs.FirestoreConstants.totalScoreField;
 import static android.technion.quickthumbs.FirestoreConstants.uidField;
 import static android.technion.quickthumbs.FirestoreConstants.usersCollection;
+import static com.google.firebase.firestore.SetOptions.merge;
 
 public class GameActivity extends AppCompatActivity {
     private EditText currentWordEditor;
@@ -107,10 +115,13 @@ public class GameActivity extends AppCompatActivity {
 
     private boolean shouldStartTimer;
     private final int comboThreshold = 4;
+    private Timestamp gameTimeStamp;
 
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private static final String TAG = GameActivity.class.getName();
+
+    private List<Pair<Pair<String,Integer>, QueryDocumentSnapshot>> selectedThemeAndTextIndex; //is assigned in TextPoll
 
     MediaPlayer positiveMediaPlayer;
     MediaPlayer negativeMediaPlayer;
@@ -130,6 +141,7 @@ public class GameActivity extends AppCompatActivity {
         setUpSounds();  //any future sound features should be added here;
 
         setGameTextAndLogicAndEnding(gameTextView);
+        setRatingBarListener();
     }
 
     public void gameCreationSequence() {
@@ -258,7 +270,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void fetchText(TextView gameTextView) {
-        TextPoll.initiateCustomizeTextFetch(gameTextView,this);
+        TextPoll.initiateCustomizeTextFetch(gameTextView,this,selectedThemeAndTextIndex);
     }
 
     private void initializeFields() {
@@ -288,6 +300,8 @@ public class GameActivity extends AppCompatActivity {
         comboDisplayer = findViewById(R.id.comboDisplayer);
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
+        gameTimeStamp = new Timestamp(new Date());
+        selectedThemeAndTextIndex = new ArrayList<>();
     }
 
     private void setEditorLogic() {
@@ -521,27 +535,35 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void writeGameResult(Double WPM, Double CPM, Double accuracy, Double points) {
+        String theme = (selectedThemeAndTextIndex.get(0)).first.first;
+        Integer index = (selectedThemeAndTextIndex.get(0)).first.second;
+        String timestamp = (selectedThemeAndTextIndex.get(0)).second.getString("date");
+
         Map<String, Object> updatedStatistics = new HashMap<>();
         updatedStatistics.put(uidField, mAuth.getUid());
         updatedStatistics.put(emailField, mAuth.getCurrentUser().getEmail());
-        updatedStatistics.put(dateField, new Timestamp(new Date()));
+        updatedStatistics.put(dateField, gameTimeStamp);
         updatedStatistics.put(CPMField, CPM);
         updatedStatistics.put(accuracyField, accuracy);
         updatedStatistics.put(WPMField, WPM);
         updatedStatistics.put(totalScoreField, points);
+        updatedStatistics.put(themeField,theme);
+        updatedStatistics.put(textIndexField,index);
+        updatedStatistics.put(textDateField,timestamp);
 
         getUserStatsCollection().document(statisticsDocument).collection(gameResultsCollection)
-                .add(updatedStatistics)
-                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                .document(theme+"-"+index.toString()+"-"+gameTimeStamp.toString())
+                .set(updatedStatistics,merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
-                    public void onSuccess(DocumentReference documentReference) {
-                        Log.d(TAG, "game result written with ID: " + documentReference.getId());
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "user game result successfully written!");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing game result to database", e);
+                        Log.w(TAG, "Error writing user game result", e);
                     }
                 });
     }
@@ -550,7 +572,7 @@ public class GameActivity extends AppCompatActivity {
         Map<String, Object> updatedStatistics = new HashMap<>();
         updatedStatistics.put(uidField, mAuth.getUid());
         updatedStatistics.put(emailField, mAuth.getCurrentUser().getEmail());
-        updatedStatistics.put(dateField, new Timestamp(new Date()));
+        updatedStatistics.put(dateField, gameTimeStamp);
         updatedStatistics.put(numOfGamesField, numOfGames);
         updatedStatistics.put(CPMField, newAvgCPM);
         updatedStatistics.put(accuracyField, newAvgAccuracy);
@@ -804,4 +826,166 @@ public class GameActivity extends AppCompatActivity {
         Intent intent = new Intent(GameActivity.this, GameActivity.class);
         startActivity(intent);
     }
+
+    private void setRatingBarListener(){
+        RatingBar ratingBar = findViewById(R.id.ratingBar);
+        //if rating value is changed,
+        ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
+            public void onRatingChanged(RatingBar ratingBar, final float rating,
+                                        boolean fromUser) {
+                String theme = (selectedThemeAndTextIndex.get(0)).first.first;
+                Integer index = (selectedThemeAndTextIndex.get(0)).first.second;
+                String timestamp = (selectedThemeAndTextIndex.get(0)).second.getString("date");
+                getUserStatsCollection().document(statisticsDocument).collection(gameResultsCollection)
+                        .whereEqualTo(themeField,theme)
+                        .whereEqualTo(textIndexField,index)
+                        .whereEqualTo(textDateField,timestamp)
+                        .get()
+                        .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                            @Override
+                            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                                if (task.isSuccessful()) {
+                                    boolean ratedTextPreviously = false;
+                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                        Log.d(TAG, document.getId() + " => " + document.getData());
+                                        Double textRating = document.getDouble(textRatingField);
+                                        if(textRating != null)
+                                            ratedTextPreviously = true;
+                                    }
+                                    if(!ratedTextPreviously){
+                                        writeRatingIntoUserGameResult(rating);
+                                        updateTextRatingInDatabase(rating);
+
+                                    }
+                                } else {
+                                    Log.d(TAG, "Error getting documents: ", task.getException());
+                                }
+                            }
+                        });
+            }
+        });
+    }
+
+    private void writeRatingIntoUserGameResult(float rating){
+        Map<String, Object> ratingMap = new HashMap<>();
+        ratingMap.put(textRatingField, rating);
+        String theme = (selectedThemeAndTextIndex.get(0)).first.first;
+        Integer index = (selectedThemeAndTextIndex.get(0)).first.second;
+        getUserStatsCollection().document(statisticsDocument).collection(gameResultsCollection)
+                .document(theme+"-"+index.toString()+"-"+gameTimeStamp.toString())
+                .set(ratingMap,merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "text rating successfully written into user game result!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing text rating into user game result", e);
+                    }
+                });
+    }
+
+
+    private void updateTextRatingInDatabase(final float rating){
+        String theme = (selectedThemeAndTextIndex.get(0)).first.first;
+        Integer index = (selectedThemeAndTextIndex.get(0)).first.second;
+        final String composerUid = selectedThemeAndTextIndex.get(0).second.getString("composer");
+        db.collection("themes").document(theme).collection("texts")
+                .whereEqualTo("mainThemeID",index)
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d(TAG, document.getId() + " => " + document.getData());
+                                Double textRating = document.getDouble(textRatingField);
+                                Long numOfRatings = document.getLong(numOfRatingsField);
+                                if(textRating != null && numOfRatings!=null){
+                                    Double newAvgRating = (numOfRatings*textRating+rating)/(numOfRatings+1);
+                                    writeTextRatingInThemesCollection(numOfRatings+1,newAvgRating,document.getId());
+                                    writeTextRatingInTextsCollection(numOfRatings+1,newAvgRating,document.getId());
+                                    writeTextRatingInComposerTextsCollection(numOfRatings+1,newAvgRating,document.getId(),composerUid);
+                                }else{
+                                    writeTextRatingInThemesCollection((long)1,(double)rating,document.getId());
+                                    writeTextRatingInTextsCollection((long)1,(double)rating,document.getId());
+                                    writeTextRatingInComposerTextsCollection((long)1,(double)rating,document.getId(),composerUid);
+                                }
+                            }
+                        } else {
+                            Log.d(TAG, "Error getting text document to write rating: ", task.getException());
+                        }
+                    }
+                });
+    }
+
+    private void writeTextRatingInComposerTextsCollection(Long numOfRatings, Double newAvgRating, String documentId, String composerUid){
+        int x = 1;
+        db.collection("users").document(composerUid)
+                .collection("texts")
+                .document(documentId)
+                .set(getRatingMap(numOfRatings,newAvgRating),merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "text rating successfully written into composer collection!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing text rating into composer collection", e);
+                    }
+                });
+
+
+    }
+
+    private Map<String, Object> getRatingMap(Long numOfRatings, Double newAvgRating){
+        Map<String, Object> ratingMap = new HashMap<>();
+        ratingMap.put(textRatingField, newAvgRating);
+        ratingMap.put(numOfRatingsField,numOfRatings);
+        return ratingMap;
+    }
+
+    private void writeTextRatingInThemesCollection(Long numOfRatings, Double newAvgRating, String documentId){
+        String theme = (selectedThemeAndTextIndex.get(0)).first.first;
+        db.collection("themes").document(theme).collection("texts")
+                .document(documentId)
+                .set(getRatingMap(numOfRatings,newAvgRating),merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "text rating successfully written into themes collection!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing text rating into themes collection", e);
+                    }
+                });
+    }
+
+    private void writeTextRatingInTextsCollection(Long numOfRatings, Double newAvgRating, String documentId){
+        db.collection("texts/").document(documentId)
+                .set(getRatingMap(numOfRatings,newAvgRating),merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "text rating successfully written into texts collection!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing text rating into texts collection", e);
+                    }
+                });
+    }
 }
+
+
