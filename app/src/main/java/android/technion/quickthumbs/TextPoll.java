@@ -31,8 +31,8 @@ public class TextPoll {
     //very useful to copy data from one to another
     public static void copyDocumentFromThemesToTextCollection() {
         final FirebaseFirestore db = FirebaseFirestore.getInstance();
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        String[] themesNames={"Comedy","Music","Movies","Science","Games","Literature"};
+        final FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        final String[] themesNames={"Comedy","Music","Movies","Science","Games","Literature"};
         for (String theme : themesNames){
             db.collection("themes").document(theme).collection("texts").get()
                     .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -42,6 +42,8 @@ public class TextPoll {
                                 for (QueryDocumentSnapshot document : task.getResult()) {
                                     Log.d(TAG, "getAllThemes:"+ document.getId() + " => " + document.getData());
                                     db.collection("texts/").document(document.getId()).set(document.getData(), SetOptions.merge());
+                                    String composer=document.get("composer").toString();
+                                    db.collection("users/").document(composer).collection("texts/").document(document.getId()).set(document.getData(), SetOptions.merge());
                                 }
                             } else {
                                 Log.d(TAG, "getAllThemes:"+  "Error getting documents: ", task.getException());
@@ -59,6 +61,7 @@ public class TextPoll {
 
         db.collection("themes/" + choosenTheme + "/texts").document(documentID).set(changedText, SetOptions.merge());
         db.collection("texts/").document(documentID).set(changedText, SetOptions.merge());
+        db.collection("users/").document(mAuth.getUid()).collection("texts/").document(documentID).set(changedText, SetOptions.merge());
 //        copyDocumentFromThemesToTextCollection();
     }
 

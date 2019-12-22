@@ -139,7 +139,7 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
                 });
         Map<String, Object> currentText = new HashMap<>();
         currentText.put("name", textAddedId);
-        db.collection("users/" + mAuth.getUid() + "/texts").document(textAddedId).set(currentText);
+        db.collection("users/" + mAuth.getUid() + "/texts").document(textAddedId).set(currentText, SetOptions.merge());
     }
 
     private void getCurrentThemeCount(final String titleText, final String mainText, final String themesSelect) {
@@ -201,7 +201,8 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String formattedDate = df.format(c.getTime());
         newText.put("date", formattedDate);
-        newText.put("best", 10e6);
+        newText.put("best", 0);
+        newText.put("fastestSpeed", 0);
         final String textDocumentName = db.collection("themes").document(themesSelect).collection("texts").document().getId();
         db.collection("themes").document(themesSelect).collection("texts").document(textDocumentName)
                 .set(newText)
@@ -218,7 +219,8 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
                         Log.w(TAG, "Error writing document", e);
                     }
                 });
-        db.collection("texts/").document(textDocumentName).set(newText);
+        db.collection("texts/").document(textDocumentName).set(newText, SetOptions.merge());
+        db.collection("users/").document(mAuth.getUid()).collection("texts/").document(textDocumentName).set(newText, SetOptions.merge());
 //        return textDocumentName;
     }
 
