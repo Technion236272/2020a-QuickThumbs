@@ -23,5 +23,6 @@
     <string name="Accuracy">Average Accuracy:</string>
     <string name="playAgain">Play Again</string>
     <string name="rateTheText">How would you rate this text?</string>
-
+    <string name="facebook_app_id">2769332536457773</string>
+    <string name="fb_login_protocol_scheme">fb2769332536457773</string>
 </resources>
