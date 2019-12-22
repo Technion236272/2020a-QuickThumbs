@@ -11,9 +11,9 @@ import android.os.Bundle;
 import android.technion.quickthumbs.game.GameActivity;
 import android.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
 import android.technion.quickthumbs.personalArea.ProfileActivity;
+import android.technion.quickthumbs.theme.ThemeSelectPopUp;
 import android.technion.quickthumbs.personalArea.TextsActivity;
 import android.technion.quickthumbs.settings.UserSettingActivity;
-import android.technion.quickthumbs.theme.ThemeSelectorActivity;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.Menu;
@@ -24,6 +24,11 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GestureDetectorCompat;
 
 import com.facebook.AccessToken;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -78,28 +83,21 @@ public class MainUserActivity extends AppCompatActivity {
                                        public void onClick(View v) {
 //                                           Intent i = new Intent(getApplicationContext(), GameActivity.class);
 //                                           startActivityForResult(i, 2);
-                                           TextPoll tp=new TextPoll(getApplicationContext());
-                                           fetchRandomTextSpecifiedForUsers();
+                                           ThemeSelectPopUp popUpWindow = new ThemeSelectPopUp();
+                                           popUpWindow.showPopupWindow(v,findViewById(R.id.RelativeLayout1));
                                        }
                                    }
         );
-
-        Button addTxtBtn = findViewById(R.id.textAdderButton);
-        addTxtBtn.setOnClickListener(new View.OnClickListener() {
-                                         @Override
-                                         public void onClick(View v) {
-                                             Intent i = new Intent(getApplicationContext(), AddTextActivity.class);
-                                             startActivityForResult(i, 3);
-                                         }
-                                     }
-        );
-
-//        setButtonListener((Button) findViewById(R.id.startGameButton), GameActivity.class);
-
-        setButtonListener((Button) findViewById(R.id.textAdderButton), AddTextActivity.class);
-
-        setButtonListener((Button) findViewById(R.id.themeSelectorButton), ThemeSelectorActivity.class);
-
+        //setButtonListener((Button) findViewById(R.id.startGameButton), GameActivity.class);
+        /*
+        ((Button) findViewById(R.id.startGameButton)).setOnClickListener(new View.OnClickListener() {
+        (findViewById(R.id.startGameButton)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ThemeSelectPopUp popUpWindow = new ThemeSelectPopUp();
+                popUpWindow.showPopupWindow(view,findViewById(R.id.RelativeLayout1));
+            }
+        });*/
         setActionBar();
 
         closeKeyboard();
@@ -141,14 +139,8 @@ public class MainUserActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
                                       @Override
                                       public void onClick(View v) {
-                                          switch (v.getId()) {
-                                              case R.id.themeSelectorButton:
-                                              case R.id.startGameButton:
-                                              case R.id.textAdderButton:
-                                                  startActivity(new Intent(getApplicationContext(), moveToActivityClass));
-
-                                                  break;
-
+                                          if (v.getId() == R.id.startGameButton) {
+                                              startActivity(new Intent(getApplicationContext(), moveToActivityClass));
                                           }
                                       }
                                   }
@@ -156,7 +148,9 @@ public class MainUserActivity extends AppCompatActivity {
     }
 
     private void setActionBar() {
-        setSupportActionBar((Toolbar) findViewById(R.id.MainUserToolbar));
+        Toolbar ab = findViewById(R.id.MainUserToolbar);
+        setSupportActionBar(ab);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
     }
 
     @Override
@@ -201,12 +195,10 @@ public class MainUserActivity extends AppCompatActivity {
             Intent intent = new Intent(MainUserActivity.this, ProfileActivity.class);
             startActivity(intent);
         }
-
-        if (id == R.id.settingsButton) {
-            Intent intent = new Intent(MainUserActivity.this, UserSettingActivity.class);
+        if (id == R.id.addTextButton) {
+            Intent intent = new Intent(MainUserActivity.this, AddTextActivity.class);
             startActivity(intent);
         }
-
         return super.onOptionsItemSelected(item);
     }
 

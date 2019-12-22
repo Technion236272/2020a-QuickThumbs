@@ -1,170 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-
+    android:background = "@drawable/gradiant_color"
     android:id="@+id/gameLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:weightSum="3"
     tools:context=".game.GameActivity">
 
-    <RelativeLayout
-        android:id="@+id/first"
+    <include
+        layout= "@layout/toolbar"
+        android:id="@+id/GameToolbar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center|top"
-        android:orientation="horizontal">
-
-        <include
-            android:id="@+id/GameToolbar"
-            layout="@layout/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <RelativeLayout
-                android:id="@+id/topRightToolbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/topLeftToolbar"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/iconButton"
-                    android:layout_width="200dip"
-                    android:layout_height="50dip"
-                    android:layout_marginStart="71dp"
-                    android:layout_marginLeft="71dp"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/name_icon" />
-            </RelativeLayout>
-        </include>
-
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/second"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/first"
-        android:orientation="horizontal">
-
-        <androidx.appcompat.widget.Toolbar
-            android:id="@+id/statsBar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@color/primaryLightColor"
-            android:minHeight="?attr/actionBarSize"
-            android:theme="?attr/actionBarTheme">
-
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <RelativeLayout
-                    android:id="@+id/relativeCenterToolbar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_centerHorizontal="true"
-                    android:layout_centerVertical="true" />
-
-                <TextView
-                    android:id="@+id/pointsHeadline"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_alignParentLeft="true"
-                    android:text="Points: "
-                    android:textColor="@color/secondaryTextColor"
-                    android:textSize="20sp" />
-
-                <TextView
-                    android:id="@+id/pointsValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBaseline="@id/pointsHeadline"
-                    android:layout_toRightOf="@id/pointsHeadline"
-                    android:text="0"
-                    android:textColor="#FFFFFF"
-                    android:textSize="20sp" />
-
-                <TextView
-                    android:id="@+id/changeIndicator"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBaseline="@id/pointsValue"
-                    android:layout_toRightOf="@id/pointsValue"
-                    android:layout_toLeftOf="@+id/relativeCenterToolbar"
-                    android:text=""
-                    android:padding="10dp"
-                    android:textColor="#FFFFFF"
-                    android:textSize="15sp" />
-
-
-
-                <TextView
-                    android:id="@+id/WPMHeadline"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_toRightOf="@id/relativeCenterToolbar"
-                    android:text="WPM: "
-                    android:textColor="@color/secondaryTextColor"
-                    android:textSize="20sp" />
-
-                <TextView
-                    android:id="@+id/WPMValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBaseline="@id/WPMHeadline"
-                    android:layout_toEndOf="@id/WPMHeadline"
-                    android:layout_toRightOf="@id/WPMHeadline"
-                    android:ems="1"
-                    android:text="0"
-                    android:textColor="#FFFFFF"
-                    android:textSize="20sp" />
-
-                <TextView
-                    android:id="@+id/CPMHeadline"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBaseline="@id/WPMValue"
-                    android:layout_toEndOf="@id/WPMValue"
-                    android:layout_toRightOf="@id/WPMValue"
-                    android:text="CPM: "
-                    android:textColor="@color/secondaryTextColor"
-                    android:textSize="20sp"
-                    android:paddingLeft="10sp"
-                    android:paddingStart="10sp" />
-
-                <TextView
-                    android:id="@+id/CPMValue"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignBaseline="@id/CPMHeadline"
-                    android:layout_toEndOf="@id/CPMHeadline"
-                    android:layout_toRightOf="@id/CPMHeadline"
-                    android:ems="4"
-                    android:text="0"
-                    android:textColor="#FFFFFF"
-                    android:textSize="20sp" />
-            </RelativeLayout>
-
-        </androidx.appcompat.widget.Toolbar>
-    </RelativeLayout>
+        android:layout_height="wrap_content" />
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/second"
+        android:layout_below="@id/GameToolbar"
         android:layout_alignParentBottom="true">
 
         <RelativeLayout
             android:id="@+id/gameReportLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="@color/secondaryLightColor"
+            android:background = "@drawable/gradiant_color"
             android:visibility="invisible">
 
             <TextView
@@ -173,24 +34,38 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
-                android:padding="10sp"
                 android:text="GAME OVER"
-                android:textColor="@color/secondaryDarkColor"
+                android:layout_marginBottom="10dp"
+                android:textColor="@color/primaryTextColor"
                 android:textSize="30sp"
-                android:textStyle="bold|italic" />
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/gameReportTextLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="top"
+                android:layout_below="@id/gameReportHeader"
+                android:layout_marginRight="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginBottom="20dp"
+                android:textColor="@color/primaryTextColor"
+                android:textSize="17sp" />
 
             <TextView
                 android:id="@+id/correctAmountTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-
-                android:layout_below="@id/gameReportHeader"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentLeft="true"
-                android:padding="10sp"
-                android:text="correct/total:"
-                android:textSize="19sp"
-                android:textStyle="bold" />
+                android:layout_below="@id/gameReportTextLayout"
+                android:textColor="@color/primaryTextColor"
+                android:text="Correct/Total characters:"
+                android:textSize="17sp"
+                android:layout_marginRight="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"/>
 
             <TextView
                 android:id="@+id/correctOutOfTotalTextView"
@@ -198,65 +73,121 @@
                 android:layout_height="wrap_content"
                 android:layout_alignBaseline="@id/correctAmountTitle"
                 android:layout_toRightOf="@id/correctAmountTitle"
-                android:padding="10sp"
                 android:text="94/100"
-                android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textSize="17sp"
+                android:layout_marginRight="10dp"
+                android:layout_marginEnd="10dp"
+                android:textColor="@color/primaryTextColor"
+                android:layout_toEndOf="@id/correctAmountTitle" />
 
             <TextView
                 android:id="@+id/correctOutOfTotalPercentageTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBaseline="@id/correctOutOfTotalTextView"
-                android:layout_toRightOf="@id/gameReportHeader"
-                android:padding="10sp"
+                android:layout_toRightOf="@id/correctOutOfTotalTextView"
                 android:text="94%"
-                android:textColor="@color/primaryDarkColor"
-                android:textSize="25sp"
-                android:textStyle="bold" />
+                android:textColor="@color/primaryTextColor"
+                android:textSize="17sp"
+                android:layout_toEndOf="@id/correctOutOfTotalTextView" />
 
             <TextView
-                android:id="@+id/generalTipHeaderText"
+                android:id="@+id/reportPointsHeadline"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_above="@id/relativeCenterGameReport"
+                android:layout_below="@id/correctAmountTitle"
+                android:text="Points: "
+                android:textColor="@color/primaryTextColor"
+                android:textSize="17sp"
+                android:layout_alignParentStart="true"
                 android:layout_alignParentLeft="true"
-                android:padding="8sp"
-                android:text="TIP: "
-                android:textColor="@color/secondaryTextColor"
-                android:textSize="15sp" />
+                android:layout_marginRight="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop = "5dp"/>
 
             <TextView
-                android:id="@+id/generalTipText"
+                android:id="@+id/reportPointsValue"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBaseline="@id/generalTipHeaderText"
-                android:layout_toRightOf="@id/generalTipHeaderText"
-                android:padding="8sp"
-                android:text="The less mistakes you'll do, the better score you'll get"
-                android:textColor="@color/secondaryTextColor"
-                android:textSize="12sp" />
+                android:layout_alignBaseline="@id/reportPointsHeadline"
+                android:layout_toRightOf="@id/reportPointsHeadline"
+                android:layout_toEndOf="@id/reportPointsHeadline"
+                android:text="0"
+                android:textColor="@color/primaryTextColor"
+                android:textSize="17sp" />
 
+            <TextView
+                android:id="@+id/reportWPMHeadline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/reportPointsHeadline"
+                android:text="WPM: "
+                android:textColor="@color/primaryTextColor"
+                android:textSize="17sp"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_marginRight="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop = "5dp"/>
+
+            <TextView
+                android:id="@+id/reportWPMValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@id/reportWPMHeadline"
+                android:layout_toEndOf="@id/reportWPMHeadline"
+                android:layout_toRightOf="@id/reportWPMHeadline"
+                android:ems="1"
+                android:text="0"
+                android:textColor="@color/primaryTextColor"
+                android:textSize="17sp" />
+
+            <TextView
+                android:id="@+id/reportCPMHeadline"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="CPM: "
+                android:textColor="@color/primaryTextColor"
+                android:textSize="17sp"
+                android:layout_below="@id/reportWPMHeadline"
+                android:layout_alignParentStart="true"
+                android:layout_alignParentLeft="true"
+                android:layout_marginRight="5dp"
+                android:layout_marginEnd="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginTop = "5dp"/>
+
+            <TextView
+                android:id="@+id/reportCPMValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignBaseline="@id/reportCPMHeadline"
+                android:layout_toEndOf="@id/reportCPMHeadline"
+                android:layout_toRightOf="@id/reportCPMHeadline"
+                android:ems="4"
+                android:text="0"
+                android:textColor="@color/primaryTextColor"
+                android:textSize="17sp" />
 
             <RelativeLayout
                 android:id="@+id/relativeCenterGameReport"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:background="@color/primaryDarkColor"
                 android:layout_alignParentBottom="true"
                 android:layout_centerVertical="true">
 
-
-                <TextView
-                    android:id="@+id/gameReportTextLayout"
+                <View
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/primaryDarkColor"
-                    android:gravity="top"
-                    android:padding="5sp"
-                    android:textColor="@color/primaryTextColor"
-                    android:textSize="17sp" />
+                    android:layout_height="1dp"
+                    android:background="@color/primaryTextColor"
+                    android:layout_marginTop="2dp"
+                    android:layout_marginBottom="2dp"/>
 
                 <TextView
                     android:id="@+id/rateText"
@@ -264,7 +195,6 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
                     android:textColor="@color/primaryTextColor"
-                    android:layout_below = "@id/gameReportTextLayout"
                     android:text="@string/rateTheText"
                     android:padding="5sp"
                     android:textSize="17sp"/>
@@ -280,12 +210,42 @@
                     android:theme="@style/RatingBar"
                     />
 
-                <Button
-                    android:id="@+id/playAgainButton"
-                    style="@style/LightPrimaryRoundedButton"
+                <TextView
+                    android:id="@+id/generalTipHeaderText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_below="@id/ratingBar"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="5dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginStart="5dp"
+                    android:text="TIP: "
+                    android:textColor="@color/primaryTextColor"
+                    android:textSize="17sp"
+                    android:layout_alignParentStart="true"
+                    android:drawableLeft="@drawable/ic_lightbulb_outline_black_24dp"
+                    android:drawableStart="@drawable/ic_lightbulb_outline_black_24dp" />
+
+                <TextView
+                    android:id="@+id/generalTipText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/generalTipHeaderText"
+                    android:text="The less mistakes you'll do, the better score you'll get."
+                    android:textColor="@color/primaryTextColor"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginBottom="5dp"
+                    android:textSize="17sp"
+                    />
+
+                <Button
+                    android:id="@+id/playAgainButton"
+                    style="@style/SecondaryColorRoundedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/generalTipText"
                     android:layout_centerHorizontal="true"
                     android:layout_marginBottom="15dp"
                     android:onClick="playAgain"
@@ -301,21 +261,120 @@
             android:id="@+id/gameTextLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@drawable/gradiant_color"
             android:orientation="vertical"
             android:visibility="visible">
+
+            <RelativeLayout
+                android:id="@+id/second"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:id="@+id/relativeCenterToolbar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerHorizontal="true"
+                    android:layout_centerVertical="true" />
+
+                <TextView
+                    android:id="@+id/pointsHeadline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginLeft="5dp"
+                    android:text="Points: "
+                    android:textColor="@color/primaryTextColor"
+                    android:textSize="17sp"
+                    android:layout_marginStart="5dp" />
+
+                <TextView
+                    android:id="@+id/pointsValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@id/pointsHeadline"
+                    android:layout_toRightOf="@id/pointsHeadline"
+                    android:text="0"
+                    android:textColor="@color/primaryTextColor"
+                    android:textSize="17sp"
+                    android:layout_toEndOf="@id/pointsHeadline" />
+
+                <TextView
+                    android:id="@+id/changeIndicator"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@id/pointsValue"
+                    android:layout_toRightOf="@id/pointsValue"
+                    android:layout_toLeftOf="@+id/relativeCenterToolbar"
+                    android:text=""
+                    android:padding="10dp"
+                    android:textColor="@color/primaryTextColor"
+                    android:textSize="15sp"
+                    android:layout_toStartOf="@+id/relativeCenterToolbar"
+                    android:layout_toEndOf="@id/pointsValue" />
+
+
+                <TextView
+                    android:id="@+id/WPMHeadline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@id/relativeCenterToolbar"
+                    android:text="WPM: "
+                    android:textColor="@color/primaryTextColor"
+                    android:textSize="17sp"
+                    android:layout_toEndOf="@id/relativeCenterToolbar" />
+
+                <TextView
+                    android:id="@+id/WPMValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@id/WPMHeadline"
+                    android:layout_toEndOf="@id/WPMHeadline"
+                    android:layout_toRightOf="@id/WPMHeadline"
+                    android:ems="1"
+                    android:text="0"
+                    android:textColor="@color/primaryTextColor"
+                    android:textSize="17sp" />
+
+                <TextView
+                    android:id="@+id/CPMHeadline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@id/WPMValue"
+                    android:layout_toEndOf="@id/WPMValue"
+                    android:layout_toRightOf="@id/WPMValue"
+                    android:text="CPM: "
+                    android:textColor="@color/primaryTextColor"
+                    android:textSize="17sp"
+                    android:paddingLeft="10sp"
+                    android:paddingStart="10sp" />
+
+                <TextView
+                    android:id="@+id/CPMValue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignBaseline="@id/CPMHeadline"
+                    android:layout_toEndOf="@id/CPMHeadline"
+                    android:layout_toRightOf="@id/CPMHeadline"
+                    android:ems="4"
+                    android:text="0"
+                    android:textColor="@color/primaryTextColor"
+                    android:textSize="17sp" />
+            </RelativeLayout>
 
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_above="@id/currentWord">
+                android:layout_below="@id/second">
 
 
                 <TextView
                     android:id="@+id/displayText"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-
-                    android:background="@color/primaryDarkColor"
                     android:gravity="center"
                     android:textColor="@color/primaryTextColor"
                     android:textSize="17sp" />
@@ -324,10 +383,10 @@
                     android:id="@+id/comboDisplayer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="top|right"
+                    android:layout_gravity="top|end"
                     android:padding="15sp"
                     android:text="X5"
-                    android:textColor="@color/secondaryLightColor"
+                    android:textColor="@color/secondaryColor"
                     android:textSize="35sp" />
 
             </FrameLayout>
@@ -350,6 +409,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
+            android:background="@drawable/gradiant_color"
             android:visibility="visible">
 
             <TextView
@@ -357,14 +417,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:text="Loading the text..."
-                android:background="@color/primaryDarkColor"
                 android:gravity="center"
                 android:textColor="@color/primaryTextColor"
                 android:textSize="17sp" />
-
-
-
         </RelativeLayout>
-
     </FrameLayout>
 </RelativeLayout>

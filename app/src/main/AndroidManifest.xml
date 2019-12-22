@@ -31,13 +31,17 @@
             android:parentActivityName=".MainUserActivity" />
         <activity
             android:name=".AddTextActivity"
+            android:label="Add Text"
             android:parentActivityName=".MainUserActivity"
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
         <activity
             android:name=".game.GameActivity"
             android:parentActivityName=".MainUserActivity"
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
-        <activity android:name=".CreateAccountActivity" />
+        <activity android:name=".CreateAccountActivity"
+            android:parentActivityName=".MainActivity"
+            android:label="Create An Account"
+            />
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

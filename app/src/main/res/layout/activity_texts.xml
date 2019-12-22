@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/primaryDarkColor"
+    android:background="@drawable/gradiant_color"
     tools:context=".personalArea.TextsActivity">
 
     <include
@@ -32,8 +32,8 @@
             android:id="@+id/personalListLoadingText"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="Loading the text..."
-            android:background="@color/secondaryDarkColor"
+            android:text="Loading the texts..."
+            android:background="@drawable/gradiant_color"
             android:gravity="center"
             android:textColor="@color/primaryTextColor"
             android:textSize="17sp" />

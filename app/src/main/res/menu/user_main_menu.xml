@@ -3,15 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/goToPersonalAreaButton"
-        android:icon="@drawable/ic_launcher_foreground"
+        android:icon="@drawable/ic_account_circle_24dp"
         android:title=""
         app:showAsAction="ifRoom" />
     <item
-        android:id="@+id/addFriendButton"
-        android:title=" + Add Friends"
-        app:showAsAction="never" />
-    <item
-        android:id="@+id/settingsButton"
-        android:title="Settings"
+        android:id="@+id/addTextButton"
+        android:title="Add Text"
         app:showAsAction="never" />
 </menu>

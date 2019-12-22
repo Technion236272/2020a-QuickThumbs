@@ -114,7 +114,7 @@ public class TextsActivity extends AppCompatActivity {
                             setRecyclerViewScroller();
                         } else {
                             Log.d(TAG, "no such collection", task.getException());
-                            loadingText.setText("There is no personal texts. Please add text to show the list");
+                            loadingText.setText(R.string.no_personal_texts);
                         }
                     }
                 });

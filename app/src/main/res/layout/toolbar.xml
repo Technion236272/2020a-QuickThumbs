@@ -3,6 +3,9 @@
     android:layout_height="?attr/actionBarSize"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/primaryColor"
-    app:theme="@style/ToolbarTheme"
-/>
+    android:theme="@style/ToolbarTheme">
+</androidx.appcompat.widget.Toolbar>
+
+
+
 

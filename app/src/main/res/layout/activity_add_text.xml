@@ -1,135 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@drawable/gradiant_color"
     tools:context=".AddTextActivity">
-    <RelativeLayout
-        android:id="@+id/first"
+
+    <include
+        android:id="@+id/AddTextToolbar"
+        layout= "@layout/toolbar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <EditText
+        android:id="@+id/titleValue"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center|top">
+        android:ems="10"
+        android:gravity="start"
+        android:hint="@string/type_the_text_title"
+        android:inputType="textVisiblePassword"
+        android:singleLine="true"
+        android:textColor="@color/primaryTextColor"
+        android:textColorHint="@color/primaryTextColor"
+        android:textSize="17sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/AddTextToolbar"/>
 
-        <include
-            android:id="@+id/AddTextToolbar"
-            layout="@layout/toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <RelativeLayout
-                android:id="@+id/topRightToolbar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/topLeftToolbar"
-                android:orientation="horizontal">
-
-                <ImageView
-                    android:id="@+id/iconButton"
-                    android:layout_width="200dip"
-                    android:layout_height="50dip"
-                    android:layout_marginStart="71dp"
-                    android:layout_marginLeft="71dp"
-                    android:scaleType="fitXY"
-                    app:srcCompat="@drawable/name_icon" />
-            </RelativeLayout>
-        </include>
-
-    </RelativeLayout>
-    <LinearLayout
+    <Spinner
+        android:id="@+id/themeSelectorspinner"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@+id/first"
-        android:weightSum="1"
-        android:orientation="vertical">
-        <LinearLayout
+        android:layout_marginLeft="5dp"
+        android:layout_height="wrap_content"
+        android:spinnerMode="dropdown"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/titleValue"
+        android:layout_marginStart="5dp" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/textLayout"
+        android:layout_width="match_parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <TextView
+            android:id="@+id/addedText"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.10"
-            android:orientation="horizontal">
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:gravity="center"
+            android:textColor="@color/primaryTextColor"
+            android:textColorHint="@color/primaryTextColor"
+            android:textSize="17sp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toEndOf="@id/textLayout"
+            app:layout_constraintStart_toStartOf="@id/textLayout" />
 
-            <EditText
-                android:id="@+id/titleValue"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/secondaryColor"
-                android:ems="10"
-                android:gravity="center"
-                android:hint="Type here the Text title..."
-                android:inputType="textVisiblePassword"
-                android:singleLine="true"
-                android:textColor="@color/secondaryTextColor"
-                android:textColorHint="@color/secondaryTextColor"
-                android:textSize="20sp" />
-        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.10">
 
-            <Spinner
-                android:id="@+id/themeSelectorspinner"
-                android:layout_width="match_parent"
-                android:layout_height="fill_parent"
-                android:background="@color/secondaryLightColor"
-                android:textAlignment="center"
-                android:spinnerMode="dropdown"
-                android:completionHint="Type here the Text title..."
-                />
-        </LinearLayout>
+    <LinearLayout
+        android:id="@+id/wordAdding"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginBottom="5dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.70"
-            android:orientation="horizontal">
+        <EditText
+            android:id="@+id/addedWord"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="@color/primaryTextColor"
+            android:ems="10"
+            android:gravity="center"
+            android:hint="@string/insert_the_text_here"
+            android:inputType="textVisiblePassword"
+            android:singleLine="true"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:textColor="@color/secondaryTextColor"
+            android:layout_marginRight="5dp"
+            android:textSize="20sp"
+            android:layout_marginLeft="5dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp" />
 
-            <TextView
-                android:id="@+id/addedText"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/primaryDarkColor"
-                android:gravity="center"
-                android:hint="Every word that you will insert in the bottom text will be shown here\n (up to 300 characters)"
-                android:textColorHint="@color/primaryTextColor"
-                android:textColor="@color/primaryTextColor"
-                android:textSize="17sp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="0.10"
-            android:weightSum="1"
-            android:orientation="horizontal">
-
-            <EditText
-                android:id="@+id/addedWord"
-                android:layout_width="0dp"
-                android:layout_weight="0.80"
-                android:layout_height="match_parent"
-                android:background="@color/primaryTextColor"
-                android:ems="10"
-                android:gravity="center"
-                android:hint="Insert the text here..."
-                android:inputType="textVisiblePassword"
-                android:singleLine="true"
-                android:textColor="@color/secondaryTextColor"
-                android:textSize="20sp"/>
-
-            <ImageButton
-                android:id="@+id/addButton"
-                android:layout_width="0dp"
-                android:layout_weight="0.20"
-                android:layout_height="match_parent"
-                android:layout_below="@id/addedText"
-                android:layout_alignEnd="@id/addedWord"
-                android:layout_alignRight="@id/addedWord"
-                android:layout_alignBaseline="@id/addedWord"
-                android:background="@color/primaryDarkColor"
-                app:srcCompat="@android:drawable/ic_input_add" />
-        </LinearLayout>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/addButton"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            android:layout_weight="0.15"
+            android:contentDescription="submit"
+            app:tint="@color/secondaryTextColor"
+            app:backgroundTint="@color/secondaryColor"
+            android:src="@drawable/ic_add_circle_24dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginEnd="5dp" />
     </LinearLayout>
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
