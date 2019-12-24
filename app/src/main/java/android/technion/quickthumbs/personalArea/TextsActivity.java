@@ -17,10 +17,14 @@ import android.technion.quickthumbs.theme.ThemeDataRow;
 import android.util.Log;
 import android.view.View;
 import android.widget.AbsListView;
+import android.widget.EditText;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -41,6 +45,7 @@ public class TextsActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private RecyclerView recyclerView;
     private View textCard;
+    private TextView loadingText;
     private RelativeLayout personalListLoadingLayout;
     private int howMuchToLoadEachScroll;
     final List<TextDataRow> textsList = new ArrayList<>();
@@ -58,6 +63,7 @@ public class TextsActivity extends AppCompatActivity {
         noMoreLoading =false;
 
         personalListLoadingLayout = findViewById(R.id.personalListLoadingLayout);
+        loadingText = findViewById(R.id.personalListLoadingText);
         textCard = findViewById(R.id.textCard);
         recyclerView = findViewById(R.id.personalTextsRecyclerView);
         // use this setting to improve performance if you know that changes
@@ -68,10 +74,26 @@ public class TextsActivity extends AppCompatActivity {
 
         setActionBar();
 
-        fetchPersonalTextsList();
 
+        checkIfUserHasPersonalTexts();
+    }
 
-        setRecyclerViewScroller();
+    private void checkIfUserHasPersonalTexts() {
+        db.collection("users").document(mAuth.getUid())
+                .collection("texts").get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful() && task.getResult().getDocuments().size() != 0) {
+                            Log.d(TAG, "collection is not empty!", task.getException());
+                            fetchPersonalTextsList();
+                            setRecyclerViewScroller();
+                        } else {
+                            Log.d(TAG, "no such collection", task.getException());
+                            loadingText.setText("There is no personal texts. Please add text to show the list");
+                        }
+                    }
+                });
     }
 
     private void setRecyclerViewScroller() {
