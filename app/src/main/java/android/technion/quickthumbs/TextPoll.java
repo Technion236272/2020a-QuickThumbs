@@ -53,7 +53,7 @@ public class TextPoll {
         }
     }
 
-    private static void changedTextData(int value,String choosenTheme, final String documentID) {
+    private static void changedTextData(int value, String composer, String choosenTheme, final String documentID) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         Map<String, Object> changedText = new HashMap<>();
@@ -61,7 +61,7 @@ public class TextPoll {
 
         db.collection("themes/" + choosenTheme + "/texts").document(documentID).set(changedText, SetOptions.merge());
         db.collection("texts/").document(documentID).set(changedText, SetOptions.merge());
-        db.collection("users/").document(mAuth.getUid()).collection("texts/").document(documentID).set(changedText, SetOptions.merge());
+        db.collection("users/").document(composer).collection("texts/").document(documentID).set(changedText, SetOptions.merge());
 //        copyDocumentFromThemesToTextCollection();
     }
 
@@ -96,7 +96,8 @@ public class TextPoll {
                                 e.printStackTrace();
                             }
                             int playCount = document.getLong("playCount").intValue();
-                            changedTextData(playCount,choosenTheme, document.getId());
+                            String composer = document.getString("composer");
+                            changedTextData(playCount,composer,choosenTheme, document.getId());
                             return;
                         }
                     }
