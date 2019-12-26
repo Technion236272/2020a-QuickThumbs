@@ -11,8 +11,10 @@ import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.technion.quickthumbs.MainUserActivity;
 import android.technion.quickthumbs.R;
 import android.technion.quickthumbs.TextPoll;
+import android.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
 import android.text.Editable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -44,6 +46,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -124,7 +130,8 @@ public class GameActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private static final String TAG = GameActivity.class.getName();
 
-    private List<Pair<Pair<String, Integer>, QueryDocumentSnapshot>> selectedThemeAndTextIndex; //is assigned in TextPoll
+    public static TextDataRow selectedTextItem; //is assigned in TextPoll
+    public boolean changed=false;
 
     MediaPlayer positiveMediaPlayer;
     MediaPlayer negativeMediaPlayer;
@@ -136,6 +143,10 @@ public class GameActivity extends AppCompatActivity {
         setContentView(R.layout.activity_game);
 
         initializeFields();
+
+        setGameTextAndLogicAndEnding(gameTextView);
+
+
         currentWordEditor.setActivated(false);
         gameLoadingLayout.setVisibility(View.VISIBLE);
         gamePlayingLayout.setVisibility(View.INVISIBLE);
@@ -144,7 +155,7 @@ public class GameActivity extends AppCompatActivity {
 
         setUpSounds();  //any future sound features should be added here;
 
-        setGameTextAndLogicAndEnding(gameTextView);
+        gameCreationSequence();
         setRatingBarListener();
     }
 
@@ -270,12 +281,28 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void setGameTextAndLogicAndEnding(TextView gameTextView) {
-
-        fetchText(gameTextView);
-    }
-
-    private void fetchText(TextView gameTextView) {
-        TextPoll.initiateCustomizeTextFetch(gameTextView, this, selectedThemeAndTextIndex);
+        Intent i = getIntent();
+        if (i.hasExtra("text") && !changed) {
+            Log.d(TAG,"being set");
+            gameTextView.setText(i.getExtras().getString("text"));
+            String id=i.getExtras().getString("id");
+            String title=i.getExtras().getString("title");
+            String text=i.getExtras().getString("text");
+            String composer=i.getExtras().getString("composer");
+            String theme=i.getExtras().getString("theme");
+            String date=i.getExtras().getString("date");
+            Double rating=i.getExtras().getDouble("rating");
+            String numberOfTimesPlayed=i.getExtras().getString("playCount");
+            String bestScore=i.getExtras().getString("bestScore");
+            String fastestSpeed=i.getExtras().getString("fastestSpeed");
+            selectedTextItem= new TextDataRow(id, title,theme,text, date,composer,
+                    rating,numberOfTimesPlayed, bestScore, fastestSpeed);
+            changed =true;
+        }
+        if(changed==true){
+            gameTextView.setText(selectedTextItem.getText());
+            changed=false;
+        }
     }
 
     private void initializeFields() {
@@ -310,7 +337,6 @@ public class GameActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
         gameTimeStamp = new Timestamp(new Date());
-        selectedThemeAndTextIndex = new ArrayList<>();
     }
 
     private void setEditorLogic() {
@@ -557,9 +583,9 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void writeGameResult(Double WPM, Double CPM, Double accuracy, Double points) {
-        String theme = (selectedThemeAndTextIndex.get(0)).first.first;
-        Integer index = (selectedThemeAndTextIndex.get(0)).first.second;
-        String timestamp = (selectedThemeAndTextIndex.get(0)).second.getString("date");
+        String theme = selectedTextItem.getThemeName();
+        String index = selectedTextItem.getID();
+        String timestamp = selectedTextItem.getDate();
 
         Map<String, Object> updatedStatistics = new HashMap<>();
         updatedStatistics.put(uidField, mAuth.getUid());
@@ -893,9 +919,12 @@ public class GameActivity extends AppCompatActivity {
     }
 
     public void playAgain(View view) {
-        finish();
-        Intent intent = new Intent(GameActivity.this, GameActivity.class);
+//        TextPoll.fetchRandomTextSpecifiedForUsers();
+        gameLoadingLayout.setVisibility(View.VISIBLE);
+        Intent intent = new Intent(GameActivity.this, MainUserActivity.class);
+        intent.putExtra("playAgain",true);
         startActivity(intent);
+        finish();
     }
 
     private void setRatingBarListener() {
@@ -904,9 +933,9 @@ public class GameActivity extends AppCompatActivity {
         ratingBar.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             public void onRatingChanged(RatingBar ratingBar, final float rating,
                                         boolean fromUser) {
-                String theme = (selectedThemeAndTextIndex.get(0)).first.first;
-                Integer index = (selectedThemeAndTextIndex.get(0)).first.second;
-                String timestamp = (selectedThemeAndTextIndex.get(0)).second.getString("date");
+                String theme = selectedTextItem.getThemeName();
+                String index = selectedTextItem.getID();
+                String timestamp = selectedTextItem.getDate();
                 getUserStatsCollection().document(statisticsDocument).collection(gameResultsCollection)
                         .whereEqualTo(themeField, theme)
                         .whereEqualTo(textIndexField, index)
@@ -940,8 +969,8 @@ public class GameActivity extends AppCompatActivity {
     private void writeRatingIntoUserGameResult(float rating) {
         Map<String, Object> ratingMap = new HashMap<>();
         ratingMap.put(textRatingField, rating);
-        String theme = (selectedThemeAndTextIndex.get(0)).first.first;
-        Integer index = (selectedThemeAndTextIndex.get(0)).first.second;
+        String theme = selectedTextItem.getThemeName();
+        String index = selectedTextItem.getID();
         getUserStatsCollection().document(statisticsDocument).collection(gameResultsCollection)
                 .document(theme + "-" + index.toString() + "-" + gameTimeStamp.toString())
                 .set(ratingMap, merge())
@@ -961,9 +990,10 @@ public class GameActivity extends AppCompatActivity {
 
 
     private void updateTextRatingInDatabase(final float rating) {
-        String theme = (selectedThemeAndTextIndex.get(0)).first.first;
-        Integer index = (selectedThemeAndTextIndex.get(0)).first.second;
-        final String composerUid = selectedThemeAndTextIndex.get(0).second.getString("composer");
+        String theme = selectedTextItem.getThemeName();
+        String index = selectedTextItem.getID();
+        String timestamp = selectedTextItem.getDate();
+        final String composerUid = selectedTextItem.getComposer();
         db.collection("themes").document(theme).collection("texts")
                 .whereEqualTo("mainThemeID", index)
                 .get()
@@ -1023,7 +1053,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void writeTextRatingInThemesCollection(Long numOfRatings, Double newAvgRating, String documentId) {
-        String theme = (selectedThemeAndTextIndex.get(0)).first.first;
+        String theme = selectedTextItem.getThemeName();
         db.collection("themes").document(theme).collection("texts")
                 .document(documentId)
                 .set(getRatingMap(numOfRatings, newAvgRating), merge())

@@ -125,7 +125,7 @@ public class TextsActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (DocumentSnapshot document:task.getResult()) {
-                                TextDataRow item = createTextCardItem(document);
+                                TextDataRow item = TextDataRow.createTextCardItem(document);
                                 if (loadedRTextsIDs.get(document.getId()) == null ) {
                                     loadedRTextsIDs.put(document.getId(),true);
                                     textsList.add(item);
@@ -140,31 +140,6 @@ public class TextsActivity extends AppCompatActivity {
                         }
                     }
                 });
-    }
-
-    private TextDataRow createTextCardItem(DocumentSnapshot document) {
-        Log.d(TAG, "getAllThemes:" + document.getId() + " => " + document.getData());
-        String title = document.get("title").toString();
-        String theme = document.get("theme").toString();
-        String text = document.get("text").toString();
-        double rating = document.getDouble("rating");
-        String numberOfPlays = "0";
-        if (document.getLong("playCount") != null) {
-            numberOfPlays = document.getLong("playCount").toString();
-        }
-        String fastestSpeed = "0";
-        if (document.getDouble("fastestSpeed") != null) {
-            fastestSpeed = document.getDouble("fastestSpeed").toString();
-        }
-        String best = "0";
-        if (document.getLong("best") != null) {
-            best = document.getLong("best").toString();
-        }
-        TextDataRow item = new TextDataRow(title, theme, text, rating,
-                numberOfPlays, best, fastestSpeed);
-
-        lastSnapShot=document;
-        return item;
     }
 
     private void setActionBar() {
@@ -191,9 +166,10 @@ public class TextsActivity extends AppCompatActivity {
 
     private void fillTextCardList(@NonNull Task<QuerySnapshot> task) {
         for (QueryDocumentSnapshot document : task.getResult()) {
-            TextDataRow item = createTextCardItem(document);
+            TextDataRow item = TextDataRow.createTextCardItem(document);
             textsList.add(item);
             loadedRTextsIDs.put(document.getId(),true);
+            lastSnapShot=document;
         }
     }
 

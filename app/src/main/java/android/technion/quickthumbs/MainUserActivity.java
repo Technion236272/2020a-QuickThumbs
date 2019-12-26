@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.technion.quickthumbs.game.GameActivity;
+import android.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
 import android.technion.quickthumbs.personalArea.ProfileActivity;
 import android.technion.quickthumbs.settings.UserSettingActivity;
 import android.technion.quickthumbs.theme.ThemeSelectorActivity;
@@ -17,21 +18,39 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.RelativeLayout;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.nio.CharBuffer;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
+
+import static android.technion.quickthumbs.TextPoll.fetchRandomTextSpecifiedForUsers;
 
 public class MainUserActivity extends AppCompatActivity {
     private static final String TAG = MainUserActivity.class.getSimpleName();
     private FirebaseAuth fireBaseAuth;
     private FirebaseFirestore db;
-
+    public static Button gameBtn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -41,12 +60,14 @@ public class MainUserActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
 
-        Button gameBtn = findViewById(R.id.startGameButton);
+
+        gameBtn = findViewById(R.id.startGameButton);
         gameBtn.setOnClickListener(new View.OnClickListener() {
                                        @Override
                                        public void onClick(View v) {
-                                           Intent i = new Intent(getApplicationContext(), GameActivity.class);
-                                           startActivityForResult(i, 2);
+//                                           Intent i = new Intent(getApplicationContext(), GameActivity.class);
+//                                           startActivityForResult(i, 2);
+                                           TextPoll.fetchRandomTextSpecifiedForUsers();
                                        }
                                    }
         );
@@ -61,7 +82,7 @@ public class MainUserActivity extends AppCompatActivity {
                                      }
         );
 
-        setButtonListener((Button) findViewById(R.id.startGameButton), GameActivity.class);
+//        setButtonListener((Button) findViewById(R.id.startGameButton), GameActivity.class);
 
         setButtonListener((Button) findViewById(R.id.textAdderButton), AddTextActivity.class);
 
@@ -70,6 +91,23 @@ public class MainUserActivity extends AppCompatActivity {
         setActionBar();
 
         closeKeyboard();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        RelativeLayout userLoadingLayout= findViewById(R.id.userLoadingLayout);
+        RelativeLayout mainLayout= findViewById(R.id.RelativeLayout1);
+        Intent i = getIntent();
+        if (i.hasExtra("playAgain") && i.getExtras().getBoolean("playAgain")) {
+            userLoadingLayout.setVisibility(View.VISIBLE);
+            mainLayout.setVisibility(View.INVISIBLE);
+            TextPoll.fetchRandomTextSpecifiedForUsers();
+        }else{
+            userLoadingLayout.setVisibility(View.INVISIBLE);
+            mainLayout.setVisibility(View.VISIBLE);
+        }
     }
 
     private void setButtonListener(Button button, final Class<? extends AppCompatActivity> moveToActivityClass) {
