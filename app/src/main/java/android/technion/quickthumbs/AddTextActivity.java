@@ -288,17 +288,16 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
     private void initializeFields() {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-        final TextView titleValue = (TextView) findViewById(R.id.titleValue);
         spin = (Spinner) findViewById(R.id.themeSelectorspinner);
-        setKeyboardSettings(titleValue);
-        setActionBar();
-        setSpinnerValues();
         needClearance = false;
         backwardsCommand = false;
         currentWordEditor = findViewById(R.id.addedWord);
-        textTitle = findViewById(R.id.titleValue);
         addedTextSoFar = findViewById(R.id.addedText);
         uploadText = findViewById(R.id.addButton);
+        textTitle = findViewById(R.id.titleValue);
+        setKeyboardSettings(textTitle);
+        setActionBar();
+        setSpinnerValues();
     }
 
     private boolean isAddedKey(int before, int count) {
