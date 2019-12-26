@@ -21,7 +21,6 @@
             android:name=".personalArea.ProfileActivity"
             android:label="@string/Profile"
             android:parentActivityName=".MainUserActivity" />
-git fet
         <activity android:name=".MainUserActivity" />
         <activity android:name=".settings.UserSettingActivity" />
         <activity

@@ -150,7 +150,8 @@ public class GameActivity extends AppCompatActivity {
 
     public void gameCreationSequence() {
 
-        ss = new SpannableString(gameTextView.getText().toString());
+        String gameText = gameTextView.getText().toString();
+        ss = new SpannableString(gameText);
 
         gamePlayingLayout.setVisibility(View.VISIBLE);
         gameLoadingLayout.setVisibility(View.INVISIBLE);
@@ -161,9 +162,6 @@ public class GameActivity extends AppCompatActivity {
 
         comboDisplayChange();
 
-        CharSequence text = gameTextView.getText();
-
-        String gameText = String.valueOf(text);
         String[] words = gameText.split(" ");
 
         wordsMapper = setWordsMapper(words);
@@ -213,7 +211,7 @@ public class GameActivity extends AppCompatActivity {
 
     private void setTimerUpdateGameStatsPresentation() {
         gameTimer = new Timer();
-        gameTimer.scheduleAtFixedRate(new TimerTask() {
+        gameTimer.schedule(new TimerTask() {
             @Override
             public void run() {
                 runOnUiThread(new Runnable() {
@@ -230,7 +228,7 @@ public class GameActivity extends AppCompatActivity {
                     }
                 });
             }
-        }, 500, 500);
+        }, 1000, 700);
     }
 
     @Override
@@ -319,14 +317,20 @@ public class GameActivity extends AppCompatActivity {
         currentWordEditor.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                Log.d(TAG, "beforeTextChanged start ...");
+
                 if (shouldStartTimer) {
                     setTimerUpdateGameStatsPresentation();
                     shouldStartTimer = false;
                 }
+
+                Log.d(TAG, "beforeTextChanged finish ...");
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
+                Log.d(TAG, "onTextChanged start ...");
+
                 if (isAddedKey(before, count)) {
                     logicOnAddedKey(s, start);
                 } else {    //removed key
@@ -334,10 +338,13 @@ public class GameActivity extends AppCompatActivity {
                     logicOnRemovingKey();
                 }
 
+                Log.d(TAG, "onTextChanged finish ...");
             }
 
             @Override
             public void afterTextChanged(Editable s) {
+                Log.d(TAG, "afterTextChanged start ...");
+
                 currentWordEditor.removeTextChangedListener(this);
 
                 if (forwardCommand) {
@@ -379,6 +386,8 @@ public class GameActivity extends AppCompatActivity {
                         finishGame();
                     }
                 }
+
+                Log.d(TAG, "afterTextChanged finish ...");
             }
 
         });
@@ -870,8 +879,8 @@ public class GameActivity extends AppCompatActivity {
         }
 
         InputMethodManager inputMethodManager = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        if (inputMethodManager != null){
-            inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+        if (inputMethodManager != null) {
+            inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
         }
 
         setActionBar();
