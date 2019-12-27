@@ -25,7 +25,6 @@
             android:parentActivityName=".MainUserActivity" />
         <activity android:name=".MainUserActivity"
             android:windowSoftInputMode="stateAlwaysHidden"/>
-        <activity android:name=".MainUserActivity" />
         <activity android:name=".settings.UserSettingActivity" />
         <activity
             android:name=".theme.ThemeSelectorActivity"
