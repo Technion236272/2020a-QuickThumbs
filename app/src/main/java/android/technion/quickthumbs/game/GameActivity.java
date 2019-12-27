@@ -12,11 +12,13 @@ import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.technion.quickthumbs.GameLoadingSplashScreenActivity;
 import android.technion.quickthumbs.MainUserActivity;
 import android.technion.quickthumbs.R;
 import android.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
 import android.text.Editable;
+import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
@@ -64,7 +66,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-import android.os.Vibrator;
+
+import io.opencensus.trace.Span;
 
 import static android.technion.quickthumbs.FirestoreConstants.accuracyField;
 import static android.technion.quickthumbs.FirestoreConstants.CPMField;
@@ -93,6 +96,7 @@ public class GameActivity extends AppCompatActivity {
     private TextView wpmTextView;
     private TextView cpmTextView;
     private SpannableString ss;
+    private SpannableStringBuilder editorMutableSpannable; //TODO get rid of this and change location of lock...
     private RelativeLayout gameLoadingLayout;
     private RelativeLayout gamePlayingLayout;
     private RelativeLayout gameReportLayout;
@@ -111,6 +115,7 @@ public class GameActivity extends AppCompatActivity {
     private int currentWordIndex;
 
     private GameWordStatus[] wordFlags;
+    private List<ForegroundColorSpan> wordColorSpans;
     private int gameTextWordOffset;
 
     private final BackgroundColorSpan colorBackGround = new BackgroundColorSpan(Color.rgb(255, 102, 0));
@@ -171,6 +176,7 @@ public class GameActivity extends AppCompatActivity {
 
         String gameText = gameTextView.getText().toString();
         ss = new SpannableString(gameText);
+        gameTextView.setText(ss, TextView.BufferType.SPANNABLE);
 
         gamePlayingLayout.setVisibility(View.VISIBLE);
         gameLoadingLayout.setVisibility(View.INVISIBLE);
@@ -328,6 +334,10 @@ public class GameActivity extends AppCompatActivity {
         isPreviousActionIsCorrectOrGameJustStarted = true;
 
         currentWordEditor = findViewById(R.id.currentWord);
+        editorMutableSpannable = new SpannableStringBuilder();
+        currentWordEditor.setText(editorMutableSpannable);
+        wordColorSpans = new ArrayList<>();
+
         gameTextView = findViewById(R.id.displayText);
         pointTextView = findViewById(R.id.pointsValue);
         wpmTextView = findViewById(R.id.WPMValue);
@@ -379,46 +389,56 @@ public class GameActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 Log.d(TAG, "afterTextChanged start ...");
 
-                currentWordEditor.removeTextChangedListener(this);
-
                 if (forwardCommand) {
-                    paintEditorTextBasedOnWordFlags(true);
                     gameTextWordOffset++;
+
+                    if (!needClearance) {
+                        paintEditorTextBasedOnLastAction(true);
+                    } else {
+                        currentWordEditor.removeTextChangedListener(this);
+
+                        currentWordEditor.getText().clear();
+                        currentWordEditor.setSelection(0);
+                        currentWordEditor.setText(editorMutableSpannable);
+                        needClearance = false;
+
+                        currentWordEditor.addTextChangedListener(this);
+
+                        if (currentWordIndex + 1 != wordsMapper.size()) {
+                            moveMarkerToNextWord(colorBackGround);
+                            spaceKeyIncreaseCorrectKeysWhenFullyCorrectWordTyped();
+                        }
+
+                        editorMutableSpannable = new SpannableStringBuilder();
+                        wordColorSpans = new ArrayList<>();
+
+
+                        paintGameTextBasedOnWordFlags();
+
+                        gameTextWordOffset = 0;
+                        gameTextWordStart = getNextStartWordIndex();
+
+                        if (gameTextWordStart != -1) {
+                            String currentExpectedWord = wordsMapper.get(currentWordIndex).first;
+                            initializeWordFlagsAndPointsDefaultValue(currentExpectedWord);
+
+                        } else {
+                            finishGame();
+                        }
+                    }
+
                 } else {
                     if (gameTextWordOffset != 0) {
                         gameTextWordOffset--;
                     }
 
-                    paintEditorTextBasedOnWordFlags(false);
+                    paintEditorTextBasedOnLastAction(false);
 
                     forwardCommand = true;
                 }
 
-                currentWordEditor.addTextChangedListener(this);
-
                 if (needClearance) {
-                    if (currentWordIndex + 1 != wordsMapper.size()) {
-                        spaceKeyIncreaseCorrectKeysWhenFullyCorrectWordTyped();
-                    }
 
-                    currentWordEditor.removeTextChangedListener(this);
-                    currentWordEditor.getText().clear();
-                    currentWordEditor.setSelection(0);
-                    currentWordEditor.addTextChangedListener(this);
-
-                    paintGameTextBasedOnWordFlags();
-
-                    gameTextWordOffset = 0;
-                    gameTextWordStart = getNextStartWordIndex();
-
-                    if (gameTextWordStart != -1) {
-                        String currentExpectedWord = wordsMapper.get(currentWordIndex).first;
-                        initializeWordFlagsAndPointsDefaultValue(currentExpectedWord);
-
-                        needClearance = false;
-                    } else {
-                        finishGame();
-                    }
                 }
 
                 Log.d(TAG, "afterTextChanged finish ...");
@@ -446,33 +466,45 @@ public class GameActivity extends AppCompatActivity {
     private void paintGameTextBasedOnWordFlags() {
         int textStartingIndex = wordsMapper.get(currentWordIndex).second;
 
-        for (int i = textStartingIndex; i < wordFlags.length + textStartingIndex; i++) {
+        int maxIndexWord = textStartingIndex + gameTextWordOffset;
+
+        int colorUntilIndex = Math.min(maxIndexWord, textStartingIndex + wordFlags.length);
+
+        Spannable gameTextSpannable = (Spannable) gameTextView.getText();
+
+        for (int i = textStartingIndex; i < colorUntilIndex; i++) {
             GameWordStatus status = wordFlags[i - textStartingIndex];
 
             switch (status) {
                 case CORRECT:
                     ForegroundColorSpan green = new ForegroundColorSpan(Color.GREEN);
-                    ss.setSpan(green, i, i + 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                    gameTextSpannable.setSpan(green, i, i + 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
 
                     break;
 
+                case ALREADY_SEEN:
                 case NO_STATUS:
                 case WRONG:
-                case ALREADY_SEEN:
                     ForegroundColorSpan red = new ForegroundColorSpan(Color.RED);
-                    ss.setSpan(red, i, i + 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                    gameTextSpannable.setSpan(red, i, i + 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
 
                     break;
 
                 case CORRECT_BUT_BEEN_HERE_BEFORE:
-                    ForegroundColorSpan orange = new ForegroundColorSpan(Color.rgb(255, 102, 0));
-                    ss.setSpan(orange, i, i + 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                    ForegroundColorSpan yellow = new ForegroundColorSpan(Color.YELLOW);
+                    gameTextSpannable.setSpan(yellow, i, i + 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
 
                     break;
             }
         }
 
-        gameTextView.setText(ss);
+        if (maxIndexWord < textStartingIndex + wordFlags.length) {
+            ForegroundColorSpan red = new ForegroundColorSpan(Color.RED);
+            gameTextSpannable.setSpan(red, maxIndexWord, textStartingIndex + wordFlags.length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+        }
+
+
+//        gameTextView.setText(ss);
     }
 
     private void logicOnRemovingKey() {
@@ -508,9 +540,10 @@ public class GameActivity extends AppCompatActivity {
 
         if (pressedKey.equals(" ")) {
             if (currentWordIndex + 1 != wordsMapper.size()) {
-                moveMarkerToNextWord(colorBackGround);
+//                moveMarkerToNextWord(colorBackGround);
             } else {
-                ss.removeSpan(colorBackGround);
+                Spannable gameTextSpannable = (Spannable) gameTextView.getText();
+                gameTextSpannable.removeSpan(colorBackGround);
             }
 
             needClearance = true;
@@ -690,9 +723,24 @@ public class GameActivity extends AppCompatActivity {
         }
     }
 
+
+    private void paintEditorTextBasedOnLastAction(boolean isForwardTyping) {
+        paintGameTextBasedOnWordFlags();
+
+//        int index;
+
+//        if (isForwardTyping) {
+//            index = gameTextWordOffset + 1;
+//
+//        } else {
+//            index = gameTextWordOffset;
+//        }
+//
+//        currentWordEditor.setSelection(index);
+    }
+
     private void paintEditorTextBasedOnWordFlags(boolean isForwardTyping) {
         Editable text = currentWordEditor.getText();
-        SpannableStringBuilder mutableSpannable = new SpannableStringBuilder();
 
         String wordText = text.toString();
 
@@ -706,7 +754,7 @@ public class GameActivity extends AppCompatActivity {
                 immutableSpannable = new SpannableString(suffix);
                 immutableSpannable.setSpan(red, 0, suffix.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
 
-                mutableSpannable.append(immutableSpannable);
+                editorMutableSpannable.append(immutableSpannable);
 
                 break;
             }
@@ -736,16 +784,16 @@ public class GameActivity extends AppCompatActivity {
                     break;
 
                 case CORRECT_BUT_BEEN_HERE_BEFORE:
-                    ForegroundColorSpan orange = new ForegroundColorSpan(Color.rgb(255, 102, 0));
-                    immutableSpannable.setSpan(orange, 0, 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                    ForegroundColorSpan yellow = new ForegroundColorSpan(Color.YELLOW);
+                    immutableSpannable.setSpan(yellow, 0, 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
 
                     break;
             }
 
-            mutableSpannable.append(immutableSpannable);
+            editorMutableSpannable.append(immutableSpannable);
         }
 
-        currentWordEditor.setText(mutableSpannable);
+        currentWordEditor.setText(editorMutableSpannable);
 
         int index;
 
@@ -928,9 +976,11 @@ public class GameActivity extends AppCompatActivity {
         String nextWord = pair.first;
 
         int lastIndex = nextWordStartIndex + nextWord.length();
-        ss.setSpan(color, nextWordStartIndex, lastIndex, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
 
-        gameTextView.setText(ss);
+        Spannable gameTextSpannable = (Spannable) gameTextView.getText();
+        gameTextSpannable.setSpan(color, nextWordStartIndex, lastIndex, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+
+//        gameTextView.setText(ss);
     }
 
     private int getNextStartWordIndex() {
