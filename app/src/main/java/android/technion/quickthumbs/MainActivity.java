@@ -202,8 +202,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             finish();
             startActivity(intent);
-
             Log.d(TAG, "already signed in user: " + uid);
+            return;
         }
 
         // Check for existing Google Sign In account, if the user is already signed in
@@ -217,6 +217,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             startActivity(intent);
 
             Log.d(TAG, "already signed in user: " + uid);
+            return;
         }
 
         // Check for existing Facebook Sign In account, if the user is already signed in
