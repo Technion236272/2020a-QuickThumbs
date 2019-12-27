@@ -42,6 +42,9 @@ dependencies {
     implementation 'com.android.support:support-compat:29.0.0'
     implementation 'com.daimajia.easing:library:2.0@aar'
     implementation 'com.daimajia.androidanimations:library:2.3@aar'
+    implementation 'com.google.android.gms:play-services-auth:17.0.0'
+    implementation 'com.facebook.android:facebook-login:5.13.0'
+
 }
 
 apply plugin: 'com.google.gms.google-services'

@@ -16,6 +16,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class CreateAccountActivity extends AppCompatActivity {
@@ -81,10 +82,9 @@ public class CreateAccountActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            String uid = fireBaseAuth.getCurrentUser().getUid();
-
-                            finish();
-
+                            FirebaseUser user = fireBaseAuth.getCurrentUser();
+                            String uid = user.getUid();
+                            sendUserEmailVerification(user);
                             Log.d(TAG, "successfully created user for uid: " + uid);
                         } else {
                             Toast.makeText(CreateAccountActivity.this, "Creation failed.", Toast.LENGTH_LONG)
@@ -96,5 +96,27 @@ public class CreateAccountActivity extends AppCompatActivity {
                         singUpButton.setEnabled(true);
                     }
                 });
+    }
+
+    void sendUserEmailVerification(final FirebaseUser user){
+        user.sendEmailVerification()
+                .addOnCompleteListener(this,new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            Log.d(TAG, "Verification mail sent successfully");
+                            Toast.makeText(CreateAccountActivity.this,
+                                    "Verification email sent to " + user.getEmail(),
+                                    Toast.LENGTH_SHORT).show();
+                            finish();
+                        } else {
+                            Log.e(TAG, "sendEmailVerification", task.getException());
+                            Toast.makeText(CreateAccountActivity.this,
+                                    "Failed to send verification email.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+
     }
 }
