@@ -72,5 +72,6 @@
     </application>
     <uses-permission android:name="android.permission.INTERNET"
         tools:ignore="ManifestOrder" />
+    <uses-permission android:name="android.permission.VIBRATE"/>
     <uses-sdk tools:overrideLibrary="com.r0adkll.slidr"/>
 </manifest>
