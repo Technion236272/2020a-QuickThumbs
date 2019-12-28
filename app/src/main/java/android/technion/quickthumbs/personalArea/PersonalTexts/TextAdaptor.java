@@ -44,18 +44,18 @@ public class TextAdaptor extends RecyclerView.Adapter<TextViewHolder>{
     public int getThemePictureId (@NonNull TextViewHolder holder, final int position) {
         switch (texts.get(position).getThemeName()){
             case "Comedy":
-                return R.drawable.funny_trump_icon;
+                return R.drawable.comedy;
             case "Music":
-                return R.drawable.music_icon;
+                return R.drawable.music;
             case "Science":
-                return R.drawable.stupid_science_icon;
+                return R.drawable.science;
             case "Games":
-                return R.drawable.games_icon;
+                return R.drawable.games;
             case "Literature":
-                return R.drawable.literature_icon;
+                return R.drawable.literature;
             case "Movies":
             default:
-                return R.drawable.movie_icon;
+                return R.drawable.movies;
         }
     }
 
