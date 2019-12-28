@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.VibrationEffect;
 import android.technion.quickthumbs.MainUserActivity;
 import android.technion.quickthumbs.R;
 import android.technion.quickthumbs.TextPoll;
@@ -63,6 +64,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import android.os.Vibrator;
 
 import static android.technion.quickthumbs.FirestoreConstants.accuracyField;
 import static android.technion.quickthumbs.FirestoreConstants.CPMField;
@@ -126,6 +128,7 @@ public class GameActivity extends AppCompatActivity {
     private int currentComboIndex;
     private int comboCounter;
     private boolean isPreviousActionIsCorrectOrGameJustStarted;
+    private boolean isVibrateOnMistakeOn =true;
 
     private boolean shouldStartTimer;
     private final int comboThreshold = 4;
@@ -758,6 +761,7 @@ public class GameActivity extends AppCompatActivity {
 
     private void logicOnCurrentWordAddedKey(String pressedKey, String expectedKey) {
         if (expectedKey == null) {
+            vibrateOnKeyPressedMistake();
             return;
         }
 
@@ -766,6 +770,20 @@ public class GameActivity extends AppCompatActivity {
         } else {
             resetCombo(false);
             wordFlags[gameTextWordOffset] = GameWordStatus.WRONG;
+            vibrateOnKeyPressedMistake();
+        }
+    }
+
+    private void vibrateOnKeyPressedMistake() {
+        if(isVibrateOnMistakeOn){
+            Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+    // Vibrate for 500 milliseconds
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                v.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));
+            } else {
+                //deprecated in API 26
+                v.vibrate(300);
+            }
         }
     }
 
