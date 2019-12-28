@@ -13,6 +13,7 @@
         tools:ignore="AllowBackup">
         <activity
             android:name=".personalArea.TextsActivity"
+            android:theme="@style/AppTheme.SlidrActivityTheme"
             android:label="@string/Texts"
             android:parentActivityName=".personalArea.ProfileActivity" />
         <activity
@@ -21,9 +22,11 @@
             android:parentActivityName=".personalArea.ProfileActivity" />
         <activity
             android:name=".personalArea.ProfileActivity"
+            android:theme="@style/AppTheme.SlidrActivityTheme"
             android:label="@string/Profile"
             android:parentActivityName=".MainUserActivity" />
         <activity android:name=".MainUserActivity"
+            android:theme="@style/AppTheme.SlidrActivityTheme"
             android:windowSoftInputMode="stateAlwaysHidden"/>
         <activity android:name=".settings.UserSettingActivity" />
 <!--        <activity-->
@@ -69,4 +72,5 @@
     </application>
     <uses-permission android:name="android.permission.INTERNET"
         tools:ignore="ManifestOrder" />
+    <uses-sdk tools:overrideLibrary="com.r0adkll.slidr"/>
 </manifest>

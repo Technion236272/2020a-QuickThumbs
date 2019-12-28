@@ -7,6 +7,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GestureDetectorCompat;
 
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.technion.quickthumbs.MainUserActivity;
 import android.technion.quickthumbs.R;
@@ -33,6 +34,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.r0adkll.slidr.Slidr;
+import com.r0adkll.slidr.model.SlidrConfig;
+import com.r0adkll.slidr.model.SlidrPosition;
 
 import java.text.DecimalFormat;
 import java.util.Locale;
@@ -58,6 +62,13 @@ public class ProfileActivity extends AppCompatActivity {
         setActionBar();
 
         gestureDetectorCompat = new GestureDetectorCompat(this, new SlideRightToMainScreen());
+
+        // Check if we're running on Android 5.0 or higher
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            SlidrConfig config = new SlidrConfig.Builder().position(SlidrPosition.HORIZONTAL).build();
+//            Slidr.attach(this, config);        } else {
+//            // Swap without transition
+//        }
     }
 
 
@@ -130,7 +141,7 @@ public class ProfileActivity extends AppCompatActivity {
         setSupportActionBar((Toolbar)findViewById(R.id.profileToolbar));
         ActionBar ab = getSupportActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
-        ab.setDisplayShowTitleEnabled(true);
+        ab.setDisplayShowTitleEnabled(false);
     }
 
     @Override

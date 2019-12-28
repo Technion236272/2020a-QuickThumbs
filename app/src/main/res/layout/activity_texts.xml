@@ -38,4 +38,27 @@
             android:textColor="@color/primaryTextColor"
             android:textSize="17sp" />
     </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/addTextLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="20dp"
+        android:paddingRight="10dp"
+        android:layout_alignBottom="@+id/personalTextsRecyclerView"
+        android:layout_alignParentRight="true"
+        android:visibility="visible">
+
+        <ImageButton
+            android:id="@+id/addTextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginRight="5dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/logo"
+            android:src="@drawable/add_document_icon"
+            android:background="@color/transparent"/>
+    </RelativeLayout>
 </RelativeLayout>
