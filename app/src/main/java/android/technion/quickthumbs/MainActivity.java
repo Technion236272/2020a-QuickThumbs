@@ -218,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void moveToMainUserActivityIfAlreadyLoggedIn() {
         FirebaseUser currentUser = fireBaseAuth.getCurrentUser();
 
-        if (currentUser != null) {
+        if (currentUser != null && currentUser.isEmailVerified()) {
             String uid = currentUser.getUid();
             Intent intent = new Intent(MainActivity.this, MainUserActivity.class);
 
