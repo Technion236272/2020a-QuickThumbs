@@ -7,24 +7,22 @@
     android:background="@drawable/gradiant_color"
     tools:context=".personalArea.TextsActivity">
 
-    <include
-        layout= "@layout/toolbar"
-        android:id="@+id/textsListToolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+<!--    <include-->
+<!--        layout= "@layout/toolbar"-->
+<!--        android:id="@+id/textsListToolbar"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content" />-->
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/personalTextsRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/textsListToolbar"
         android:scrollbars="vertical"
         android:fastScrollEnabled="true"/>
     <RelativeLayout
         android:id="@+id/personalListLoadingLayout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/textsListToolbar"
         android:orientation="vertical"
         android:visibility="visible">
 
@@ -58,7 +56,7 @@
             android:layout_marginRight="5dp"
             android:adjustViewBounds="true"
             android:contentDescription="@string/logo"
-            android:src="@drawable/add_document_icon"
+            android:src="@drawable/icons8_create_document_100"
             android:background="@color/transparent"/>
     </RelativeLayout>
 </RelativeLayout>

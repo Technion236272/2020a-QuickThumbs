@@ -46,6 +46,8 @@
             android:parentActivityName=".MainUserActivity"
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
         <activity
+            android:name=".MainPager" />
+        <activity
             android:name=".game.GameActivity"
             android:parentActivityName=".MainUserActivity"
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />

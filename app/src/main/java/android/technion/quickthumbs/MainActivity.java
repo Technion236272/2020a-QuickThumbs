@@ -2,13 +2,11 @@ package android.technion.quickthumbs;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -16,8 +14,6 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
-import com.facebook.GraphRequest;
-import com.facebook.GraphResponse;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -39,8 +35,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
-
-import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -220,7 +214,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (currentUser != null && currentUser.isEmailVerified()) {
             String uid = currentUser.getUid();
-            Intent intent = new Intent(MainActivity.this, MainUserActivity.class);
+            //TODO
+            Intent intent = new Intent(MainActivity.this, MainPager.class);
 
             finish();
             startActivity(intent);
@@ -233,7 +228,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         if (account != null && !account.isExpired()) {
             String uid = account.getId();
-            Intent intent = new Intent(MainActivity.this, MainUserActivity.class);
+            //TODO
+            Intent intent = new Intent(MainActivity.this, MainPager.class);
 
             finish();
             startActivity(intent);
@@ -323,10 +319,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "Verification mail sent successfully");
+                            finish();
                             Toast.makeText(MainActivity.this,
                                     "Verification email sent to " + user.getEmail(),
                                     Toast.LENGTH_SHORT).show();
-                            finish();
                         } else {
                             Log.e(TAG, "sendEmailVerification", task.getException());
                             Toast.makeText(MainActivity.this,
