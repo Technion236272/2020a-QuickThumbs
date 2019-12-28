@@ -22,7 +22,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:paddingLeft="50dip"
         android:paddingRight="50dip"
         android:orientation="vertical">
@@ -32,12 +32,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="10dp"
-            android:layout_marginTop="100dp"
             android:layout_marginRight="10dp"
             android:layout_marginBottom="5dp"
             android:drawableStart="@drawable/ic_adb_24dp"
             android:drawableLeft="@drawable/ic_adb_24dp"
             android:ems="10"
+            android:textSize="17sp"
             android:hint="@string/email"
             android:inputType="textEmailAddress"
             android:textColor="@color/primaryTextColor"
@@ -50,6 +50,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_marginBottom="10dp"
+            android:textSize="17sp"
             android:drawableStart="@drawable/ic_lock_24dp"
             android:drawableLeft="@drawable/ic_lock_24dp"
             android:ems="10"
@@ -64,7 +65,6 @@
             android:layout_width="fill_parent"
             android:layout_height="?attr/actionBarSize"
             android:layout_gravity="center"
-            android:layout_marginTop="40dp"
             android:text="@string/sign_in" />
 
         <TextView
@@ -72,28 +72,39 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="30dp"
             android:clickable="true"
             android:focusable="true"
             android:onClick="moveToCreateAccount"
             android:text="@string/create_an_account"
             android:textColor="@color/primaryTextColor" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text ="Or:"
+            android:textSize="17sp"
+            android:textColor="@color/primaryTextColor"
+            android:layout_alignBaseline="@id/google_sign_in_button"
+            android:layout_toRightOf="@id/google_sign_in_button"
+            android:layout_toEndOf="@id/google_sign_in_button"
+            android:gravity="center"
+            />
+
+        <com.google.android.gms.common.SignInButton
+            android:id="@+id/google_sign_in_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_marginTop="10dp"
+            />
+
+        <com.facebook.login.widget.LoginButton
+            android:id="@+id/facebook_login_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:layout_marginBottom="10dp" />
     </LinearLayout>
-
-    <com.google.android.gms.common.SignInButton
-        android:id="@+id/google_sign_in_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:layout_gravity="center"/>
-
-    <com.facebook.login.widget.LoginButton
-        android:id="@+id/facebook_login_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginTop="40dp"
-        android:layout_marginBottom="30dp" />
 
 </LinearLayout>
