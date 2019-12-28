@@ -89,6 +89,7 @@ public class ThemeAdaptor extends RecyclerView.Adapter<ThemeViewHolder> {
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 countDownTimer.cancel();
                 timerTextView.setText("");
                 boolean previousValue =false;

@@ -76,9 +76,7 @@ public class ThemeSelectPopUp {
 
         popupWindow.showAtLocation(callingLayout, Gravity.CENTER,0,0);
 
-        setCountDownTimer(popupView);
-
-        getPersonalThemesData(view);
+        getPersonalThemesData(view,popupView);
     }
 
     private void setCountDownTimer(final View popupView) {
@@ -107,7 +105,7 @@ public class ThemeSelectPopUp {
         });
     }
 
-    private void getPersonalThemesData(final View view) {
+    private void getPersonalThemesData(final View view, final View popupView) {
         final List<ThemeDataRow> data = fillWithData();
         db.collection("users").document(getUid()).collection("themes").get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -119,8 +117,8 @@ public class ThemeSelectPopUp {
                                 Boolean currentText = document.getBoolean("isChosen");
                                 selectedThemes.put(document.getId(),currentText);
                             }
+                            setCountDownTimer(popupView);
                             themeAdaptorSet(data, view);
-                            //themeLoadingLayout.setVisibility(View.INVISIBLE);
                             recyclerView.setVisibility(View.VISIBLE);
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());
@@ -132,8 +130,8 @@ public class ThemeSelectPopUp {
                                 currentTheme.put("isChosen", true);
                                 db.collection("users/" + getUid() + "/themes").document(themesNames[i]).set(currentTheme, SetOptions.merge());
                             }
+                            setCountDownTimer(popupView);
                             themeAdaptorSet(data,view);
-                            //themeLoadingLayout.setVisibility(View.INVISIBLE);
                             recyclerView.setVisibility(View.VISIBLE);
                         }
                     }
