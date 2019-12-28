@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GestureDetectorCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -15,18 +16,25 @@ import android.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
 import android.technion.quickthumbs.theme.ThemeAdaptor;
 import android.technion.quickthumbs.theme.ThemeDataRow;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.facebook.AccessToken;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
@@ -52,6 +60,7 @@ public class TextsActivity extends AppCompatActivity {
     private DocumentSnapshot lastSnapShot =null;
     boolean noMoreLoading;
     HashMap<String,Boolean> loadedRTextsIDs=new HashMap<>();
+    private GestureDetectorCompat gestureDetectorCompat;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,10 +85,25 @@ public class TextsActivity extends AppCompatActivity {
 
 
         checkIfUserHasPersonalTexts();
+
+        gestureDetectorCompat = new GestureDetectorCompat(this, new SlideLeftToMainScreen());
+
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        this.gestureDetectorCompat.onTouchEvent(event);
+        return super.onTouchEvent(event);
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
     }
 
     private void checkIfUserHasPersonalTexts() {
-        db.collection("users").document(mAuth.getUid())
+        db.collection("users").document(getUid())
                 .collection("texts").get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -96,6 +120,19 @@ public class TextsActivity extends AppCompatActivity {
                 });
     }
 
+    private String getUid() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        if (account != null && currentUser == null){
+            return account.getId();
+        }else if (currentUser!=null){
+            return mAuth.getUid();
+        }else{
+            return accessToken.getUserId();
+        }
+    }
+
     private void setRecyclerViewScroller() {
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
@@ -108,16 +145,20 @@ public class TextsActivity extends AppCompatActivity {
                     if(textsList.size() != 0 && !noMoreLoading){
                         refillTextsCardsList(recyclerView);
                     }
-                } else {
+                } else if (dy < 0){
                     // Scrolling down
                     Log.i("RecyclerView scrolled: ", "scroll up!");
+                }
+                else if (dx<0){
+                    finish();
+                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
                 }
             }
         });
     }
 
     private void refillTextsCardsList(final RecyclerView recyclerView) {
-        db.collection("users").document(mAuth.getUid()).
+        db.collection("users").document(getUid()).
                 collection("texts").orderBy("playCount", Query.Direction.DESCENDING).
                 startAfter(lastSnapShot).limit(howMuchToLoadEachScroll).get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -149,7 +190,7 @@ public class TextsActivity extends AppCompatActivity {
     }
 
     private void fetchPersonalTextsList(){
-        db.collection("users").document(mAuth.getUid()).collection("texts").
+        db.collection("users").document(getUid()).collection("texts").
                 orderBy("playCount", Query.Direction.DESCENDING).limit(8).get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -180,4 +221,22 @@ public class TextsActivity extends AppCompatActivity {
         personalListLoadingLayout.setVisibility(View.INVISIBLE);
         recyclerView.setVisibility(View.VISIBLE);
     }
+
+    class SlideLeftToMainScreen extends GestureDetector.SimpleOnGestureListener {
+        //handle 'swipe right' action only
+
+        @Override
+        public boolean onFling(MotionEvent event1, MotionEvent event2,
+                               float velocityX, float velocityY) {
+            if(event2.getX() > event1.getX()){
+//                Toast.makeText(getBaseContext(),"Swipe Left - finish()",Toast.LENGTH_SHORT).show();
+                finish();
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+            }
+
+            return true;
+        }
+    }
+
+
 }
