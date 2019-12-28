@@ -8,8 +8,11 @@ import androidx.core.view.GestureDetectorCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.technion.quickthumbs.AddTextActivity;
+import android.technion.quickthumbs.MainUserActivity;
 import android.technion.quickthumbs.R;
 import android.technion.quickthumbs.personalArea.PersonalTexts.TextAdaptor;
 import android.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
@@ -21,6 +24,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,6 +45,9 @@ import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
+import com.r0adkll.slidr.Slidr;
+import com.r0adkll.slidr.model.SlidrConfig;
+import com.r0adkll.slidr.model.SlidrPosition;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,6 +68,8 @@ public class TextsActivity extends AppCompatActivity {
     boolean noMoreLoading;
     HashMap<String,Boolean> loadedRTextsIDs=new HashMap<>();
     private GestureDetectorCompat gestureDetectorCompat;
+    public static ImageButton addTextButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -88,6 +97,27 @@ public class TextsActivity extends AppCompatActivity {
 
         gestureDetectorCompat = new GestureDetectorCompat(this, new SlideLeftToMainScreen());
 
+        // Check if we're running on Android 5.0 or higher
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            SlidrConfig config = new SlidrConfig.Builder().position(SlidrPosition.HORIZONTAL).build();
+//            Slidr.attach(this, config);        } else {
+//            // Swap without transition
+//        }
+
+        setAddTextButton();
+    }
+
+    private void setAddTextButton() {
+        addTextButton = findViewById(R.id.addTextButton);
+        addTextButton.setOnClickListener(new View.OnClickListener() {
+                                             @Override
+                                             public void onClick(View v) {
+                                                 Intent intent = new Intent(TextsActivity.this, AddTextActivity.class);
+                                                 startActivity(intent);
+                                                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                                             }
+                                         }
+        );
     }
 
     @Override
@@ -188,6 +218,7 @@ public class TextsActivity extends AppCompatActivity {
         setSupportActionBar((Toolbar)findViewById(R.id.textsListToolbar));
         ActionBar ab = getSupportActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
+        ab.setDisplayShowTitleEnabled(false);
     }
 
     private void fetchPersonalTextsList(){

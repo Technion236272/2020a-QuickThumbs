@@ -7,6 +7,7 @@ import androidx.core.view.GestureDetectorCompat;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.technion.quickthumbs.game.GameActivity;
 import android.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
@@ -22,6 +23,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
@@ -40,6 +42,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
+import com.r0adkll.slidr.Slidr;
+import com.r0adkll.slidr.model.SlidrConfig;
+import com.r0adkll.slidr.model.SlidrPosition;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -88,6 +93,8 @@ public class MainUserActivity extends AppCompatActivity {
                                        }
                                    }
         );
+
+
         //setButtonListener((Button) findViewById(R.id.startGameButton), GameActivity.class);
         /*
         ((Button) findViewById(R.id.startGameButton)).setOnClickListener(new View.OnClickListener() {
@@ -103,6 +110,14 @@ public class MainUserActivity extends AppCompatActivity {
         closeKeyboard();
 
         gestureDetectorCompat = new GestureDetectorCompat(this, new MyGestureListener());
+
+
+        // Check if we're running on Android 5.0 or higher
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+//            SlidrConfig config = new SlidrConfig.Builder().position(SlidrPosition.HORIZONTAL).build();
+//            Slidr.attach(this, config);        } else {
+//            // Swap without transition
+//        }
 
     }
 
@@ -194,10 +209,12 @@ public class MainUserActivity extends AppCompatActivity {
         if (id == R.id.goToPersonalAreaButton) {
             Intent intent = new Intent(MainUserActivity.this, ProfileActivity.class);
             startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
         }
-        if (id == R.id.addTextButton) {
-            Intent intent = new Intent(MainUserActivity.this, AddTextActivity.class);
+        if (id == R.id.TextAreaButton) {
+            Intent intent = new Intent(MainUserActivity.this, TextsActivity.class);
             startActivity(intent);
+            overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
         }
         return super.onOptionsItemSelected(item);
     }

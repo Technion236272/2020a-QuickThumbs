@@ -45,6 +45,7 @@ dependencies {
     implementation 'com.daimajia.androidanimations:library:2.3@aar'
     implementation 'com.google.android.gms:play-services-auth:17.0.0'
     implementation 'com.facebook.android:facebook-login:5.13.0'
+    implementation 'com.r0adkll:slidableactivity:2.1.0'
 
 }
 
