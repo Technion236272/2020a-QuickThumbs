@@ -198,12 +198,12 @@ public class ThemeSelectPopUp {
 
         List<ThemeDataRow> data = new ArrayList<>();
 
-        data.add(new ThemeDataRow("Comedy", "funny times with your keyboard", R.drawable.funny_trump_icon));
-        data.add(new ThemeDataRow("Music", "start singing once you recognized the song", R.drawable.music_icon));
-        data.add(new ThemeDataRow("Movies", "so exiting that you will forget typing", R.drawable.movie_icon));
-        data.add(new ThemeDataRow("Science", "full of science", R.drawable.stupid_science_icon));
-        data.add(new ThemeDataRow("Games", "are you a gamer? your place is here", R.drawable.games_icon));
-        data.add(new ThemeDataRow("Literature", "book warm? don't forget to type", R.drawable.literature_icon));
+        data.add(new ThemeDataRow("Comedy", "funny times with your keyboard", R.drawable.comedy));
+        data.add(new ThemeDataRow("Music", "start singing once you recognized the song", R.drawable.music));
+        data.add(new ThemeDataRow("Movies", "so exiting that you will forget typing", R.drawable.movies));
+        data.add(new ThemeDataRow("Science", "full of science", R.drawable.science));
+        data.add(new ThemeDataRow("Games", "are you a gamer? your place is here", R.drawable.games));
+        data.add(new ThemeDataRow("Literature", "book warm? don't forget to type", R.drawable.literature));
 
         return data;
     }
