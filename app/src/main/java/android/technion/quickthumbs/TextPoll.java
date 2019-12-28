@@ -8,9 +8,13 @@ import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.facebook.AccessToken;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -34,8 +38,10 @@ public class TextPoll {
     private static Map<String, Boolean> allUserThemes = new HashMap<>();
     private static List<TextDataRow> textItem = new LinkedList<>();
     private static int repeat = 10;
-
-
+    private static Context context;
+    public TextPoll(Context context){
+        this.context=context;
+    }
     public static void populateTextCache(Context context) {
         try {
             TextDataRow item = CacheHandler.loadFileFromCacheFolder(context);
@@ -83,7 +89,7 @@ public class TextPoll {
     }
 
     private static void getUserThemes() {
-        getUserCollection(mAuth.getUid(),"themes").get()
+        getUserCollection(getUid(),"themes").get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -281,4 +287,16 @@ public class TextPoll {
         return db.collection("themes");
     }
 
+    private static String getUid() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(context);
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        if (account != null && currentUser == null){
+            return account.getId();
+        }else if (currentUser!=null){
+            return mAuth.getUid();
+        }else{
+            return accessToken.getUserId();
+        }
+    }
 }

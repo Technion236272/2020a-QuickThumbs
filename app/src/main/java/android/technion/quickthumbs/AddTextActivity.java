@@ -17,12 +17,16 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.facebook.AccessToken;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.common.collect.ImmutableList;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -33,6 +37,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static android.technion.quickthumbs.FirestoreConstants.emailField;
 
 public class AddTextActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
     private static final String TAG = AddTextActivity.class.getSimpleName();
@@ -94,7 +100,7 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
     }
 
     private void updateUserTexts(final String textAddedId) {
-        db.collection("users").document(mAuth.getUid()).
+        db.collection("users").document(getUid()).
                 get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -103,8 +109,10 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
                     if (document.exists()) {
 
                         Log.d(TAG, "DocumentSnapshot data: " + document.getData());
-
-                        int userTextsAmount = document.getLong("textsAdded").intValue();
+                        int userTextsAmount= 0 ;
+                        if (document.getLong("textsAdded") !=  null){
+                            userTextsAmount = document.getLong("textsAdded").intValue();
+                        }
                         changeUserData(userTextsAmount,textAddedId);
                     } else {
                         Log.d(TAG, "No such document");
@@ -120,10 +128,9 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
 
     private void changeUserData(int value,final String textAddedId) {
         Map<String, Object> changedUser = new HashMap<>();
-        changedUser.put("uid", mAuth.getUid());
-        changedUser.put("email", mAuth.getCurrentUser().getEmail());
+        changedUser.put("uid", getUid());
         changedUser.put("textsAdded", value + 1);
-        db.collection("users").document(mAuth.getUid())
+        db.collection("users").document(getUid())
                 .set(changedUser, SetOptions.merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -139,7 +146,7 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
                 });
         Map<String, Object> currentText = new HashMap<>();
         currentText.put("name", textAddedId);
-        db.collection("users/" + mAuth.getUid() + "/texts").document(textAddedId).set(currentText, SetOptions.merge());
+        db.collection("users/" + getUid() + "/texts").document(textAddedId).set(currentText, SetOptions.merge());
     }
 
     private void getCurrentThemeCount(final String titleText, final String mainText, final String themesSelect) {
@@ -153,7 +160,10 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
 
                         Log.d(TAG, "DocumentSnapshot data: " + document.getData());
 
-                        int currentThemeCount = document.getLong("textsCount").intValue();
+                        int currentThemeCount= 0 ;
+                        if (document.getLong("textsCount") !=  null){
+                            currentThemeCount = document.getLong("textsCount").intValue();
+                        }
                         changeThemeData(titleText, mainText, themesSelect, currentThemeCount);
                     } else {
                         Log.d(TAG, "No such document");
@@ -193,7 +203,7 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
         newText.put("theme", themesSelect);
         newText.put("mainThemeID", currentThemeTextsCount + 1);
         newText.put("text", mainText);
-        newText.put("composer", mAuth.getUid());
+        newText.put("composer", getUid());
         newText.put("playCount", 0);
         newText.put("rating", 0);
         Calendar c = Calendar.getInstance();
@@ -220,8 +230,21 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
                     }
                 });
         db.collection("texts/").document(textDocumentName).set(newText, SetOptions.merge());
-        db.collection("users/").document(mAuth.getUid()).collection("texts/").document(textDocumentName).set(newText, SetOptions.merge());
+        db.collection("users/").document(getUid()).collection("texts/").document(textDocumentName).set(newText, SetOptions.merge());
 //        return textDocumentName;
+    }
+
+    private String getUid() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        if (account != null && currentUser == null){
+            return account.getId();
+        }else if (currentUser!=null){
+            return mAuth.getUid();
+        }else{
+            return accessToken.getUserId();
+        }
     }
 
     private void moveWordToText() {

@@ -16,6 +16,8 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -25,6 +27,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.AuthCredential;
@@ -33,6 +37,13 @@ import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
+
+import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private static final int google_SIGN_IN = 1;
@@ -43,6 +54,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private SignInButton googleSignInButton;
     private LoginButton facebookLogIn;
     private CallbackManager callbackManager;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +63,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         FirebaseApp.initializeApp(this);
         fireBaseAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
 
         moveToMainUserActivityIfAlreadyLoggedIn();
 
@@ -87,7 +100,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         });
     }
 
-    private void handleFacebookAccessToken(AccessToken token) {
+    private void handleFacebookAccessToken(final AccessToken token) {
         Log.d(TAG, "handleFacebookAccessToken:" + token);
 
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
@@ -99,7 +112,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = fireBaseAuth.getCurrentUser();
-                            moveToMainUserActivityIfAlreadyLoggedIn();
+                            String email = fireBaseAuth.getCurrentUser().getEmail();
+                            String uid = fireBaseAuth.getUid();
+//                            getFacebookUserData();
+                            Map<String, Object> changedUser = new HashMap<>();
+                            changedUser.put("uid", uid);
+                            changedUser.put("email", email);
+                            addUserDataToCollection(changedUser);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
@@ -179,7 +198,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = fireBaseAuth.getCurrentUser();
-                            moveToMainUserActivityIfAlreadyLoggedIn();
+                            Map<String, Object> changedUser = new HashMap<>();
+                            changedUser.put("uid", fireBaseAuth.getUid());
+                            changedUser.put("email", fireBaseAuth.getCurrentUser().getEmail());
+                            addUserDataToCollection(changedUser);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
@@ -209,7 +231,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Check for existing Google Sign In account, if the user is already signed in
         // the GoogleSignInAccount will be non-null.
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        if (account != null) {
+        if (account != null && !account.isExpired()) {
             String uid = account.getId();
             Intent intent = new Intent(MainActivity.this, MainUserActivity.class);
 
@@ -234,6 +256,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    private void addUserDataToCollection(Map<String, Object> changedUser) {
+        db.collection("users").document(changedUser.get("uid").toString())
+                .set(changedUser, SetOptions.merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        moveToMainUserActivityIfAlreadyLoggedIn();
+                        Log.d(TAG, "User was inserted to to DB!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing document", e);
+                    }
+                });
+    }
+
+
     private void signIn(final Class<?> moveToActivityClass) {
         int emailMainActivity = R.id.emailMainActivity;
         int passwordMainActivity = R.id.passwordMainActivity;
@@ -253,12 +294,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            Intent intent = new Intent(MainActivity.this, moveToActivityClass);
                             FirebaseUser user = fireBaseAuth.getCurrentUser();
                             String uid = user.getUid();
                             if(user.isEmailVerified()){
-                                finish();
-                                startActivity(intent);
+                                Map<String, Object> changedUser = new HashMap<>();
+                                changedUser.put("uid", fireBaseAuth.getUid());
+                                changedUser.put("email", fireBaseAuth.getCurrentUser().getEmail());
+                                addUserDataToCollection(changedUser);
                                 Log.d(TAG, "successfully signed in user: " + uid);
                             } else{
                                 Toast.makeText(MainActivity.this, "Authentication failed. Please verify your email.", Toast.LENGTH_LONG)

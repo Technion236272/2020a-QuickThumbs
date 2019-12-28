@@ -33,6 +33,9 @@ import android.widget.TextView;
 
 import com.daimajia.androidanimations.library.Techniques;
 import com.daimajia.androidanimations.library.YoYo;
+import com.facebook.AccessToken;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -40,6 +43,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.common.collect.ImmutableList;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -588,8 +592,10 @@ public class GameActivity extends AppCompatActivity {
         String timestamp = selectedTextItem.getDate();
 
         Map<String, Object> updatedStatistics = new HashMap<>();
-        updatedStatistics.put(uidField, mAuth.getUid());
-        updatedStatistics.put(emailField, mAuth.getCurrentUser().getEmail());
+        updatedStatistics.put(uidField, getUid());
+        if(mAuth.getCurrentUser() !=null){
+            updatedStatistics.put(emailField, mAuth.getCurrentUser().getEmail());
+        }
         updatedStatistics.put(dateField, gameTimeStamp);
         updatedStatistics.put(CPMField, CPM);
         updatedStatistics.put(accuracyField, accuracy);
@@ -618,8 +624,10 @@ public class GameActivity extends AppCompatActivity {
 
     private void writeToUserStatistics(long numOfGames, Double newAvgAccuracy, Double newAvgWPM, Double newAvgCPM, Double newTotalScore) {
         Map<String, Object> updatedStatistics = new HashMap<>();
-        updatedStatistics.put(uidField, mAuth.getUid());
-        updatedStatistics.put(emailField, mAuth.getCurrentUser().getEmail());
+        updatedStatistics.put(uidField, getUid());
+        if(mAuth.getCurrentUser() !=null){
+            updatedStatistics.put(emailField, mAuth.getCurrentUser().getEmail());
+        }
         updatedStatistics.put(dateField, gameTimeStamp);
         updatedStatistics.put(numOfGamesField, numOfGames);
         updatedStatistics.put(CPMField, newAvgCPM);
@@ -644,9 +652,25 @@ public class GameActivity extends AppCompatActivity {
     private CollectionReference getUserStatsCollection() {
         if (mAuth.getCurrentUser() != null) {
             return db.collection(usersCollection)
-                    .document(mAuth.getUid()).collection(statsCollection);
+                    .document(getUid()).collection(statsCollection);
+        }else{
+            return db.collection(usersCollection)
+                    .document(getUid()).collection(statsCollection);
         }
-        return null;
+//        return null;
+    }
+
+    private String getUid() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        if (account != null){
+            return account.getId();
+        }else if (currentUser != null){
+            return mAuth.getUid();
+        }else{
+            return accessToken.getUserId();
+        }
     }
 
     private void closeKeyboard() {

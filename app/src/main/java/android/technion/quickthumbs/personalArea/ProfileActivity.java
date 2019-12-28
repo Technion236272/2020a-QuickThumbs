@@ -4,19 +4,32 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GestureDetectorCompat;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.technion.quickthumbs.MainUserActivity;
 import android.technion.quickthumbs.R;
 import android.technion.quickthumbs.game.GameActivity;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Menu;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.facebook.AccessToken;
+import com.facebook.FacebookSdk;
+import com.facebook.login.LoginManager;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -24,11 +37,14 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.text.DecimalFormat;
 import java.util.Locale;
 
+import static android.technion.quickthumbs.FirestoreConstants.emailField;
+
 public class ProfileActivity extends AppCompatActivity {
 
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private static final String TAG = GameActivity.class.getSimpleName();
+    private GestureDetectorCompat gestureDetectorCompat;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,14 +56,37 @@ public class ProfileActivity extends AppCompatActivity {
 
         displayStatistics();
         setActionBar();
+
+        gestureDetectorCompat = new GestureDetectorCompat(this, new SlideRightToMainScreen());
+    }
+
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        this.gestureDetectorCompat.onTouchEvent(event);
+        return super.onTouchEvent(event);
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
 
     private CollectionReference getUserStatsCollection() {
-        if(mAuth.getCurrentUser() != null){
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(this);
+        if(mAuth.getCurrentUser() !=null){
             return db.collection("users")
                     .document(mAuth.getUid()).collection("stats");
+        }else if (googleAccount != null) {
+                return db.collection("users")
+                        .document(googleAccount.getId()).collection("stats");
+        }else{
+            return db.collection("users")
+                    .document(accessToken.getUserId()).collection("stats");
         }
-        return null;
+//        return null;
     }
 
     private void displayStatistics() {
@@ -106,10 +145,47 @@ public class ProfileActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void moveToTextsActivity(View view){
-        Intent intent = new Intent(this,TextsActivity.class);
-        startActivity(intent);
+    public void logOut(View view){
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        boolean isLoggedInOnFacebook = accessToken != null && !accessToken.isExpired();
+        if(currentUser != null){
+            mAuth.signOut();
+            finish();
+        }else if (isLoggedInOnFacebook){
+            LoginManager.getInstance().logOut();
+            finish();
+        }else{
+            GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                    .requestIdToken(getString(R.string.default_web_client_id))
+                    .requestEmail()
+                    .build();
+            GoogleSignInClient client = GoogleSignIn.getClient(this,gso);
+            client.signOut()
+                    .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            finish();
+                        }
+                    });
+        }
     }
 
+    class SlideRightToMainScreen extends GestureDetector.SimpleOnGestureListener {
+        //handle 'swipe right' action only
+
+        @Override
+        public boolean onFling(MotionEvent event1, MotionEvent event2,
+                               float velocityX, float velocityY) {
+            if(event2.getX() < event1.getX()){
+//                Toast.makeText(getBaseContext(),"Swipe right - finish()",Toast.LENGTH_SHORT).show();
+                finish();
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            }
+
+            return true;
+        }
+    }
 
 }

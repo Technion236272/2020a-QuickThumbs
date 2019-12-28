@@ -15,9 +15,13 @@ import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 
+import com.facebook.AccessToken;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -64,7 +68,7 @@ public class ThemeSelectorActivity extends AppCompatActivity {
     }
 
     private void getPersonalThemesData(final List<ThemeDataRow> data) {
-        db.collection("users").document(mAuth.getUid()).collection("themes").get()
+        db.collection("users").document(getUid()).collection("themes").get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -85,7 +89,7 @@ public class ThemeSelectorActivity extends AppCompatActivity {
                                 //this is for the db
                                 Map<String, Object> currentTheme = new HashMap<>();
                                 currentTheme.put("isChosen", true);
-                                db.collection("users/" + mAuth.getUid() + "/themes").document(themesNames[i]).set(currentTheme, SetOptions.merge());
+                                db.collection("users/" + getUid() + "/themes").document(themesNames[i]).set(currentTheme, SetOptions.merge());
                             }
                             themeAdaptorSet(data);
                             themeLoadingLayout.setVisibility(View.INVISIBLE);
@@ -93,6 +97,19 @@ public class ThemeSelectorActivity extends AppCompatActivity {
                         }
                     }
                 });
+    }
+
+    private String getUid() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        if (account != null && currentUser == null){
+            return account.getId();
+        }else if (currentUser!=null){
+            return mAuth.getUid();
+        }else{
+            return accessToken.getUserId();
+        }
     }
 
     private void themeAdaptorSet(List<ThemeDataRow> data) {

@@ -3,6 +3,7 @@ package android.technion.quickthumbs;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.view.GestureDetectorCompat;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,19 +11,27 @@ import android.os.Bundle;
 import android.technion.quickthumbs.game.GameActivity;
 import android.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
 import android.technion.quickthumbs.personalArea.ProfileActivity;
+import android.technion.quickthumbs.personalArea.TextsActivity;
 import android.technion.quickthumbs.settings.UserSettingActivity;
 import android.technion.quickthumbs.theme.ThemeSelectorActivity;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
+import com.facebook.AccessToken;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
@@ -51,6 +60,8 @@ public class MainUserActivity extends AppCompatActivity {
     private FirebaseAuth fireBaseAuth;
     private FirebaseFirestore db;
     public static Button gameBtn;
+    private GestureDetectorCompat gestureDetectorCompat;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,7 +78,8 @@ public class MainUserActivity extends AppCompatActivity {
                                        public void onClick(View v) {
 //                                           Intent i = new Intent(getApplicationContext(), GameActivity.class);
 //                                           startActivityForResult(i, 2);
-                                           TextPoll.fetchRandomTextSpecifiedForUsers();
+                                           TextPoll tp=new TextPoll(getApplicationContext());
+                                           fetchRandomTextSpecifiedForUsers();
                                        }
                                    }
         );
@@ -92,11 +104,26 @@ public class MainUserActivity extends AppCompatActivity {
 
         closeKeyboard();
 
+        gestureDetectorCompat = new GestureDetectorCompat(this, new MyGestureListener());
+
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        this.gestureDetectorCompat.onTouchEvent(event);
+        return super.onTouchEvent(event);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        FirebaseUser currentUser = fireBaseAuth.getCurrentUser();
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        boolean isLoggedIn = accessToken != null && !accessToken.isExpired();
+        if (checkIfUserLoggedIn(currentUser,account,isLoggedIn)) return;
+
+        //the part that belong to the play again settings
         RelativeLayout userLoadingLayout= findViewById(R.id.userLoadingLayout);
         RelativeLayout mainLayout= findViewById(R.id.RelativeLayout1);
         Intent i = getIntent();
@@ -137,26 +164,26 @@ public class MainUserActivity extends AppCompatActivity {
         super.onStop();
     }
 
+
     @Override
     protected void onStart() {
         super.onStart();
-        Map<String, Object> changedUser = new HashMap<>();
-        changedUser.put("uid", fireBaseAuth.getUid());
-        changedUser.put("email", fireBaseAuth.getCurrentUser().getEmail());
-        db.collection("users").document(fireBaseAuth.getUid())
-                .set(changedUser, SetOptions.merge())
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "User was inserted to to DB!");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing document", e);
-                    }
-                });
+        FirebaseUser currentUser = fireBaseAuth.getCurrentUser();
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        boolean isLoggedIn = accessToken != null && !accessToken.isExpired();
+        if (checkIfUserLoggedIn(currentUser,account,isLoggedIn)) return;
+        //the part where i insert the user to the db just ot make sure he's there in case no user has been made
+    }
+
+    private boolean checkIfUserLoggedIn(FirebaseUser currentUser, GoogleSignInAccount account, boolean isLoggedIn) {
+        if(currentUser!=null || account !=null && !account.isExpired() || isLoggedIn){
+            return false;
+        }
+        Intent i = new Intent(getApplicationContext(), MainActivity.class);
+        finish();
+        startActivity(i);
+        return true;
     }
 
     @Override
@@ -190,4 +217,32 @@ public class MainUserActivity extends AppCompatActivity {
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
     }
+
+    class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
+        //handle 'swipe left' action only
+
+        @Override
+        public boolean onFling(MotionEvent event1, MotionEvent event2,
+                               float velocityX, float velocityY) {
+
+            if(event2.getX() < event1.getX()){
+//                Toast.makeText(getBaseContext(),"Swipe left - startActivity()",Toast.LENGTH_SHORT).show();
+                //switch another activity
+                Intent intent = new Intent(
+                        MainUserActivity.this, TextsActivity.class);
+                startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+            }
+            else if (event2.getX() > event1.getX()){
+//                Toast.makeText(getBaseContext(), "Swipe right - startActivity()", Toast.LENGTH_SHORT).show();
+                //switch another activity
+                Intent intent = new Intent(
+                        MainUserActivity.this, ProfileActivity.class);
+                startActivity(intent);
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+            }
+            return true;
+        }
+    }
+
 }
