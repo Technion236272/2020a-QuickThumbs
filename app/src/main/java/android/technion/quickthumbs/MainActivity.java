@@ -67,14 +67,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         moveToMainUserActivityIfAlreadyLoggedIn();
 
-        setActionBar();
-
         setGoogleSignInConfigurations();
 
         setFacebookSignInConfigurations();
 
         setButtonsListeners();
     }
+
 
     private void setFacebookSignInConfigurations() {
         // Initialize Facebook Login button
@@ -132,9 +131,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setButtonsListeners() {
-        ((Button) findViewById(R.id.sign_in_button)).setOnClickListener(this);
+        (findViewById(R.id.sign_in_button)).setOnClickListener(this);
 
-        ((Button) findViewById(R.id.create_account_button)).setOnClickListener(this);
+        (findViewById(R.id.create_account_button)).setOnClickListener(this);
 
         googleSignInButton.setOnClickListener(this);
 
@@ -211,8 +210,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 });
     }
 
-    private void setActionBar() {
-        setSupportActionBar((Toolbar)findViewById(R.id.signInToolbar));
+    public void moveToCreateAccount(View view){
+        Intent intent = new Intent(this, CreateAccountActivity.class);
+        startActivity(intent);
     }
 
     private void moveToMainUserActivityIfAlreadyLoggedIn() {

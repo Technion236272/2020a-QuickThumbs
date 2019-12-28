@@ -49,6 +49,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.SetOptions;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -461,8 +462,8 @@ public class GameActivity extends AppCompatActivity {
                     break;
 
                 case CORRECT_BUT_BEEN_HERE_BEFORE:
-                    ForegroundColorSpan yellow = new ForegroundColorSpan(Color.YELLOW);
-                    ss.setSpan(yellow, i, i + 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                    ForegroundColorSpan orange = new ForegroundColorSpan(Color.rgb(255, 102, 0));
+                    ss.setSpan(orange, i, i + 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
 
                     break;
             }
@@ -542,10 +543,15 @@ public class GameActivity extends AppCompatActivity {
 
         correctOutOfTotalPercentageTextView.setText(correctPercentage + "%");
 
-        updateUserStats(Double.valueOf(correctPercentage),
-                Double.valueOf(wpmTextView.getText().toString()),
-                Double.valueOf(cpmTextView.getText().toString()),
-                Double.valueOf(pointTextView.getText().toString()));
+        ((TextView)(findViewById(R.id.reportWPMValue))).setText(wpmTextView.getText());
+        ((TextView)(findViewById(R.id.reportCPMValue))).setText(cpmTextView.getText());
+        ((TextView)(findViewById(R.id.reportPointsValue))).setText(pointTextView.getText());
+
+        Double wpm = Double.valueOf(wpmTextView.getText().toString());
+        Double cpm = Double.valueOf(cpmTextView.getText().toString());
+        Double points = Double.valueOf(pointTextView.getText().toString());
+        updateUserStats(Double.valueOf(correctPercentage),wpm,cpm,points);
+        updateComposerTextBestScoreAndWPM(wpm, points);
     }
 
     private Double calcNewAvgAfterAddingElement(Double oldAvg, Long oldCount, Double element) {
@@ -727,8 +733,8 @@ public class GameActivity extends AppCompatActivity {
                     break;
 
                 case CORRECT_BUT_BEEN_HERE_BEFORE:
-                    ForegroundColorSpan yellow = new ForegroundColorSpan(Color.YELLOW);
-                    immutableSpannable.setSpan(yellow, 0, 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                    ForegroundColorSpan orange = new ForegroundColorSpan(Color.rgb(255, 102, 0));
+                    immutableSpannable.setSpan(orange, 0, 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
 
                     break;
             }
@@ -940,6 +946,7 @@ public class GameActivity extends AppCompatActivity {
         setSupportActionBar((Toolbar) findViewById(R.id.GameToolbar));
         ActionBar ab = getSupportActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
+        ab.setDisplayShowTitleEnabled(true);
     }
 
     public void playAgain(View view) {
@@ -1047,8 +1054,77 @@ public class GameActivity extends AppCompatActivity {
                 });
     }
 
+    private void updateComposerTextBestScoreAndWPM(final Double wpm, final Double score){
+        db.collection("themes").document(selectedTextItem.getThemeName()).collection("texts")
+                .whereEqualTo("mainThemeID", selectedTextItem.getID())
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d(TAG, document.getId() + " => " + document.getData());
+                                Double bestScore = document.getDouble("best");
+                                Double bestWPM = document.getDouble("fastestSpeed");
+                                if (bestScore != null && bestWPM != null) {
+                                    if(bestScore < score)
+                                        writeBestScoreInComposerTextsCollection(score, document.getId());
+                                    if(bestWPM < wpm)
+                                        writeBestWPMInComposerTextsCollection(wpm,document.getId());
+                                } else {
+                                    writeBestScoreInComposerTextsCollection(score, document.getId());
+                                    writeBestWPMInComposerTextsCollection(wpm,document.getId());
+                                }
+                            }
+                        } else {
+                            Log.d(TAG, "Error getting text document to write best score and wpm: ", task.getException());
+                        }
+                    }
+                });
+    }
+
+    private void writeBestScoreInComposerTextsCollection(Double currentScore, String documentId) {
+        Map<String, Object> temp = new HashMap<>();
+        temp.put("best", currentScore);
+        db.collection("users").document(selectedTextItem.getComposer())
+                .collection("texts")
+                .document(documentId)
+                .set(temp, SetOptions.merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "best score successfully updated into composer collection!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing text best score into composer collection", e);
+                    }
+                });
+    }
+    private void writeBestWPMInComposerTextsCollection(Double currentWPM, String documentId){
+        Map<String, Object> temp = new HashMap<>();
+        temp.put("fastestSpeed", currentWPM);
+        db.collection("users").document(selectedTextItem.getComposer())
+                .collection("texts")
+                .document(documentId)
+                .set(temp, SetOptions.merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "best wpm successfully updated into composer collection!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing text best wpm into composer collection", e);
+                    }
+                });
+    }
+
     private void writeTextRatingInComposerTextsCollection(Long numOfRatings, Double newAvgRating, String documentId, String composerUid) {
-        int x = 1;
         db.collection("users").document(composerUid)
                 .collection("texts")
                 .document(documentId)
@@ -1065,8 +1141,6 @@ public class GameActivity extends AppCompatActivity {
                         Log.w(TAG, "Error writing text rating into composer collection", e);
                     }
                 });
-
-
     }
 
     private Map<String, Object> getRatingMap(Long numOfRatings, Double newAvgRating) {

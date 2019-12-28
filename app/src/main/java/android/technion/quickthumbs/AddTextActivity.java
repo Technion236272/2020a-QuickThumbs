@@ -341,7 +341,7 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
         spin.setOnItemSelectedListener(this);
 
         //Creating the ArrayAdapter instance having the bank name list
-        ArrayAdapter aa = new ArrayAdapter(this, android.R.layout.simple_spinner_item, themesNames.toArray());
+        ArrayAdapter aa = new ArrayAdapter(this, R.layout.add_text_spinner_item, themesNames.toArray());
         aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         //Setting the ArrayAdapter data on the Spinner
         spin.setAdapter(aa);
