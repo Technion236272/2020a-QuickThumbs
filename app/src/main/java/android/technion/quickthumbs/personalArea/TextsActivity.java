@@ -166,6 +166,7 @@ public class TextsActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (DocumentSnapshot document:task.getResult()) {
+                                if ( document.getString("text") == null ) continue;
                                 TextDataRow item = TextDataRow.createTextCardItem(document);
                                 if (loadedRTextsIDs.get(document.getId()) == null ) {
                                     loadedRTextsIDs.put(document.getId(),true);
@@ -207,6 +208,7 @@ public class TextsActivity extends AppCompatActivity {
 
     private void fillTextCardList(@NonNull Task<QuerySnapshot> task) {
         for (QueryDocumentSnapshot document : task.getResult()) {
+            if ( document.getString("text") == null ) continue;
             TextDataRow item = TextDataRow.createTextCardItem(document);
             textsList.add(item);
             loadedRTextsIDs.put(document.getId(),true);
