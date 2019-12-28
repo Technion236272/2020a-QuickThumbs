@@ -26,9 +26,9 @@
         <activity android:name=".MainUserActivity"
             android:windowSoftInputMode="stateAlwaysHidden"/>
         <activity android:name=".settings.UserSettingActivity" />
-        <activity
-            android:name=".theme.ThemeSelectorActivity"
-            android:parentActivityName=".MainUserActivity" />
+<!--        <activity-->
+<!--            android:name=".theme.ThemeSelectorActivity"-->
+<!--            android:parentActivityName=".MainUserActivity" />-->
         <activity
             android:name=".AddTextActivity"
             android:label="Add Text"
