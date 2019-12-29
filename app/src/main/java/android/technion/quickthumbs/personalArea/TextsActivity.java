@@ -5,6 +5,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GestureDetectorCompat;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -20,8 +21,10 @@ import android.technion.quickthumbs.theme.ThemeAdaptor;
 import android.technion.quickthumbs.theme.ThemeDataRow;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -54,7 +57,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-public class TextsActivity extends AppCompatActivity {
+public class TextsActivity extends Fragment {
     private static final String TAG = AddTextActivity.class.getSimpleName();
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
@@ -71,31 +74,33 @@ public class TextsActivity extends AppCompatActivity {
     public static ImageButton addTextButton;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_texts);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState){
+        return inflater.inflate(R.layout.activity_texts, container, false);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
         howMuchToLoadEachScroll = 3;
         noMoreLoading =false;
 
-        personalListLoadingLayout = findViewById(R.id.personalListLoadingLayout);
-        loadingText = findViewById(R.id.personalListLoadingText);
-        textCard = findViewById(R.id.textCard);
-        recyclerView = findViewById(R.id.personalTextsRecyclerView);
+        personalListLoadingLayout = getView().findViewById(R.id.personalListLoadingLayout);
+        loadingText = getView().findViewById(R.id.personalListLoadingText);
+        textCard = getView().findViewById(R.id.textCard);
+        recyclerView = getView().findViewById(R.id.personalTextsRecyclerView);
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         recyclerView.setHasFixedSize(true);
         personalListLoadingLayout.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.INVISIBLE);
 
-        setActionBar();
-
-
         checkIfUserHasPersonalTexts();
 
-        gestureDetectorCompat = new GestureDetectorCompat(this, new SlideLeftToMainScreen());
+        //gestureDetectorCompat = new GestureDetectorCompat(this, new SlideLeftToMainScreen());
 
         // Check if we're running on Android 5.0 or higher
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -108,29 +113,29 @@ public class TextsActivity extends AppCompatActivity {
     }
 
     private void setAddTextButton() {
-        addTextButton = findViewById(R.id.addTextButton);
+        addTextButton = getView().findViewById(R.id.addTextButton);
         addTextButton.setOnClickListener(new View.OnClickListener() {
                                              @Override
                                              public void onClick(View v) {
-                                                 Intent intent = new Intent(TextsActivity.this, AddTextActivity.class);
+                                                 Intent intent = new Intent(getActivity(), AddTextActivity.class);
                                                  startActivity(intent);
-                                                 overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+                                                 //overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                                              }
                                          }
         );
     }
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        this.gestureDetectorCompat.onTouchEvent(event);
-        return super.onTouchEvent(event);
-    }
+//    @Override
+//    public boolean onTouchEvent(MotionEvent event) {
+//        this.gestureDetectorCompat.onTouchEvent(event);
+//        return super.onTouchEvent(event);
+//    }
 
-    @Override
-    public void finish() {
-        super.finish();
-        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-    }
+//    @Override
+//    public void finish() {
+//        super.finish();
+//        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+//    }
 
     private void checkIfUserHasPersonalTexts() {
         db.collection("users").document(getUid())
@@ -152,7 +157,7 @@ public class TextsActivity extends AppCompatActivity {
 
     private String getUid() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(getActivity());
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         if (account != null && currentUser == null){
             return account.getId();
@@ -180,8 +185,8 @@ public class TextsActivity extends AppCompatActivity {
                     Log.i("RecyclerView scrolled: ", "scroll up!");
                 }
                 else if (dx<0){
-                    finish();
-                    overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                    getActivity().finish();
+                    //overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
                 }
             }
         });
@@ -214,13 +219,6 @@ public class TextsActivity extends AppCompatActivity {
                 });
     }
 
-    private void setActionBar() {
-        setSupportActionBar((Toolbar)findViewById(R.id.textsListToolbar));
-        ActionBar ab = getSupportActionBar();
-        ab.setDisplayHomeAsUpEnabled(true);
-        ab.setDisplayShowTitleEnabled(false);
-    }
-
     private void fetchPersonalTextsList(){
         db.collection("users").document(getUid()).collection("texts").
                 orderBy("playCount", Query.Direction.DESCENDING).limit(8).get()
@@ -248,28 +246,26 @@ public class TextsActivity extends AppCompatActivity {
     }
 
     private void setTextAdaptor() {
-        TextAdaptor adapter = new TextAdaptor(textsList,getApplication());
+        TextAdaptor adapter = new TextAdaptor(textsList,getActivity());
         recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getApplication()));
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         personalListLoadingLayout.setVisibility(View.INVISIBLE);
         recyclerView.setVisibility(View.VISIBLE);
     }
 
-    class SlideLeftToMainScreen extends GestureDetector.SimpleOnGestureListener {
-        //handle 'swipe right' action only
-
-        @Override
-        public boolean onFling(MotionEvent event1, MotionEvent event2,
-                               float velocityX, float velocityY) {
-            if(event2.getX() > event1.getX()){
-//                Toast.makeText(getBaseContext(),"Swipe Left - finish()",Toast.LENGTH_SHORT).show();
-                finish();
-                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-            }
-
-            return true;
-        }
-    }
-
-
+//    class SlideLeftToMainScreen extends GestureDetector.SimpleOnGestureListener {
+//        //handle 'swipe right' action only
+//
+//        @Override
+//        public boolean onFling(MotionEvent event1, MotionEvent event2,
+//                               float velocityX, float velocityY) {
+//            if(event2.getX() > event1.getX()){
+////                Toast.makeText(getBaseContext(),"Swipe Left - finish()",Toast.LENGTH_SHORT).show();
+//                finish();
+//                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+//            }
+//
+//            return true;
+//        }
+//    }
 }

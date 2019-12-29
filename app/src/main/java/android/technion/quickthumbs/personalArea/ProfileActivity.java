@@ -5,6 +5,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.GestureDetectorCompat;
+import androidx.fragment.app.Fragment;
 
 import android.content.Intent;
 import android.os.Build;
@@ -14,9 +15,11 @@ import android.technion.quickthumbs.R;
 import android.technion.quickthumbs.game.GameActivity;
 import android.util.Log;
 import android.view.GestureDetector;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,7 +46,7 @@ import java.util.Locale;
 
 import static android.technion.quickthumbs.FirestoreConstants.emailField;
 
-public class ProfileActivity extends AppCompatActivity {
+public class ProfileActivity extends Fragment {
 
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
@@ -51,17 +54,22 @@ public class ProfileActivity extends AppCompatActivity {
     private GestureDetectorCompat gestureDetectorCompat;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_profile);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState){
+        return inflater.inflate(R.layout.activity_profile, container, false);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
         displayStatistics();
-        setActionBar();
+        //setActionBar();
 
-        gestureDetectorCompat = new GestureDetectorCompat(this, new SlideRightToMainScreen());
+        //gestureDetectorCompat = new GestureDetectorCompat(getActivity(), new SlideRightToMainScreen());
 
         // Check if we're running on Android 5.0 or higher
 //        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -72,21 +80,21 @@ public class ProfileActivity extends AppCompatActivity {
     }
 
 
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        this.gestureDetectorCompat.onTouchEvent(event);
-        return super.onTouchEvent(event);
-    }
+//    @Override
+//    public boolean onTouchEvent(MotionEvent event) {
+//        this.gestureDetectorCompat.onTouchEvent(event);
+//        return super.onTouchEvent(event);
+//    }
 
-    @Override
-    public void finish() {
-        super.finish();
-        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-    }
+//    @Override
+//    public void finish() {
+//        super.finish();
+//        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+//    }
 
     private CollectionReference getUserStatsCollection() {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(this);
+        GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(getActivity());
         if(mAuth.getCurrentUser() !=null){
             return db.collection("users")
                     .document(mAuth.getUid()).collection("stats");
@@ -126,77 +134,77 @@ public class ProfileActivity extends AppCompatActivity {
 
     private void setStatisticsTextViews(Double avgAccuracy, Double avgWPM, Double avgCPM, Double totalScore) {
         DecimalFormat df = new DecimalFormat("#.##");
-        TextView avgAccuracyText = findViewById(R.id.AccuracyValue);
+        TextView avgAccuracyText = getView().findViewById(R.id.AccuracyValue);
         avgAccuracyText.setText(String.valueOf(df.format(avgAccuracy)));
-        TextView avgWPMText = findViewById(R.id.WPMValue);
+        TextView avgWPMText = getView().findViewById(R.id.WPMValue);
         avgWPMText.setText(String.valueOf(df.format(avgWPM)));
-        TextView avgCPMText = findViewById(R.id.CPMValue);
+        TextView avgCPMText = getView().findViewById(R.id.CPMValue);
         avgCPMText.setText(String.valueOf(df.format(avgCPM)));
-        TextView totalScoreText = findViewById(R.id.ScoreValue);
+        TextView totalScoreText = getView().findViewById(R.id.ScoreValue);
         totalScoreText.setText(String.valueOf(df.format(totalScore)));
     }
 
 
-    private void setActionBar() {
-        setSupportActionBar((Toolbar)findViewById(R.id.profileToolbar));
-        ActionBar ab = getSupportActionBar();
-        ab.setDisplayHomeAsUpEnabled(true);
-        ab.setDisplayShowTitleEnabled(false);
-    }
+//    private void setActionBar() {
+//        setSupportActionBar((Toolbar)getView().findViewById(R.id.profileToolbar));
+//        ActionBar ab = getSupportActionBar();
+//        ab.setDisplayHomeAsUpEnabled(true);
+//        ab.setDisplayShowTitleEnabled(false);
+//    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
+//    @Override
+//    public boolean onCreateOptionsMenu(Menu menu) {
+//        // Inflate the menu; this adds items to the action bar if it is present.
+//        //getMenuInflater().inflate(R.menu.menu_main, menu);
+//        return true;
+//    }
 
     public void moveToFriendsActivity(View view){
-        Intent intent = new Intent(this,FriendsActivity.class);
+        Intent intent = new Intent(getActivity(),FriendsActivity.class);
         startActivity(intent);
     }
 
     public void logOut(View view){
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(getActivity());
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         boolean isLoggedInOnFacebook = accessToken != null && !accessToken.isExpired();
         if(currentUser != null){
             mAuth.signOut();
-            finish();
+            getActivity().finish();
         }else if (isLoggedInOnFacebook){
             LoginManager.getInstance().logOut();
-            finish();
+            getActivity().finish();
         }else{
             GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestIdToken(getString(R.string.default_web_client_id))
                     .requestEmail()
                     .build();
-            GoogleSignInClient client = GoogleSignIn.getClient(this,gso);
+            GoogleSignInClient client = GoogleSignIn.getClient(getActivity(),gso);
             client.signOut()
-                    .addOnCompleteListener(this, new OnCompleteListener<Void>() {
+                    .addOnCompleteListener(getActivity(), new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
-                            finish();
+                            getActivity().finish();
                         }
                     });
         }
     }
 
-    class SlideRightToMainScreen extends GestureDetector.SimpleOnGestureListener {
-        //handle 'swipe right' action only
-
-        @Override
-        public boolean onFling(MotionEvent event1, MotionEvent event2,
-                               float velocityX, float velocityY) {
-            if(event2.getX() < event1.getX()){
-//                Toast.makeText(getBaseContext(),"Swipe right - finish()",Toast.LENGTH_SHORT).show();
-                finish();
-                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-            }
-
-            return true;
-        }
-    }
+//    class SlideRightToMainScreen extends GestureDetector.SimpleOnGestureListener {
+//        //handle 'swipe right' action only
+//
+//        @Override
+//        public boolean onFling(MotionEvent event1, MotionEvent event2,
+//                               float velocityX, float velocityY) {
+//            if(event2.getX() < event1.getX()){
+////                Toast.makeText(getBaseContext(),"Swipe right - finish()",Toast.LENGTH_SHORT).show();
+//                finish();
+//                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+//            }
+//
+//            return true;
+//        }
+//    }
 
 }
