@@ -25,6 +25,9 @@ import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.facebook.FacebookSdk;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
+import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -68,11 +71,20 @@ public class ProfileActivity extends Fragment {
 
         displayStatistics();
 
+        setLogOutButton();
         getView().findViewById(R.id.logOutButton).setOnClickListener(
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
                         logOut(v);
+                    }
+                }
+        );
+        getView().findViewById(R.id.facebook_log_out_button).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        facebookLogOut(v);
                     }
                 }
         );
@@ -85,6 +97,16 @@ public class ProfileActivity extends Fragment {
 //            Slidr.attach(this, config);        } else {
 //            // Swap without transition
 //        }
+    }
+
+    private void setLogOutButton() {
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        boolean isLoggedInOnFacebook = accessToken != null && !accessToken.isExpired();
+        if (isLoggedInOnFacebook){
+            getView().findViewById(R.id.logOutButton).setVisibility(View.INVISIBLE);
+        }else{
+            getView().findViewById(R.id.facebook_login_button).setVisibility(View.INVISIBLE);
+        }
     }
 
 
@@ -170,6 +192,19 @@ public class ProfileActivity extends Fragment {
     public void moveToFriendsActivity(View view){
         Intent intent = new Intent(getActivity(),FriendsActivity.class);
         startActivity(intent);
+    }
+
+    public void facebookLogOut(View view){
+        new GraphRequest(AccessToken.getCurrentAccessToken(), "/me/permissions/", null, HttpMethod.DELETE, new GraphRequest
+                .Callback() {
+            @Override
+            public void onCompleted(GraphResponse graphResponse) {
+
+                LoginManager.getInstance().logOut();
+                getActivity().finish();
+
+            }
+        }).executeAsync();
     }
 
     public void logOut(View view){

@@ -159,4 +159,12 @@
         android:layout_marginBottom="40dp"
         android:layout_centerHorizontal="true"
         android:text="@string/LogOut" />
+    <com.facebook.login.widget.LoginButton
+        android:id="@+id/facebook_log_out_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="start"
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="40dp"
+        android:layout_centerHorizontal="true"/>
 </RelativeLayout>
