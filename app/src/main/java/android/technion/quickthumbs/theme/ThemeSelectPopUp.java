@@ -47,7 +47,6 @@ public class ThemeSelectPopUp {
     private CountDownTimer timer;
     private TextView timerTextView;
     private View contextView;
-
     public void showPopupWindow(final View view, View callingLayout) {
         this.contextView = view;
         LayoutInflater inflater = (LayoutInflater) view.getContext()
@@ -75,10 +74,10 @@ public class ThemeSelectPopUp {
 
         popupWindow.showAtLocation(callingLayout, Gravity.CENTER,0,0);
 
-        getPersonalThemesData(view,popupView);
+        getPersonalThemesData(view,popupWindow);
     }
 
-    private void setCountDownTimer(final View popupView) {
+    private void setCountDownTimer(final View popupView,final PopupWindow mPopupWindow) {
         timerTextView = popupView.findViewById(R.id.timer);
         timer  = new CountDownTimer(5000, 1000){
             public void onTick(long millisUntilFinished){
@@ -87,7 +86,9 @@ public class ThemeSelectPopUp {
             public  void onFinish(){
                 timerTextView.setText("");
                 Intent i = new Intent(popupView.getContext(), GameLoadingSplashScreenActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 popupView.getContext().startActivity(i);
+                mPopupWindow.dismiss();
 
             }
         };
@@ -104,7 +105,7 @@ public class ThemeSelectPopUp {
         });
     }
 
-    private void getPersonalThemesData(final View view, final View popupView) {
+    private void getPersonalThemesData(final View view, final PopupWindow popupView) {
         final List<ThemeDataRow> data = fillWithData();
         db.collection("users").document(getUid()).collection("themes").get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -116,7 +117,7 @@ public class ThemeSelectPopUp {
                                 Boolean currentText = document.getBoolean("isChosen");
                                 selectedThemes.put(document.getId(),currentText);
                             }
-                            setCountDownTimer(popupView);
+                            setCountDownTimer(popupView.getContentView(),popupView);
                             themeAdaptorSet(data, view);
                             recyclerView.setVisibility(View.VISIBLE);
                         } else {
@@ -129,7 +130,7 @@ public class ThemeSelectPopUp {
                                 currentTheme.put("isChosen", true);
                                 db.collection("users/" + getUid() + "/themes").document(themesNames[i]).set(currentTheme, SetOptions.merge());
                             }
-                            setCountDownTimer(popupView);
+                            setCountDownTimer(popupView.getContentView(),popupView);
                             themeAdaptorSet(data,view);
                             recyclerView.setVisibility(View.VISIBLE);
                         }
@@ -167,6 +168,7 @@ public class ThemeSelectPopUp {
 //                TextPoll tp = new TextPoll(contextView.getContext());
 //                fetchRandomTextSpecifiedForUsers();
                 Intent i = new Intent(popupView.getContext(), GameLoadingSplashScreenActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 popupView.getContext().startActivity(i);
             }
         });
