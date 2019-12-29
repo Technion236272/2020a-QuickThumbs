@@ -200,18 +200,8 @@ public class TextsActivity extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
-                            for (DocumentSnapshot document:task.getResult()) {
-                                if ( document.getString("text") == null ) continue;
-                                TextDataRow item = TextDataRow.createTextCardItem(document);
-                                if (loadedRTextsIDs.get(document.getId()) == null ) {
-                                    loadedRTextsIDs.put(document.getId(),true);
-                                    textsList.add(item);
-                                    recyclerView.getAdapter().notifyDataSetChanged();
-                                }else{
-                                    noMoreLoading =true;
-                                    recyclerView.clearOnScrollListeners();
-                                }
-                            }
+                            fillTextCardList(task);
+                            recyclerView.getAdapter().notifyDataSetChanged();
                         } else {
                             Log.d(TAG, "getAllThemes:"+  "Error getting documents: ", task.getException());
                         }
@@ -236,12 +226,17 @@ public class TextsActivity extends Fragment {
     }
 
     private void fillTextCardList(@NonNull Task<QuerySnapshot> task) {
-        for (QueryDocumentSnapshot document : task.getResult()) {
+        for (DocumentSnapshot document:task.getResult()) {
             if ( document.getString("text") == null ) continue;
             TextDataRow item = TextDataRow.createTextCardItem(document);
-            textsList.add(item);
-            loadedRTextsIDs.put(document.getId(),true);
-            lastSnapShot=document;
+            if (loadedRTextsIDs.get(document.getId()) == null ) {
+                loadedRTextsIDs.put(document.getId(),true);
+                textsList.add(item);
+                lastSnapShot=document;
+            }else{
+                noMoreLoading =true;
+                recyclerView.clearOnScrollListeners();
+            }
         }
     }
 
