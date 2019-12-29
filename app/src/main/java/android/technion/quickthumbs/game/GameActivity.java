@@ -969,6 +969,7 @@ public class GameActivity extends AppCompatActivity {
 
     public void playAgain(View view) {
         Intent intent = new Intent(GameActivity.this, GameLoadingSplashScreenActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
         startActivity(intent);
         finish();
     }
