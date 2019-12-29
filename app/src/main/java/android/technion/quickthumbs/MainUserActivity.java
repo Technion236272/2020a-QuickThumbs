@@ -63,7 +63,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static android.technion.quickthumbs.TextPoll.fetchRandomTextSpecifiedForUsers;
 
 public class MainUserActivity extends AppCompatActivity {
     private static final String TAG = MainUserActivity.class.getSimpleName();
@@ -136,18 +135,6 @@ public class MainUserActivity extends AppCompatActivity {
         boolean isLoggedIn = accessToken != null && !accessToken.isExpired();
         if (checkIfUserLoggedIn(currentUser,account,isLoggedIn)) return;
 
-        //the part that belong to the play again settings
-        RelativeLayout userLoadingLayout= findViewById(R.id.userLoadingLayout);
-        RelativeLayout mainLayout= findViewById(R.id.RelativeLayout1);
-        Intent i = getIntent();
-        if (i.hasExtra("playAgain") && i.getExtras().getBoolean("playAgain")) {
-            userLoadingLayout.setVisibility(View.VISIBLE);
-            mainLayout.setVisibility(View.INVISIBLE);
-            TextPoll.fetchRandomTextSpecifiedForUsers();
-        }else{
-            userLoadingLayout.setVisibility(View.INVISIBLE);
-            mainLayout.setVisibility(View.VISIBLE);
-        }
     }
 
     private void setButtonListener(Button button, final Class<? extends AppCompatActivity> moveToActivityClass) {

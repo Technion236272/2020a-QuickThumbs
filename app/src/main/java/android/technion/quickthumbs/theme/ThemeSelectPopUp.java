@@ -4,8 +4,8 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.CountDownTimer;
 import android.technion.quickthumbs.AddTextActivity;
+import android.technion.quickthumbs.GameLoadingSplashScreenActivity;
 import android.technion.quickthumbs.R;
-import android.technion.quickthumbs.TextPoll;
 import android.technion.quickthumbs.game.GameActivity;
 import android.util.Log;
 import android.view.Gravity;
@@ -36,7 +36,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static android.technion.quickthumbs.TextPoll.fetchRandomTextSpecifiedForUsers;
 
 public class ThemeSelectPopUp {
     private static final String TAG = AddTextActivity.class.getSimpleName();
@@ -87,7 +86,7 @@ public class ThemeSelectPopUp {
             }
             public  void onFinish(){
                 timerTextView.setText("");
-                Intent i = new Intent(popupView.getContext(), GameActivity.class);
+                Intent i = new Intent(popupView.getContext(), GameLoadingSplashScreenActivity.class);
                 popupView.getContext().startActivity(i);
 
             }
@@ -157,7 +156,7 @@ public class ThemeSelectPopUp {
     }
 
 
-    private void setStartGameButton(View popupView, final PopupWindow mPopupWindow) {
+    private void setStartGameButton(final View popupView, final PopupWindow mPopupWindow) {
         TextView closeButton = popupView.findViewById(R.id.startGamePopUpButton);
         closeButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -165,8 +164,10 @@ public class ThemeSelectPopUp {
                 mPopupWindow.dismiss();
                 timer.cancel();
                 timerTextView.setText("");
-                TextPoll tp = new TextPoll(contextView.getContext());
-                fetchRandomTextSpecifiedForUsers();
+//                TextPoll tp = new TextPoll(contextView.getContext());
+//                fetchRandomTextSpecifiedForUsers();
+                Intent i = new Intent(popupView.getContext(), GameLoadingSplashScreenActivity.class);
+                popupView.getContext().startActivity(i);
             }
         });
     }
