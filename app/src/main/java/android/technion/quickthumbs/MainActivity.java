@@ -252,6 +252,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void onSuccess(Void aVoid) {
                         moveToMainUserActivityIfAlreadyLoggedIn();
+                        finish();
                         Log.d(TAG, "User was inserted to to DB!");
                     }
                 })

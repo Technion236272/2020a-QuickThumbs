@@ -124,19 +124,6 @@ public class MainUserActivity extends Fragment {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         boolean isLoggedIn = accessToken != null && !accessToken.isExpired();
         if (checkIfUserLoggedIn(currentUser,account,isLoggedIn)) return;
-
-        //the part that belong to the play again settings
-        RelativeLayout userLoadingLayout= getView().findViewById(R.id.userLoadingLayout);
-        RelativeLayout mainLayout= getView().findViewById(R.id.RelativeLayout1);
-        Intent i = getActivity().getIntent();
-        if (i.hasExtra("playAgain") && i.getExtras().getBoolean("playAgain")) {
-            userLoadingLayout.setVisibility(View.VISIBLE);
-            mainLayout.setVisibility(View.INVISIBLE);
-            TextPoll.fetchRandomTextSpecifiedForUsers();
-        }else{
-            userLoadingLayout.setVisibility(View.INVISIBLE);
-            mainLayout.setVisibility(View.VISIBLE);
-        }
     }
 
     private void setButtonListener(Button button, final Class<? extends AppCompatActivity> moveToActivityClass) {
