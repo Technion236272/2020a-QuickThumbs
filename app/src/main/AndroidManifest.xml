@@ -18,26 +18,31 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup">
-        <activity android:name=".GameLoadingSplashScreenActivity"></activity>
+        <activity android:name=".GameLoadingSplashScreenActivity"
+            android:windowSoftInputMode="stateAlwaysHidden"/>
         <activity
             android:name=".personalArea.TextsActivity"
             android:label="@string/Texts"
             android:parentActivityName=".personalArea.ProfileActivity"
+            android:windowSoftInputMode="stateAlwaysHidden"
             android:theme="@style/AppTheme.SlidrActivityTheme" />
         <activity
             android:name=".personalArea.FriendsActivity"
             android:label="@string/Friends"
-            android:parentActivityName=".personalArea.ProfileActivity" />
+            android:parentActivityName=".personalArea.ProfileActivity"
+            android:windowSoftInputMode="stateAlwaysHidden"/>
         <activity
             android:name=".personalArea.ProfileActivity"
             android:label="@string/Profile"
             android:parentActivityName=".MainUserActivity"
-            android:theme="@style/AppTheme.SlidrActivityTheme" />
+            android:theme="@style/AppTheme.SlidrActivityTheme"
+            android:windowSoftInputMode="stateAlwaysHidden"/>
         <activity
             android:name=".MainUserActivity"
             android:theme="@style/AppTheme.SlidrActivityTheme"
             android:windowSoftInputMode="stateAlwaysHidden" />
-        <activity android:name=".settings.UserSettingActivity" /> <!-- <activity -->
+        <activity android:name=".settings.UserSettingActivity"
+            android:windowSoftInputMode="stateAlwaysHidden"/> <!-- <activity -->
         <!-- android:name=".theme.ThemeSelectorActivity" -->
         <!-- android:parentActivityName=".MainUserActivity" /> -->
         <activity
@@ -46,7 +51,8 @@
             android:parentActivityName=".MainUserActivity"
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
         <activity
-            android:name=".MainPager" />
+            android:name=".MainPager"
+            android:windowSoftInputMode="stateAlwaysHidden"/>
         <activity
             android:name=".game.GameActivity"
             android:parentActivityName=".MainUserActivity"
