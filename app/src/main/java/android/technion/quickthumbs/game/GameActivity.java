@@ -12,9 +12,9 @@ import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
+import android.technion.quickthumbs.GameLoadingSplashScreenActivity;
 import android.technion.quickthumbs.MainUserActivity;
 import android.technion.quickthumbs.R;
-import android.technion.quickthumbs.TextPoll;
 import android.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
 import android.text.Editable;
 import android.text.SpannableString;
@@ -968,10 +968,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     public void playAgain(View view) {
-//        TextPoll.fetchRandomTextSpecifiedForUsers();
-        gameLoadingLayout.setVisibility(View.VISIBLE);
-        Intent intent = new Intent(GameActivity.this, MainUserActivity.class);
-        intent.putExtra("playAgain",true);
+        Intent intent = new Intent(GameActivity.this, GameLoadingSplashScreenActivity.class);
         startActivity(intent);
         finish();
     }
