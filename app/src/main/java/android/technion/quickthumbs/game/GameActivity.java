@@ -706,10 +706,10 @@ public class GameActivity extends AppCompatActivity {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        if (account != null){
-            return account.getId();
-        }else if (currentUser != null){
+        if (currentUser != null) {
             return mAuth.getUid();
+        } else if (account != null){
+            return account.getId();
         }else{
             return accessToken.getUserId();
         }
@@ -825,7 +825,7 @@ public class GameActivity extends AppCompatActivity {
     private void vibrateOnKeyPressedMistake() {
         if(isVibrateOnMistakeOn){
             Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
-    // Vibrate for 500 milliseconds
+            // Vibrate for 500 milliseconds
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 v.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));
             } else {
