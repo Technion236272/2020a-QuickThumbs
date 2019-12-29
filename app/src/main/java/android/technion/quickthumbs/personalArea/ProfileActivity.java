@@ -67,7 +67,15 @@ public class ProfileActivity extends Fragment {
         db = FirebaseFirestore.getInstance();
 
         displayStatistics();
-        //setActionBar();
+
+        getView().findViewById(R.id.logOutButton).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        logOut(v);
+                    }
+                }
+        );
 
         //gestureDetectorCompat = new GestureDetectorCompat(getActivity(), new SlideRightToMainScreen());
 
@@ -99,8 +107,8 @@ public class ProfileActivity extends Fragment {
             return db.collection("users")
                     .document(mAuth.getUid()).collection("stats");
         }else if (googleAccount != null) {
-                return db.collection("users")
-                        .document(googleAccount.getId()).collection("stats");
+            return db.collection("users")
+                    .document(googleAccount.getId()).collection("stats");
         }else{
             return db.collection("users")
                     .document(accessToken.getUserId()).collection("stats");

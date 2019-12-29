@@ -214,10 +214,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if (currentUser != null && currentUser.isEmailVerified()) {
             String uid = currentUser.getUid();
-            //TODO
             Intent intent = new Intent(MainActivity.this, MainPager.class);
 
-            finish();
             startActivity(intent);
             Log.d(TAG, "already signed in user: " + uid);
             return;
@@ -228,12 +226,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         if (account != null && !account.isExpired()) {
             String uid = account.getId();
-            //TODO
             Intent intent = new Intent(MainActivity.this, MainPager.class);
 
-            finish();
             startActivity(intent);
-
             Log.d(TAG, "already signed in user: " + uid);
             return;
         }
@@ -243,11 +238,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         boolean isLoggedIn = accessToken != null && !accessToken.isExpired();
         if (isLoggedIn) {
             String uid = accessToken.getUserId();
-            Intent intent = new Intent(MainActivity.this, MainUserActivity.class);
+            Intent intent = new Intent(MainActivity.this, MainPager.class);
 
-            finish();
             startActivity(intent);
-
             Log.d(TAG, "already signed in user: " + uid);
         }
     }
