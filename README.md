@@ -57,7 +57,7 @@ add text image button: <a target="_blank" href="https://icons8.com/icons/set/add
 
 [Github: r0adkll/Slidr project](https://github.com/r0adkll/Slidr)
 
-
+[privacy policy](https://pastebin.com/bZ1268Zv)
 
 
 
