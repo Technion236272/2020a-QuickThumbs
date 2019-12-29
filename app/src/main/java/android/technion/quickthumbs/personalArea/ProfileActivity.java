@@ -72,22 +72,8 @@ public class ProfileActivity extends Fragment {
         displayStatistics();
 
         setLogOutButton();
-        getView().findViewById(R.id.logOutButton).setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        logOut(v);
-                    }
-                }
-        );
-        getView().findViewById(R.id.facebook_log_out_button).setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        facebookLogOut(v);
-                    }
-                }
-        );
+
+
 
         //gestureDetectorCompat = new GestureDetectorCompat(getActivity(), new SlideRightToMainScreen());
 
@@ -104,8 +90,24 @@ public class ProfileActivity extends Fragment {
         boolean isLoggedInOnFacebook = accessToken != null && !accessToken.isExpired();
         if (isLoggedInOnFacebook){
             getView().findViewById(R.id.logOutButton).setVisibility(View.INVISIBLE);
+            getView().findViewById(R.id.facebook_log_out_button).setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            facebookLogOut(v);
+                        }
+                    }
+            );
         }else{
-            getView().findViewById(R.id.facebook_login_button).setVisibility(View.INVISIBLE);
+            getView().findViewById(R.id.facebook_log_out_button).setVisibility(View.INVISIBLE);
+            getView().findViewById(R.id.logOutButton).setOnClickListener(
+                    new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            logOut(v);
+                        }
+                    }
+            );
         }
     }
 
