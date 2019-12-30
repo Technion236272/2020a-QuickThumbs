@@ -125,11 +125,11 @@ public class TextsActivity extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful() && task.getResult().getDocuments().size() != 0) {
-                            Log.d(TAG, "collection is not empty!", task.getException());
+//                            Log.d(TAG, "collection is not empty!", task.getException());
                             fetchPersonalTextsList();
                             setRecyclerViewScroller();
                         } else {
-                            Log.d(TAG, "no such collection", task.getException());
+//                            Log.d(TAG, "no such collection", task.getException());
                             loadingText.setText(R.string.no_personal_texts);
                         }
                     }
@@ -184,7 +184,7 @@ public class TextsActivity extends Fragment {
                             fillTextCardList(task);
                             recyclerView.getAdapter().notifyDataSetChanged();
                         } else {
-                            Log.d(TAG, "getAllThemes:"+  "Error getting documents: ", task.getException());
+//                            Log.d(TAG, "getAllThemes:"+  "Error getting documents: ", task.getException());
                         }
                     }
                 });
@@ -200,7 +200,7 @@ public class TextsActivity extends Fragment {
                             fillTextCardList(task);
                             setTextAdaptor();
                         } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
+//                            Log.d(TAG, "Error getting documents: ", task.getException());
                         }
                     }
                 });

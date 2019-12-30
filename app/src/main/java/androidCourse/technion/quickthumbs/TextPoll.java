@@ -95,13 +95,13 @@ public class TextPoll {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, "getUserThemes:"+ document.getId() + " => " + document.getData());
+//                                Log.d(TAG, "getUserThemes:"+ document.getId() + " => " + document.getData());
                                 insertThemesFromAllThemes(document,document.getBoolean("isChosen"));
                             }
                             getRandomTheme();
                         } else {
                             //there is no user prefences- take all -> don't change the themes
-                            Log.d(TAG, "getUserThemes:"+ "Error getting documents: ", task.getException());
+//                            Log.d(TAG, "getUserThemes:"+ "Error getting documents: ", task.getException());
                             getRandomTheme();
                         }
                     }
@@ -118,15 +118,15 @@ public class TextPoll {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
-                        Log.d(TAG, "getRandomTheme:"+ "DocumentSnapshot data: " + document.getData());
+//                        Log.d(TAG, "getRandomTheme:"+ "DocumentSnapshot data: " + document.getData());
                         int textsAmount = document.getLong("textsCount").intValue();
                         getRandomText(choosenTheme, textsAmount);
                     } else {
-                        Log.d(TAG, "getRandomTheme:"+"No such document");
+//                        Log.d(TAG, "getRandomTheme:"+"No such document");
                         //TODO: is it possible that we will reach here?
                     }
                 } else {
-                    Log.d(TAG, "getRandomTheme:"+ "get failed with ", task.getException());
+//                    Log.d(TAG, "getRandomTheme:"+ "get failed with ", task.getException());
                     //TODO: is it possible that we will reach here?
                 }
             }
@@ -161,11 +161,11 @@ public class TextPoll {
                 if (task.isSuccessful()) {
                     if (task.getResult().isEmpty()){
                         fetchRandomTextSpecifiedForUsers();
-                        Log.d(TAG, "getRandomText: another round");
+//                        Log.d(TAG, "getRandomText: another round");
                     }
                     else{
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            Log.d(TAG, "getRandomText: "+ "DocumentSnapshot data: " + document.getData());
+//                            Log.d(TAG, "getRandomText: "+ "DocumentSnapshot data: " + document.getData());
                             TextDataRow textCardItem = TextDataRow.createTextCardItem(document);
                             textItem.add(textCardItem);
                             int playCount = Integer.parseInt(textCardItem.getNumberOfTimesPlayed());
@@ -175,7 +175,7 @@ public class TextPoll {
                         setIntentAndStartGame();
                     }
                 } else {
-                    Log.d(TAG, "getRandomText: "+"get failed with ", task.getException());
+//                    Log.d(TAG, "getRandomText: "+"get failed with ", task.getException());
                 }
             }
         });
@@ -206,13 +206,13 @@ public class TextPoll {
                         public void onComplete(@NonNull Task<QuerySnapshot> task) {
                             if (task.isSuccessful()) {
                                 for (QueryDocumentSnapshot document : task.getResult()) {
-                                    Log.d(TAG, "getAllThemes:"+ document.getId() + " => " + document.getData());
+//                                    Log.d(TAG, "getAllThemes:"+ document.getId() + " => " + document.getData());
                                     getTextFromTextsCollection(document.getId()).set(document.getData(), SetOptions.merge());
                                     String composer=document.get("composer").toString();
                                     getUserCollection(composer,"texts").document(document.getId()).set(document.getData(), SetOptions.merge());
                                 }
                             } else {
-                                Log.d(TAG, "getAllThemes:"+  "Error getting documents: ", task.getException());
+//                                Log.d(TAG, "getAllThemes:"+  "Error getting documents: ", task.getException());
                             }
                         }
                     });

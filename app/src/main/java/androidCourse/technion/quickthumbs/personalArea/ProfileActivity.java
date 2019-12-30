@@ -132,17 +132,17 @@ public class ProfileActivity extends Fragment {
                         if (task.isSuccessful()) {
                             DocumentSnapshot document = task.getResult();
                             if (document.exists()) {
-                                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+//                                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
                                 Double avgAccuracy = document.getDouble("avgAccuracy");
                                 Double avgWPM = document.getDouble("avgWPM");
                                 Double avgCPM = document.getDouble("avgCPM");
                                 Double totalScore = document.getDouble("TotalScore");
                                 setStatisticsTextViews(avgAccuracy,avgWPM,avgCPM,totalScore);
                             } else {
-                                Log.d(TAG, "No such document - reading statistics");
+//                                Log.d(TAG, "No such document - reading statistics");
                             }
                         } else {
-                            Log.d(TAG, "reading statistics failed with ", task.getException());
+//                            Log.d(TAG, "reading statistics failed with ", task.getException());
                         }
                     }
                 });
