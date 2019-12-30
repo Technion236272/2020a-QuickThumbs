@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@drawable/gradiant_color"
-    tools:context=".AddTextActivity">
+    tools:context="androidCourse.technion.quickthumbs.AddTextActivity">
 
     <include
         android:id="@+id/AddTextToolbar"

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="android.technion.quickthumbs">
+    package="androidCourse.technion.quickthumbs">
 
     <uses-sdk tools:overrideLibrary="com.r0adkll.slidr" />
 
@@ -18,50 +18,50 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup">
-        <activity android:name=".GameLoadingSplashScreenActivity"
+        <activity android:name="androidCourse.technion.quickthumbs.GameLoadingSplashScreenActivity"
             android:windowSoftInputMode="stateAlwaysHidden"/>
         <activity
-            android:name=".personalArea.TextsActivity"
+            android:name="androidCourse.technion.quickthumbs.personalArea.TextsActivity"
             android:label="@string/Texts"
-            android:parentActivityName=".personalArea.ProfileActivity"
+            android:parentActivityName="androidCourse.technion.quickthumbs.personalArea.ProfileActivity"
             android:windowSoftInputMode="stateAlwaysHidden"
             android:theme="@style/AppTheme.SlidrActivityTheme" />
         <activity
-            android:name=".personalArea.FriendsActivity"
+            android:name="androidCourse.technion.quickthumbs.personalArea.FriendsActivity"
             android:label="@string/Friends"
-            android:parentActivityName=".personalArea.ProfileActivity"
+            android:parentActivityName="androidCourse.technion.quickthumbs.personalArea.ProfileActivity"
             android:windowSoftInputMode="stateAlwaysHidden"/>
         <activity
-            android:name=".personalArea.ProfileActivity"
+            android:name="androidCourse.technion.quickthumbs.personalArea.ProfileActivity"
             android:label="@string/Profile"
-            android:parentActivityName=".MainUserActivity"
+            android:parentActivityName="androidCourse.technion.quickthumbs.MainUserActivity"
             android:theme="@style/AppTheme.SlidrActivityTheme"
             android:windowSoftInputMode="stateAlwaysHidden"/>
         <activity
-            android:name=".MainUserActivity"
+            android:name="androidCourse.technion.quickthumbs.MainUserActivity"
             android:theme="@style/AppTheme.SlidrActivityTheme"
             android:windowSoftInputMode="stateAlwaysHidden" />
-        <activity android:name=".settings.UserSettingActivity"
+        <activity android:name="androidCourse.technion.quickthumbs.settings.UserSettingActivity"
             android:windowSoftInputMode="stateAlwaysHidden"/> <!-- <activity -->
         <!-- android:name=".theme.ThemeSelectorActivity" -->
         <!-- android:parentActivityName=".MainUserActivity" /> -->
         <activity
-            android:name=".AddTextActivity"
+            android:name="androidCourse.technion.quickthumbs.AddTextActivity"
             android:label="Add Text"
-            android:parentActivityName=".MainUserActivity"
+            android:parentActivityName="androidCourse.technion.quickthumbs.MainUserActivity"
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
         <activity
-            android:name=".MainPager"
+            android:name="androidCourse.technion.quickthumbs.MainPager"
             android:windowSoftInputMode="stateAlwaysHidden"/>
         <activity
-            android:name=".game.GameActivity"
-            android:parentActivityName=".MainUserActivity"
+            android:name="androidCourse.technion.quickthumbs.game.GameActivity"
+            android:parentActivityName="androidCourse.technion.quickthumbs.MainUserActivity"
             android:windowSoftInputMode="stateAlwaysVisible|adjustResize" />
         <activity
-            android:name=".CreateAccountActivity"
+            android:name="androidCourse.technion.quickthumbs.CreateAccountActivity"
             android:label="Create An Account"
-            android:parentActivityName=".MainActivity" />
-        <activity android:name=".MainActivity">
+            android:parentActivityName="androidCourse.technion.quickthumbs.MainActivity" />
+        <activity android:name="androidCourse.technion.quickthumbs.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
