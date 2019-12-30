@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">QuickThumbs</string>
+    <string name="app_name">Quick Thumbs</string>
     <string name="main_heading">Login to QuickThumbs</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
