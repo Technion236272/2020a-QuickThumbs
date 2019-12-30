@@ -19,6 +19,7 @@ public class TextViewHolder extends RecyclerView.ViewHolder {
     TextView bestScore;
     ImageView textTheme;
     ImageView viewMoreButton;
+    ImageView playTextButton;
     ImageView star1;
     ImageView star2;
     ImageView star3;
@@ -27,12 +28,14 @@ public class TextViewHolder extends RecyclerView.ViewHolder {
     LinearLayout textExpand;
     LinearLayout titleExpand;
     LinearLayout statsExpand;
+    LinearLayout playLayoutExpand;
 
     public TextViewHolder(@NonNull View itemView) {
         super(itemView);
         textCard = itemView.findViewById(R.id.textCard);
         textTheme = itemView.findViewById(R.id.textTheme);
         viewMoreButton = itemView.findViewById(R.id.viewMoreButton);
+        playTextButton = itemView.findViewById(R.id.playTextButton);
         textTitle = itemView.findViewById(R.id.textTitle);
         textDescription = itemView.findViewById(R.id.textDescription);
         numberOfTimesTextPlayed = itemView.findViewById(R.id.itemNumberOfPlays);
@@ -46,5 +49,6 @@ public class TextViewHolder extends RecyclerView.ViewHolder {
         textExpand = itemView.findViewById(R.id.textLayoutExpand);
         titleExpand = itemView.findViewById(R.id.titleLayoutExpand);
         statsExpand = itemView.findViewById(R.id.statsLayoutExpand);
+        playLayoutExpand = itemView.findViewById(R.id.playLayout);
     }
 }

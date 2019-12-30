@@ -11,7 +11,7 @@
     app:cardCornerRadius="5dp"
     app:cardElevation="5dp">
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="20dp">
@@ -224,6 +224,42 @@
                 android:textColor="@color/secondaryTextColor"
                 android:gravity="center"
                 android:layout_margin="15dp" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_below="@id/statsLayoutExpand"
+            android:id="@+id/playLayout"
+            android:focusable="true"
+            android:clickable="true"
+            android:minHeight="?attr/actionBarSize"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:weightSum="1"
+            android:layout_height="?attr/actionBarSize">
+            <TextView
+                android:id="@+id/challengeUserText"
+                android:layout_width="0dp"
+                android:layout_weight="0.90"
+                android:layout_height="?attr/actionBarSize"
+                android:text="Think you can do better? Play now on this text"
+                android:textSize="12sp"
+                android:textColor="@color/primaryColor"
+                android:gravity="center"
+                android:layout_margin="0dp" />
+            <ImageButton
+                android:id="@+id/playTextButton"
+                app:srcCompat="@android:drawable/ic_media_play"
+                android:contentDescription="play Now"
+                android:background="@color/transparent"
+                android:layout_width="0dp"
+                android:layout_weight="0.10"
+                android:layout_height="?attr/actionBarSize"
+                android:gravity="center"
+                android:layout_margin="0dp" />
+
+
+
         </LinearLayout>
     </RelativeLayout>
 </androidx.cardview.widget.CardView>

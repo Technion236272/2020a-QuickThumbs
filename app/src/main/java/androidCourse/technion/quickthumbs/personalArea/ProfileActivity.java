@@ -6,6 +6,8 @@ import androidx.fragment.app.Fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidCourse.technion.quickthumbs.MainActivity;
 import androidCourse.technion.quickthumbs.R;
 import androidCourse.technion.quickthumbs.game.GameActivity;
 import android.util.Log;
@@ -187,8 +189,9 @@ public class ProfileActivity extends Fragment {
             public void onCompleted(GraphResponse graphResponse) {
 
                 LoginManager.getInstance().logOut();
+                Intent i = new Intent(getActivity(), MainActivity.class);
                 getActivity().finish();
-
+                startActivity(i);
             }
         }).executeAsync();
     }
@@ -200,10 +203,9 @@ public class ProfileActivity extends Fragment {
         boolean isLoggedInOnFacebook = accessToken != null && !accessToken.isExpired();
         if(currentUser != null){
             mAuth.signOut();
+            Intent i = new Intent(getActivity(), MainActivity.class);
             getActivity().finish();
-        }else if (isLoggedInOnFacebook){
-            LoginManager.getInstance().logOut();
-            getActivity().finish();
+            startActivity(i);
         }else{
             GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestIdToken(getString(R.string.default_web_client_id))
@@ -214,7 +216,9 @@ public class ProfileActivity extends Fragment {
                     .addOnCompleteListener(getActivity(), new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
+                            Intent i = new Intent(getActivity(), MainActivity.class);
                             getActivity().finish();
+                            startActivity(i);
                         }
                     });
         }

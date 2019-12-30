@@ -218,6 +218,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent intent = new Intent(MainActivity.this, MainPager.class);
 
             startActivity(intent);
+            finish();
             Log.d(TAG, "already signed in user: " + uid);
             return;
         }
@@ -230,6 +231,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent intent = new Intent(MainActivity.this, MainPager.class);
 
             startActivity(intent);
+            finish();
             Log.d(TAG, "already signed in user: " + uid);
             return;
         }
@@ -242,6 +244,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Intent intent = new Intent(MainActivity.this, MainPager.class);
 
             startActivity(intent);
+            finish();
             Log.d(TAG, "already signed in user: " + uid);
         }
     }
@@ -253,7 +256,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void onSuccess(Void aVoid) {
                         moveToMainUserActivityIfAlreadyLoggedIn();
-                        finish();
                         Log.d(TAG, "User was inserted to to DB!");
                     }
                 })
@@ -314,7 +316,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "Verification mail sent successfully");
-                            finish();
+//                            finish();
                             Toast.makeText(MainActivity.this,
                                     "Verification email sent to " + user.getEmail(),
                                     Toast.LENGTH_SHORT).show();

@@ -11,6 +11,7 @@ import android.os.CountDownTimer;
 import androidCourse.technion.quickthumbs.game.GameActivity;
 import androidCourse.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.View;
 
 import com.facebook.AccessToken;
@@ -52,25 +53,99 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-
-        config = new EasySplashScreen(GameLoadingSplashScreenActivity.this)
-                .withFullScreen()
-                .withSplashTimeOut(7000)
-                .withBackgroundColor(Color.parseColor("#1a1b29"))
-//                .withHeaderText("Header")
-//                .withFooterText("Footer")
-                .withBeforeLogoText("Choosing From Preferred themes")
-                .withAfterLogoText(" ")
-                .withLogo(R.drawable.game_loading_icon);
-
+        Intent fromWhichActivityYouCameFrom = getIntent();
+        if (!fromWhichActivityYouCameFrom.hasExtra("text")){
+            config = new EasySplashScreen(GameLoadingSplashScreenActivity.this)
+                    .withFullScreen()
+                    .withSplashTimeOut(7000)
+                    .withBackgroundColor(Color.parseColor("#1a1b29"))
+                    .withHeaderText("")
+                    .withFooterText("")
+                    .withBeforeLogoText("Choosing From Preferred themes")
+                    .withAfterLogoText(" ")
+                    .withLogo(R.drawable.game_loading_icon);
+            config.getFooterTextView().setTextSize(70);
+            config.getFooterTextView().setTextColor(Color.WHITE);
+            config.getHeaderTextView().setTextSize(70);
+            config.getHeaderTextView().setTextColor(Color.WHITE);
 //        config.getHeaderTextView().setTextColor(Color.WHITE);
 //        config.getFooterTextView().setTextColor(Color.WHITE);
-        config.getBeforeLogoTextView().setTextColor(Color.WHITE);
-        config.getAfterLogoTextView().setTextColor(Color.WHITE);
+            config.getBeforeLogoTextView().setTextColor(Color.WHITE);
+            config.getAfterLogoTextView().setTextColor(Color.WHITE);
 //        config.getLogo().setScaleType(CENTER);
-        easySplashScreen = config.create();
-        setContentView(easySplashScreen);
-        new FetchRandomText().execute();
+            easySplashScreen = config.create();
+            setContentView(easySplashScreen);
+            new FetchRandomText().execute();
+        }else{
+            TextDataRow selectedTextItem = setTextDataFromSelectedText(fromWhichActivityYouCameFrom);
+            Intent i = new Intent();
+            i.setClass(getApplicationContext(), GameActivity.class);
+            i.putExtra("id",selectedTextItem.getID());
+            i.putExtra("title",selectedTextItem.getTitle());
+            i.putExtra("text",selectedTextItem.getText());
+            i.putExtra("composer",selectedTextItem.getComposer());
+            i.putExtra("theme",selectedTextItem.getThemeName());
+            i.putExtra("date",selectedTextItem.getDate());
+            i.putExtra("rating",selectedTextItem.getRating());
+            i.putExtra("playCount",selectedTextItem.getNumberOfTimesPlayed());
+            i.putExtra("bestScore",selectedTextItem.getBestScore());
+            i.putExtra("fastestSpeed",selectedTextItem.getFastestSpeed());
+
+            config = new EasySplashScreen(GameLoadingSplashScreenActivity.this)
+                    .withFullScreen()
+                    .withSplashTimeOut(4000)
+                    .withBackgroundColor(Color.parseColor("#1a1b29"))
+                .withHeaderText("")
+                .withFooterText("")
+                    .withBeforeLogoText("You choose the text: "+selectedTextItem.getTitle())
+                    .withAfterLogoText("")
+                    .withLogo(getThemePictureId(selectedTextItem.getThemeName()));
+            config.getFooterTextView().setTextSize(70);
+            config.getFooterTextView().setTextColor(Color.WHITE);
+            config.getHeaderTextView().setTextSize(70);
+            config.getHeaderTextView().setTextColor(Color.WHITE);
+//        config.getHeaderTextView().setTextColor(Color.WHITE);
+//        config.getFooterTextView().setTextColor(Color.WHITE);
+            config.getBeforeLogoTextView().setTextColor(Color.WHITE);
+            config.getAfterLogoTextView().setTextColor(Color.WHITE);
+            if (selectedTextItem.getBestScore() != "0"){
+                config.withAfterLogoText("The best score on this text is "+selectedTextItem.getBestScore()+"\n"+
+                        "The fastest speed achieved on this text is "+selectedTextItem.getBestScore()+
+                        " Words per minute");
+                config.getAfterLogoTextView().setGravity(Gravity.CENTER);
+            }else{
+                config.withAfterLogoText("You are the first one to play on this text!");
+            }
+            easySplashScreen = config.create();
+            setContentView(easySplashScreen);
+            final Intent intent=i;
+            timer  = new CountDownTimer(4000, 1000){
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    config.getFooterTextView().setText(String.valueOf(millisUntilFinished/1000));
+                    config.getHeaderTextView().setText(String.valueOf(millisUntilFinished/1000));
+                }
+                public  void onFinish(){
+                    startActivity(intent);
+                }
+            };
+            timer.start();
+        }
+    }
+
+    private TextDataRow setTextDataFromSelectedText(Intent fromWhichActivityYouCameFrom) {
+        String id=fromWhichActivityYouCameFrom.getExtras().getString("id");
+        String title=fromWhichActivityYouCameFrom.getExtras().getString("title");
+        String text=fromWhichActivityYouCameFrom.getExtras().getString("text");
+        String composer=fromWhichActivityYouCameFrom.getExtras().getString("composer");
+        String theme=fromWhichActivityYouCameFrom.getExtras().getString("theme");
+        String date=fromWhichActivityYouCameFrom.getExtras().getString("date");
+        Double rating=fromWhichActivityYouCameFrom.getExtras().getDouble("rating");
+        String numberOfTimesPlayed=fromWhichActivityYouCameFrom.getExtras().getString("playCount");
+        String bestScore=fromWhichActivityYouCameFrom.getExtras().getString("bestScore");
+        String fastestSpeed=fromWhichActivityYouCameFrom.getExtras().getString("fastestSpeed");
+        return new TextDataRow(id, title,theme,text, date,composer,
+                rating,numberOfTimesPlayed, bestScore, fastestSpeed);
     }
 
     private class FetchRandomText extends AsyncTask<Void, Void, Void> {
@@ -173,31 +248,9 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
             });
         }
 
-        private void sleep(int seconds) {
-            try {
-                TimeUnit.SECONDS.sleep(seconds);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
 
-        public int getThemePictureId (String themeName) {
-            switch (themeName){
-                case "Comedy":
-                    return R.drawable.comedy;
-                case "Music":
-                    return R.drawable.music;
-                case "Science":
-                    return R.drawable.science;
-                case "Games":
-                    return R.drawable.games;
-                case "Literature":
-                    return R.drawable.literature;
-                case "Movies":
-                default:
-                    return R.drawable.movies;
-            }
-        }
+
+
 
         private String getRandomThemeName() {
             List<String> userChosenThemes = new LinkedList<>();
@@ -260,8 +313,20 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
             i.putExtra("playCount",textCardItem.getNumberOfTimesPlayed());
             i.putExtra("bestScore",textCardItem.getBestScore());
             i.putExtra("fastestSpeed",textCardItem.getFastestSpeed());
-            sleep(3);
-            startActivity(i);
+            final Intent intent=i;
+            timer  = new CountDownTimer(4000, 1000){
+                @Override
+                public void onTick(long millisUntilFinished) {
+                    config.getFooterTextView().setText(String.valueOf(millisUntilFinished/1000));
+                    config.getHeaderTextView().setText(String.valueOf(millisUntilFinished/1000));
+
+
+                }
+                public  void onFinish(){
+                    startActivity(intent);
+                }
+            };
+            timer.start();
         }
 
         //very useful to copy data from one text collection to another
@@ -329,5 +394,30 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
         }
 
 
+    }
+
+    public int getThemePictureId (String themeName) {
+        switch (themeName){
+            case "Comedy":
+                return R.drawable.comedy;
+            case "Music":
+                return R.drawable.music;
+            case "Science":
+                return R.drawable.science;
+            case "Games":
+                return R.drawable.games;
+            case "Literature":
+                return R.drawable.literature;
+            case "Movies":
+            default:
+                return R.drawable.movies;
+        }
+    }
+    private void sleep(int seconds) {
+        try {
+            TimeUnit.SECONDS.sleep(seconds);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
