@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:id="@+id/profileLayout"
     android:background="@drawable/gradiant_color"
-    tools:context=".personalArea.ProfileActivity">
+    tools:context="androidCourse.technion.quickthumbs.personalArea.ProfileActivity">
 
     <!--    <include-->
     <!--        android:id="@+id/profileToolbar"-->

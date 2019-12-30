@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@drawable/gradiant_color"
     android:orientation="vertical"
-    tools:context=".CreateAccountActivity">
+    tools:context="androidCourse.technion.quickthumbs.CreateAccountActivity">
 
     <include
         android:id="@+id/createAccountToolbar"
