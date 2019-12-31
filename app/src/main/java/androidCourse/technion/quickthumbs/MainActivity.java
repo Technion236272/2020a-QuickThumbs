@@ -212,8 +212,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void moveToMainUserActivityIfAlreadyLoggedIn() {
         FirebaseUser currentUser = fireBaseAuth.getCurrentUser();
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
 
-        if (currentUser != null && currentUser.isEmailVerified()) {
+        if (currentUser != null && currentUser.isEmailVerified() && account==null) {
             String uid = currentUser.getUid();
             Intent intent = new Intent(MainActivity.this, MainPager.class);
 
@@ -225,8 +226,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // Check for existing Google Sign In account, if the user is already signed in
         // the GoogleSignInAccount will be non-null.
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        if (account != null && !account.isExpired()) {
+       if (account != null && !account.isExpired()) {
             String uid = account.getId();
             Intent intent = new Intent(MainActivity.this, MainPager.class);
 

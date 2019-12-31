@@ -143,7 +143,7 @@ public class GameActivity extends AppCompatActivity {
     private FirebaseAuth mAuth;
     private static final String TAG = GameActivity.class.getName();
 
-    public static TextDataRow selectedTextItem; //is assigned in TextPoll
+    public static TextDataRow selectedTextItem;
     public boolean changed=false;
 
     MediaPlayer positiveMediaPlayer;

@@ -61,14 +61,7 @@ public class ProfileActivity extends Fragment {
 
 
 
-        //gestureDetectorCompat = new GestureDetectorCompat(getActivity(), new SlideRightToMainScreen());
 
-        // Check if we're running on Android 5.0 or higher
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            SlidrConfig config = new SlidrConfig.Builder().position(SlidrPosition.HORIZONTAL).build();
-//            Slidr.attach(this, config);        } else {
-//            // Swap without transition
-//        }
     }
 
     private void setLogOutButton() {
@@ -98,11 +91,6 @@ public class ProfileActivity extends Fragment {
     }
 
 
-//    @Override
-//    public boolean onTouchEvent(MotionEvent event) {
-//        this.gestureDetectorCompat.onTouchEvent(event);
-//        return super.onTouchEvent(event);
-//    }
 
 //    @Override
 //    public void finish() {
@@ -162,21 +150,6 @@ public class ProfileActivity extends Fragment {
         totalScoreText.setText(String.valueOf(df.format(totalScore)));
     }
 
-
-//    private void setActionBar() {
-//        setSupportActionBar((Toolbar)getView().findViewById(R.id.profileToolbar));
-//        ActionBar ab = getSupportActionBar();
-//        ab.setDisplayHomeAsUpEnabled(true);
-//        ab.setDisplayShowTitleEnabled(false);
-//    }
-
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        // Inflate the menu; this adds items to the action bar if it is present.
-//        //getMenuInflater().inflate(R.menu.menu_main, menu);
-//        return true;
-//    }
-
     public void moveToFriendsActivity(View view){
         Intent intent = new Intent(getActivity(),FriendsActivity.class);
         startActivity(intent);
@@ -201,7 +174,7 @@ public class ProfileActivity extends Fragment {
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(getActivity());
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         boolean isLoggedInOnFacebook = accessToken != null && !accessToken.isExpired();
-        if(currentUser != null){
+        if(currentUser != null && account==null){
             mAuth.signOut();
             Intent i = new Intent(getActivity(), MainActivity.class);
             getActivity().finish();
@@ -216,6 +189,7 @@ public class ProfileActivity extends Fragment {
                     .addOnCompleteListener(getActivity(), new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
+                            mAuth.signOut();
                             Intent i = new Intent(getActivity(), MainActivity.class);
                             getActivity().finish();
                             startActivity(i);
@@ -223,21 +197,5 @@ public class ProfileActivity extends Fragment {
                     });
         }
     }
-
-//    class SlideRightToMainScreen extends GestureDetector.SimpleOnGestureListener {
-//        //handle 'swipe right' action only
-//
-//        @Override
-//        public boolean onFling(MotionEvent event1, MotionEvent event2,
-//                               float velocityX, float velocityY) {
-//            if(event2.getX() < event1.getX()){
-////                Toast.makeText(getBaseContext(),"Swipe right - finish()",Toast.LENGTH_SHORT).show();
-//                finish();
-//                overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-//            }
-//
-//            return true;
-//        }
-//    }
 
 }

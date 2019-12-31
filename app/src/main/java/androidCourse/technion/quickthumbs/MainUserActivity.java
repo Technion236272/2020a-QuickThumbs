@@ -56,23 +56,8 @@ public class MainUserActivity extends Fragment {
 
         closeKeyboard();
 
-        //gestureDetectorCompat = new GestureDetectorCompat(getActivity(), new MyGestureListener());
-
-
-        // Check if we're running on Android 5.0 or higher
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            SlidrConfig config = new SlidrConfig.Builder().position(SlidrPosition.HORIZONTAL).build();
-//            Slidr.attach(this, config);        } else {
-//            // Swap without transition
-//        }
-
     }
 
-//    @Override
-//    public boolean onTouchEvent(MotionEvent event) {
-//        this.gestureDetectorCompat.onTouchEvent(event);
-//        return super.onTouchEvent(event);
-//    }
 
     @Override
     public void onResume() {
@@ -124,29 +109,6 @@ public class MainUserActivity extends Fragment {
         return true;
     }
 
-//    @Override
-//    public boolean onCreateOptionsMenu(Menu menu) {
-//        getMenuInflater().inflate(R.menu.user_main_menu, menu);
-//
-//        return super.onCreateOptionsMenu(menu);
-//    }
-
-//    @Override
-//    public boolean onOptionsItemSelected(MenuItem item) {
-//        int id = item.getItemId();
-//
-//        if (id == R.id.goToPersonalAreaButton) {
-//            Intent intent = new Intent(getActivity(), ProfileActivity.class);
-//            startActivity(intent);
-//            //overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-//        }
-//        if (id == R.id.TextAreaButton) {
-//            Intent intent = new Intent(getActivity(), TextsActivity.class);
-//            startActivity(intent);
-//            //overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-//        }
-//        return super.onOptionsItemSelected(item);
-//    }
 
     private void closeKeyboard() {
         View view = getActivity().getCurrentFocus();
@@ -156,31 +118,5 @@ public class MainUserActivity extends Fragment {
         }
     }
 
-//    class MyGestureListener extends GestureDetector.SimpleOnGestureListener {
-//        //handle 'swipe left' action only
-//
-//        @Override
-//        public boolean onFling(MotionEvent event1, MotionEvent event2,
-//                               float velocityX, float velocityY) {
-//
-//            if(event2.getX() < event1.getX()){
-////                Toast.makeText(getBaseContext(),"Swipe left - startActivity()",Toast.LENGTH_SHORT).show();
-//                //switch another activity
-//                Intent intent = new Intent(
-//                        getActivity(), TextsActivity.class);
-//                startActivity(intent);
-//               // overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
-//            }
-//            else if (event2.getX() > event1.getX()){
-////                Toast.makeText(getBaseContext(), "Swipe right - startActivity()", Toast.LENGTH_SHORT).show();
-//                //switch another activity
-//                Intent intent = new Intent(
-//                        getActivity(), ProfileActivity.class);
-//                startActivity(intent);
-//               // overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-//            }
-//            return true;
-//        }
-//    }
 
 }
