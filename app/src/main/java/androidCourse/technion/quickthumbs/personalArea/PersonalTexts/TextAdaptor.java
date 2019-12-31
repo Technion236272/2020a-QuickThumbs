@@ -1,7 +1,11 @@
 package androidCourse.technion.quickthumbs.personalArea.PersonalTexts;
 
 import android.content.Context;
+
+import androidCourse.technion.quickthumbs.GameLoadingSplashScreenActivity;
 import androidCourse.technion.quickthumbs.R;
+
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -92,7 +96,6 @@ public class TextAdaptor extends RecyclerView.Adapter<TextViewHolder>{
         setStarRanking(holder, position);
         int color = getCardColorBasedOnClicks((texts.get(position).isClicked));
         holder.textCard.setCardBackgroundColor(color);
-
         holder.viewMoreButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -100,16 +103,38 @@ public class TextAdaptor extends RecyclerView.Adapter<TextViewHolder>{
                     holder.textExpand.setVisibility(View.VISIBLE);
                     holder.titleExpand.setVisibility(View.VISIBLE);
                     holder.statsExpand.setVisibility(View.VISIBLE);
+                    holder.playLayoutExpand.setVisibility(View.VISIBLE);
                 }else{
                     holder.textExpand.setVisibility(View.GONE);
                     holder.titleExpand.setVisibility(View.GONE);
                     holder.statsExpand.setVisibility(View.GONE);
+                    holder.playLayoutExpand.setVisibility(View.GONE);
                 }
                 texts.get(position).isExpanded = ! texts.get(position).isExpanded;
 
                 texts.get(position).isClicked = ! texts.get(position).isClicked;
                 int color = getCardColorBasedOnClicks(texts.get(position).isClicked);
                 holder.textCard.setCardBackgroundColor(color);
+            }
+
+
+        });
+        holder.playTextButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(context, GameLoadingSplashScreenActivity.class);
+                i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                i.putExtra("id",texts.get(position).getID());
+                i.putExtra("title",texts.get(position).getTitle());
+                i.putExtra("text",texts.get(position).getText());
+                i.putExtra("composer",texts.get(position).getComposer());
+                i.putExtra("theme",texts.get(position).getThemeName());
+                i.putExtra("date",texts.get(position).getDate());
+                i.putExtra("rating",texts.get(position).getRating());
+                i.putExtra("playCount",texts.get(position).getNumberOfTimesPlayed());
+                i.putExtra("bestScore",texts.get(position).getBestScore());
+                i.putExtra("fastestSpeed",texts.get(position).getFastestSpeed());
+                context.startActivity(i);
             }
 
 
