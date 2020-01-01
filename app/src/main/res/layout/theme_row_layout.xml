@@ -24,8 +24,7 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:layout_marginRight="12dp"
-            android:scaleType="fitXY"
-            android:src="@drawable/ic_launcher_foreground" />
+            android:scaleType="fitXY" />
 
         <TextView
             android:id="@+id/title"

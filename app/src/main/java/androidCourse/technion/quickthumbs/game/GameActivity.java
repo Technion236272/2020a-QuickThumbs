@@ -146,6 +146,7 @@ public class GameActivity extends AppCompatActivity {
     public static TextDataRow selectedTextItem;
     public boolean changed=false;
 
+    private boolean soundsOn=false;
     MediaPlayer positiveMediaPlayer;
     MediaPlayer negativeMediaPlayer;
 
@@ -219,19 +220,23 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void supplyFreshMediaPlayers() {
-        double randomDouble = Math.random();
-        randomDouble = randomDouble * 3;
-        int randomInt = (int) randomDouble;
+        if(soundsOn) {
+            double randomDouble = Math.random();
+            randomDouble = randomDouble * 3;
+            int randomInt = (int) randomDouble;
 
-        assert (randomInt >= 0 && randomInt <= 2);
+            assert (randomInt >= 0 && randomInt <= 2);
 
-        positiveMediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.typing_sound);
-        negativeMediaPlayer = MediaPlayer.create(getApplicationContext(), catNoises.get(randomInt));
+            positiveMediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.typing_sound);
+            negativeMediaPlayer = MediaPlayer.create(getApplicationContext(), catNoises.get(randomInt));
+        }
     }
 
     private void setUpSoundsOnComplete() {
-        setUpSoundOnComplete(positiveMediaPlayer);
-        setUpSoundOnComplete(negativeMediaPlayer);
+        if(soundsOn){
+            setUpSoundOnComplete(positiveMediaPlayer);
+            setUpSoundOnComplete(negativeMediaPlayer);
+        }
     }
 
     private void setTimerUpdateGameStatsPresentation() {
@@ -935,16 +940,22 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void comboMakePositiveSound() {
-        comboMakeSound(positiveMediaPlayer);
+        if(soundsOn){
+            comboMakeSound(positiveMediaPlayer);
+        }
     }
 
     private void comboMakeNegativeSound() {
-        comboMakeSound(negativeMediaPlayer);
+        if(soundsOn){
+            comboMakeSound(negativeMediaPlayer);
+        }
     }
 
     private void comboMakeSound(MediaPlayer mediaPlayer) {
-        mediaPlayer.start();
-        setUpSounds();
+        if(soundsOn){
+            mediaPlayer.start();
+            setUpSounds();
+        }
     }
 
     private void setUpSoundOnComplete(MediaPlayer positiveMediaPlayer) {
