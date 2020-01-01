@@ -164,8 +164,6 @@ public class ThemeSelectPopUp {
                 mPopupWindow.dismiss();
                 timer.cancel();
                 timerTextView.setText("");
-//                TextPoll tp = new TextPoll(contextView.getContext());
-//                fetchRandomTextSpecifiedForUsers();
                 Intent i = new Intent(popupView.getContext(), GameLoadingSplashScreenActivity.class);
                 i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                 popupView.getContext().startActivity(i);

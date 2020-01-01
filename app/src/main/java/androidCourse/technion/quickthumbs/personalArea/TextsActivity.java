@@ -81,15 +81,6 @@ public class TextsActivity extends Fragment {
 
         checkIfUserHasPersonalTexts();
 
-        //gestureDetectorCompat = new GestureDetectorCompat(this, new SlideLeftToMainScreen());
-
-        // Check if we're running on Android 5.0 or higher
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-//            SlidrConfig config = new SlidrConfig.Builder().position(SlidrPosition.HORIZONTAL).build();
-//            Slidr.attach(this, config);        } else {
-//            // Swap without transition
-//        }
-
         setAddTextButton();
     }
 
@@ -106,17 +97,7 @@ public class TextsActivity extends Fragment {
         );
     }
 
-//    @Override
-//    public boolean onTouchEvent(MotionEvent event) {
-//        this.gestureDetectorCompat.onTouchEvent(event);
-//        return super.onTouchEvent(event);
-//    }
 
-//    @Override
-//    public void finish() {
-//        super.finish();
-//        overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-//    }
 
     private void checkIfUserHasPersonalTexts() {
         db.collection("users").document(getUid())
@@ -229,19 +210,4 @@ public class TextsActivity extends Fragment {
         recyclerView.setVisibility(View.VISIBLE);
     }
 
-//    class SlideLeftToMainScreen extends GestureDetector.SimpleOnGestureListener {
-//        //handle 'swipe right' action only
-//
-//        @Override
-//        public boolean onFling(MotionEvent event1, MotionEvent event2,
-//                               float velocityX, float velocityY) {
-//            if(event2.getX() > event1.getX()){
-////                Toast.makeText(getBaseContext(),"Swipe Left - finish()",Toast.LENGTH_SHORT).show();
-//                finish();
-//                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-//            }
-//
-//            return true;
-//        }
-//    }
 }
