@@ -1,5 +1,7 @@
 package androidCourse.technion.quickthumbs;
 
+import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import androidCourse.technion.quickthumbs.R;
 
@@ -17,6 +19,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
 
+
 public class MainPager extends AppCompatActivity {
     FragmentPagerAdapter adapterViewPager;
     TextView pageTitle;
@@ -33,6 +36,11 @@ public class MainPager extends AppCompatActivity {
         vpPager = findViewById(R.id.vpPager);
         adapterViewPager = new MyPagerAdapter(getSupportFragmentManager());
         vpPager.setAdapter(adapterViewPager);
+
+        if(Build.VERSION.SDK_INT>=17){
+            TabLayout tabLayout = findViewById(R.id.view_pager_tab);
+            tabLayout.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+        }
 
         TabLayout tabLayout = findViewById(R.id.view_pager_tab);
         tabLayout.setupWithViewPager(vpPager, true);
@@ -167,3 +175,4 @@ public class MainPager extends AppCompatActivity {
         }
     }
 }
+

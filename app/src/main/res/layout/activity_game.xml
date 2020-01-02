@@ -57,9 +57,7 @@
                 android:gravity="top"
                 android:layout_below="@id/gameReportHeader"
                 android:layout_marginRight="5dp"
-                android:layout_marginEnd="5dp"
                 android:layout_marginLeft="5dp"
-                android:layout_marginStart="5dp"
                 android:layout_marginBottom="20dp"
                 android:textColor="@color/primaryTextColor"
                 android:textSize="17sp" />
@@ -68,14 +66,13 @@
                 android:id="@+id/correctAmountTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
                 android:layout_below="@id/gameReportTextLayout"
                 android:textColor="@color/primaryTextColor"
                 android:text="Correct/Total characters:"
                 android:textSize="17sp"
                 android:layout_marginRight="5dp"
-                android:layout_marginEnd="5dp"
-                android:layout_marginLeft="5dp"
-                android:layout_marginStart="5dp"/>
+                android:layout_marginLeft="5dp" />
 
             <TextView
                 android:id="@+id/correctOutOfTotalTextView"
@@ -86,9 +83,7 @@
                 android:text="94/100"
                 android:textSize="17sp"
                 android:layout_marginRight="10dp"
-                android:layout_marginEnd="10dp"
-                android:textColor="@color/primaryTextColor"
-                android:layout_toEndOf="@id/correctAmountTitle" />
+                android:textColor="@color/primaryTextColor" />
 
             <TextView
                 android:id="@+id/correctOutOfTotalPercentageTextView"
@@ -98,8 +93,7 @@
                 android:layout_toRightOf="@id/correctOutOfTotalTextView"
                 android:text="94%"
                 android:textColor="@color/primaryTextColor"
-                android:textSize="17sp"
-                android:layout_toEndOf="@id/correctOutOfTotalTextView" />
+                android:textSize="17sp" />
 
             <TextView
                 android:id="@+id/reportPointsHeadline"
@@ -109,12 +103,9 @@
                 android:text="Points: "
                 android:textColor="@color/primaryTextColor"
                 android:textSize="17sp"
-                android:layout_alignParentStart="true"
                 android:layout_alignParentLeft="true"
                 android:layout_marginRight="5dp"
-                android:layout_marginEnd="5dp"
                 android:layout_marginLeft="5dp"
-                android:layout_marginStart="5dp"
                 android:layout_marginTop = "5dp"/>
 
             <TextView
@@ -123,7 +114,6 @@
                 android:layout_height="wrap_content"
                 android:layout_alignBaseline="@id/reportPointsHeadline"
                 android:layout_toRightOf="@id/reportPointsHeadline"
-                android:layout_toEndOf="@id/reportPointsHeadline"
                 android:text="0"
                 android:textColor="@color/primaryTextColor"
                 android:textSize="17sp" />
@@ -136,12 +126,9 @@
                 android:text="WPM: "
                 android:textColor="@color/primaryTextColor"
                 android:textSize="17sp"
-                android:layout_alignParentStart="true"
                 android:layout_alignParentLeft="true"
                 android:layout_marginRight="5dp"
-                android:layout_marginEnd="5dp"
                 android:layout_marginLeft="5dp"
-                android:layout_marginStart="5dp"
                 android:layout_marginTop = "5dp"/>
 
             <TextView
@@ -149,9 +136,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBaseline="@id/reportWPMHeadline"
-                android:layout_toEndOf="@id/reportWPMHeadline"
                 android:layout_toRightOf="@id/reportWPMHeadline"
-                android:ems="1"
                 android:text="0"
                 android:textColor="@color/primaryTextColor"
                 android:textSize="17sp" />
@@ -164,12 +149,9 @@
                 android:textColor="@color/primaryTextColor"
                 android:textSize="17sp"
                 android:layout_below="@id/reportWPMHeadline"
-                android:layout_alignParentStart="true"
                 android:layout_alignParentLeft="true"
                 android:layout_marginRight="5dp"
-                android:layout_marginEnd="5dp"
                 android:layout_marginLeft="5dp"
-                android:layout_marginStart="5dp"
                 android:layout_marginTop = "5dp"/>
 
             <TextView
@@ -177,9 +159,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBaseline="@id/reportCPMHeadline"
-                android:layout_toEndOf="@id/reportCPMHeadline"
                 android:layout_toRightOf="@id/reportCPMHeadline"
-                android:ems="4"
                 android:text="0"
                 android:layout_marginBottom="10dp"
                 android:textColor="@color/primaryTextColor"
@@ -225,13 +205,10 @@
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="5dp"
                 android:layout_marginLeft="5dp"
-                android:layout_marginStart="5dp"
                 android:text="TIP: "
                 android:textColor="@color/primaryTextColor"
                 android:textSize="17sp"
-                android:layout_alignParentStart="true"
-                android:drawableLeft="@drawable/ic_lightbulb_outline_black_24dp"
-                android:drawableStart="@drawable/ic_lightbulb_outline_black_24dp" />
+                android:drawableLeft="@drawable/ic_lightbulb_outline_black_24dp"/>
 
             <TextView
                 android:id="@+id/generalTipText"
@@ -241,10 +218,9 @@
                 android:text="The less mistakes you'll do, the better score you'll get."
                 android:textColor="@color/primaryTextColor"
                 android:layout_marginLeft="5dp"
-                android:layout_marginStart="5dp"
                 android:layout_marginBottom="5dp"
-                android:textSize="17sp"
-                />
+                android:textSize="17sp" />
+
         </RelativeLayout>
         </ScrollView>
         <RelativeLayout
@@ -292,13 +268,11 @@
                     android:id="@+id/pointsHeadline"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
                     android:layout_alignParentLeft="true"
-                    android:layout_marginLeft="5dp"
+                    android:layout_marginLeft="10dp"
                     android:text="Points: "
                     android:textColor="@color/primaryTextColor"
-                    android:textSize="17sp"
-                    android:layout_marginStart="5dp" />
+                    android:textSize="17sp" />
 
                 <TextView
                     android:id="@+id/pointsValue"
@@ -308,8 +282,7 @@
                     android:layout_toRightOf="@id/pointsHeadline"
                     android:text="0"
                     android:textColor="@color/primaryTextColor"
-                    android:textSize="17sp"
-                    android:layout_toEndOf="@id/pointsHeadline" />
+                    android:textSize="17sp" />
 
                 <TextView
                     android:id="@+id/changeIndicator"
@@ -321,10 +294,7 @@
                     android:text=""
                     android:padding="10dp"
                     android:textColor="@color/primaryTextColor"
-                    android:textSize="15sp"
-                    android:layout_toStartOf="@+id/relativeCenterToolbar"
-                    android:layout_toEndOf="@id/pointsValue" />
-
+                    android:textSize="15sp" />
 
                 <TextView
                     android:id="@+id/WPMHeadline"
@@ -333,15 +303,13 @@
                     android:layout_toRightOf="@id/relativeCenterToolbar"
                     android:text="WPM: "
                     android:textColor="@color/primaryTextColor"
-                    android:textSize="17sp"
-                    android:layout_toEndOf="@id/relativeCenterToolbar" />
+                    android:textSize="17sp" />
 
                 <TextView
                     android:id="@+id/WPMValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignBaseline="@id/WPMHeadline"
-                    android:layout_toEndOf="@id/WPMHeadline"
                     android:layout_toRightOf="@id/WPMHeadline"
                     android:ems="1"
                     android:text="0"
@@ -353,23 +321,21 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignBaseline="@id/WPMValue"
-                    android:layout_toEndOf="@id/WPMValue"
                     android:layout_toRightOf="@id/WPMValue"
                     android:text="CPM: "
                     android:textColor="@color/primaryTextColor"
                     android:textSize="17sp"
-                    android:paddingLeft="10sp"
-                    android:paddingStart="10sp" />
+                    android:paddingLeft="10sp" />
 
                 <TextView
                     android:id="@+id/CPMValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_alignBaseline="@id/CPMHeadline"
-                    android:layout_toEndOf="@id/CPMHeadline"
                     android:layout_toRightOf="@id/CPMHeadline"
-                    android:ems="4"
+                    android:ems="1"
                     android:text="0"
+                    android:layout_marginRight="10dp"
                     android:textColor="@color/primaryTextColor"
                     android:textSize="17sp" />
             </RelativeLayout>
@@ -387,7 +353,7 @@
                     android:id="@+id/comboDisplayer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="top|end"
+                    android:layout_gravity="top|right"
                     android:padding="15sp"
                     android:text="X5"
                     android:textColor="@color/secondaryColor"
