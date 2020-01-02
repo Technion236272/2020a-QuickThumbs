@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+
+<RelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background = "@drawable/gradiant_color"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@drawable/gradiant_color"
     android:id="@+id/gameLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -18,13 +19,21 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/GameToolbar"
-        android:layout_alignParentBottom="true">
+        android:layout_below="@id/GameToolbar">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_above="@id/reportBottomButtons"
+            android:fillViewport="true">
         <RelativeLayout
             android:id="@+id/gameReportLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_above="@id/reportBottomButtons"
             android:background = "@drawable/gradiant_color"
             android:visibility="invisible">
 
@@ -171,91 +180,90 @@
                 android:layout_toRightOf="@id/reportCPMHeadline"
                 android:ems="4"
                 android:text="0"
+                android:layout_marginBottom="10dp"
                 android:textColor="@color/primaryTextColor"
                 android:textSize="17sp" />
 
-            <RelativeLayout
-                android:id="@+id/relativeCenterGameReport"
+            <View
+                android:id = "@+id/reportLine"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@id/reportCPMValue"
+                android:background="@color/primaryTextColor"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"/>
+
+            <TextView
+                android:id="@+id/rateText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/reportLine"
+                android:layout_marginTop="10dp"
+                android:textColor="@color/primaryTextColor"
+                android:text="@string/rateTheText"
+                android:padding="5sp"
+                android:textSize="17sp"/>
+
+            <RatingBar
+                android:id="@+id/ratingBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:numStars="5"
+                android:padding="5sp"
+                android:layout_below = "@id/rateText"
+                android:stepSize="0.5"
+                android:theme="@style/RatingBar"
+                />
+
+            <TextView
+                android:id="@+id/generalTipHeaderText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/ratingBar"
+                android:layout_alignParentLeft="true"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="5dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"
+                android:text="TIP: "
+                android:textColor="@color/primaryTextColor"
+                android:textSize="17sp"
+                android:layout_alignParentStart="true"
+                android:drawableLeft="@drawable/ic_lightbulb_outline_black_24dp"
+                android:drawableStart="@drawable/ic_lightbulb_outline_black_24dp" />
+
+            <TextView
+                android:id="@+id/generalTipText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/generalTipHeaderText"
+                android:text="The less mistakes you'll do, the better score you'll get."
+                android:textColor="@color/primaryTextColor"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"
+                android:layout_marginBottom="5dp"
+                android:textSize="17sp"
+                />
+        </RelativeLayout>
+        </ScrollView>
+        <RelativeLayout
+            android:id="@+id/reportBottomButtons"
+            android:layout_width="match_parent"
+            android:layout_alignParentBottom="true"
+            android:layout_height="wrap_content">
+            <Button
+                android:id="@+id/playAgainButton"
+                style="@style/SecondaryColorRoundedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
-                android:layout_alignParentBottom="true"
-                android:layout_centerVertical="true">
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/primaryTextColor"
-                    android:layout_marginTop="2dp"
-                    android:layout_marginBottom="2dp"/>
-
-                <TextView
-                    android:id="@+id/rateText"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="10dp"
-                    android:textColor="@color/primaryTextColor"
-                    android:text="@string/rateTheText"
-                    android:padding="5sp"
-                    android:textSize="17sp"/>
-
-                <RatingBar
-                    android:id="@+id/ratingBar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:numStars="5"
-                    android:padding="5sp"
-                    android:layout_below = "@id/rateText"
-                    android:stepSize="0.5"
-                    android:theme="@style/RatingBar"
-                    />
-
-                <TextView
-                    android:id="@+id/generalTipHeaderText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/ratingBar"
-                    android:layout_alignParentLeft="true"
-                    android:layout_marginTop="10dp"
-                    android:layout_marginBottom="5dp"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginStart="5dp"
-                    android:text="TIP: "
-                    android:textColor="@color/primaryTextColor"
-                    android:textSize="17sp"
-                    android:layout_alignParentStart="true"
-                    android:drawableLeft="@drawable/ic_lightbulb_outline_black_24dp"
-                    android:drawableStart="@drawable/ic_lightbulb_outline_black_24dp" />
-
-                <TextView
-                    android:id="@+id/generalTipText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/generalTipHeaderText"
-                    android:text="The less mistakes you'll do, the better score you'll get."
-                    android:textColor="@color/primaryTextColor"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginStart="5dp"
-                    android:layout_marginBottom="5dp"
-                    android:textSize="17sp"
-                    />
-
-                <Button
-                    android:id="@+id/playAgainButton"
-                    style="@style/SecondaryColorRoundedButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/generalTipText"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginBottom="15dp"
-                    android:onClick="playAgain"
-                    android:padding="10dp"
-                    android:text="@string/playAgain" />
-
-            </RelativeLayout>
-
-
+                android:layout_marginBottom="15dp"
+                android:onClick="playAgain"
+                android:padding="10dp"
+                android:text="@string/playAgain" />
         </RelativeLayout>
+    </RelativeLayout>
+
 
         <RelativeLayout
             android:id="@+id/gameTextLayout"
@@ -364,21 +372,16 @@
                     android:textColor="@color/primaryTextColor"
                     android:textSize="17sp" />
             </RelativeLayout>
-
-            <FrameLayout
+            <ScrollView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_below="@id/second">
-
-
-                <TextView
-                    android:id="@+id/displayText"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:textColor="@color/primaryTextColor"
-                    android:textSize="17sp" />
-
+                android:layout_above="@id/currentWord"
+                android:layout_below="@id/second"
+                android:fillViewport="true">
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
                 <TextView
                     android:id="@+id/comboDisplayer"
                     android:layout_width="wrap_content"
@@ -389,7 +392,16 @@
                     android:textColor="@color/secondaryColor"
                     android:textSize="35sp" />
 
-            </FrameLayout>
+                <TextView
+                    android:id="@+id/displayText"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/comboDisplayer"
+                    android:gravity="center"
+                    android:textColor="@color/primaryTextColor"
+                    android:textSize="17sp" />
+            </RelativeLayout>
+            </ScrollView>
 
             <EditText
                 android:id="@+id/currentWord"

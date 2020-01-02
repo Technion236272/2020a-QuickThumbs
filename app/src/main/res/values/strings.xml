@@ -31,5 +31,6 @@
     <string name="facebook_app_id">2769332536457773</string>
     <string name="fb_login_protocol_scheme">fb2769332536457773</string>
     <string name="quick_thumbs">Quick Thumbs</string>
+    <string name="emptyText">--</string>
 
 </resources>
