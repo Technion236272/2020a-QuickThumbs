@@ -7,18 +7,13 @@
     android:background="@drawable/gradiant_color"
     tools:context="androidCourse.technion.quickthumbs.personalArea.TextsActivity">
 
-<!--    <include-->
-<!--        layout= "@layout/toolbar"-->
-<!--        android:id="@+id/textsListToolbar"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content" />-->
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/personalTextsRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="vertical"
         android:fastScrollEnabled="true"/>
+
     <RelativeLayout
         android:id="@+id/personalListLoadingLayout"
         android:layout_width="match_parent"
@@ -34,6 +29,7 @@
             android:background="@drawable/gradiant_color"
             android:gravity="center"
             android:textColor="@color/primaryTextColor"
+            android:layout_centerHorizontal="true"
             android:textSize="17sp" />
     </RelativeLayout>
 
@@ -46,7 +42,9 @@
         android:paddingRight="10dp"
         android:layout_alignBottom="@+id/personalTextsRecyclerView"
         android:layout_alignParentRight="true"
-        android:visibility="visible">
+        android:visibility="visible"
+        android:paddingEnd="10dp"
+        android:layout_alignParentEnd="true">
 
         <ImageButton
             android:id="@+id/addTextButton"
@@ -57,6 +55,7 @@
             android:adjustViewBounds="true"
             android:contentDescription="@string/logo"
             android:src="@drawable/icons8_create_document_100"
-            android:background="@color/transparent"/>
+            android:background="@color/transparent"
+            android:layout_marginEnd="5dp" />
     </RelativeLayout>
 </RelativeLayout>

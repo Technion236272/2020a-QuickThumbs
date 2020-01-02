@@ -1,19 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fillViewport="true">
+<RelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     android:id="@+id/profileLayout"
     android:background="@drawable/gradiant_color"
     tools:context="androidCourse.technion.quickthumbs.personalArea.ProfileActivity">
-
-    <!--    <include-->
-    <!--        android:id="@+id/profileToolbar"-->
-    <!--        layout= "@layout/toolbar"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content" />-->
 
     <ImageView
         android:id="@+id/achievementBadge"
@@ -45,7 +42,7 @@
         android:layout_marginTop="5dp"
         android:layout_marginLeft="5dp"
         android:layout_marginStart="5dp"
-        android:text="--" />
+        android:text="@string/emptyText" />
 
     <TextView
         android:id="@+id/WPM"
@@ -67,7 +64,7 @@
         android:layout_marginLeft="5dp"
         android:layout_marginStart="5dp"
         android:textColor="@color/primaryTextColor"
-        android:text="--" />
+        android:text="@string/emptyText" />
 
     <TextView
         android:id="@+id/CPM"
@@ -83,13 +80,13 @@
         android:id="@+id/CPMValue"
         style="@style/BlackTextHeader"
         android:layout_below="@id/WPMValue"
-        android:layout_toRightOf="@id/WPM"
-        android:layout_toEndOf="@id/WPM"
+        android:layout_toRightOf="@id/CPM"
+        android:layout_toEndOf="@id/CPM"
         android:layout_marginTop="5dp"
         android:layout_marginLeft="5dp"
         android:layout_marginStart="5dp"
         android:textColor="@color/primaryTextColor"
-        android:text="--" />
+        android:text="@string/emptyText" />
 
     <TextView
         android:id="@+id/Score"
@@ -110,61 +107,25 @@
         android:layout_marginTop="5dp"
         android:layout_marginLeft="5dp"
         android:layout_marginStart="5dp"
-        android:text="--"
+        android:text="@string/emptyText"
         android:textColor="@color/primaryTextColor"
         />
-
-    <!--    <TextView-->
-    <!--        android:id="@+id/ScoreRanking"-->
-    <!--        style="@style/BlackTextHeader"-->
-    <!--        android:layout_below="@id/Score"-->
-    <!--        android:layout_marginTop="5dp"-->
-    <!--        android:layout_marginStart="15dp"-->
-    <!--        android:layout_marginLeft="15dp"-->
-    <!--        android:layout_centerHorizontal="true"-->
-    <!--        android:text="@string/CurrentScoreRanking" />-->
-
-    <!--    <TextView-->
-    <!--        android:id="@+id/ScoreRankingValue"-->
-    <!--        style="@style/BlackTextHeader"-->
-    <!--        android:layout_below="@id/ScoreValue"-->
-    <!--        android:layout_toRightOf="@id/ScoreRanking"-->
-    <!--        android:layout_toEndOf="@id/ScoreRanking"-->
-    <!--        android:layout_marginTop="5dp"-->
-    <!--        android:layout_marginLeft="5dp"-->
-    <!--        android:layout_marginStart="5dp"-->
-    <!--        android:layout_centerHorizontal="true"-->
-    <!--        android:text="&#45;&#45;" />-->
-
-    <!--    <Button-->
-    <!--        android:id="@+id/FriendsButton"-->
-    <!--        style="@style/LightPrimaryRoundedButton"-->
-    <!--        android:layout_below="@id/ScoreRankingValue"-->
-    <!--        android:layout_alignParentStart="true"-->
-    <!--        android:layout_alignParentLeft="true"-->
-    <!--        android:layout_toStartOf="@+id/space"-->
-    <!--        android:layout_toLeftOf="@+id/space"-->
-    <!--        android:onClick="moveToFriendsActivity"-->
-    <!--        android:text="@string/Friends" />-->
-    <!--    <TextView-->
-    <!--        android:id="@+id/space"-->
-    <!--        android:layout_width="wrap_content"-->
-    <!--        android:layout_height="wrap_content"-->
-    <!--        android:layout_centerHorizontal="true"/>-->
 
     <Button
         android:id="@+id/logOutButton"
         style="@style/SecondaryColorRoundedButton"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="40dp"
+        android:layout_below="@id/Score"
+        android:layout_marginTop="10dp"
         android:layout_centerHorizontal="true"
         android:text="@string/LogOut" />
+
     <com.facebook.login.widget.LoginButton
         android:id="@+id/facebook_log_out_button"
         android:layout_width="wrap_content"
+        android:layout_below="@id/Score"
         android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
         android:layout_gravity="start"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="40dp"
         android:layout_centerHorizontal="true"/>
 </RelativeLayout>
+</ScrollView>
