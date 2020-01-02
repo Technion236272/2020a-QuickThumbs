@@ -13,10 +13,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+
 import androidCourse.technion.quickthumbs.GameLoadingSplashScreenActivity;
 import androidCourse.technion.quickthumbs.MainUserActivity;
 import androidCourse.technion.quickthumbs.R;
 import androidCourse.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
+
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
@@ -96,11 +98,9 @@ public class GameActivity extends AppCompatActivity {
     private TextView wpmTextView;
     private TextView cpmTextView;
     private SpannableString ss;
-    private SpannableStringBuilder editorMutableSpannable; //TODO get rid of this and change location of lock...
     private RelativeLayout gameLoadingLayout;
     private RelativeLayout gamePlayingLayout;
     private RelativeLayout gameReportLayout;
-    private TextView gameLoadingText;
     private TextView gameReportText;
     private TextView correctOutOfTotalTextView;
     private TextView correctOutOfTotalPercentageTextView;
@@ -115,7 +115,6 @@ public class GameActivity extends AppCompatActivity {
     private int currentWordIndex;
 
     private GameWordStatus[] wordFlags;
-    private List<ForegroundColorSpan> wordColorSpans;
     private int gameTextWordOffset;
 
     private final BackgroundColorSpan colorBackGround = new BackgroundColorSpan(Color.rgb(255, 102, 0));
@@ -133,7 +132,7 @@ public class GameActivity extends AppCompatActivity {
     private int currentComboIndex;
     private int comboCounter;
     private boolean isPreviousActionIsCorrectOrGameJustStarted;
-    private boolean isVibrateOnMistakeOn =true;
+    private boolean isVibrateOnMistakeOn = true;
 
     private boolean shouldStartTimer;
     private final int comboThreshold = 4;
@@ -144,9 +143,9 @@ public class GameActivity extends AppCompatActivity {
     private static final String TAG = GameActivity.class.getName();
 
     public static TextDataRow selectedTextItem;
-    public boolean changed=false;
+    public boolean changed = false;
 
-    private boolean soundsOn=false;
+    private boolean soundsOn = false;
     MediaPlayer positiveMediaPlayer;
     MediaPlayer negativeMediaPlayer;
 
@@ -220,7 +219,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void supplyFreshMediaPlayers() {
-        if(soundsOn) {
+        if (soundsOn) {
             double randomDouble = Math.random();
             randomDouble = randomDouble * 3;
             int randomInt = (int) randomDouble;
@@ -233,7 +232,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void setUpSoundsOnComplete() {
-        if(soundsOn){
+        if (soundsOn) {
             setUpSoundOnComplete(positiveMediaPlayer);
             setUpSoundOnComplete(negativeMediaPlayer);
         }
@@ -302,25 +301,25 @@ public class GameActivity extends AppCompatActivity {
     private void setGameTextAndLogicAndEnding(TextView gameTextView) {
         Intent i = getIntent();
         if (i.hasExtra("text") && !changed) {
-            Log.d(TAG,"being set");
+            Log.d(TAG, "being set");
             gameTextView.setText(i.getExtras().getString("text"));
-            String id=i.getExtras().getString("id");
-            String title=i.getExtras().getString("title");
-            String text=i.getExtras().getString("text");
-            String composer=i.getExtras().getString("composer");
-            String theme=i.getExtras().getString("theme");
-            String date=i.getExtras().getString("date");
-            Double rating=i.getExtras().getDouble("rating");
-            String numberOfTimesPlayed=i.getExtras().getString("playCount");
-            String bestScore=i.getExtras().getString("bestScore");
-            String fastestSpeed=i.getExtras().getString("fastestSpeed");
-            selectedTextItem= new TextDataRow(id, title,theme,text, date,composer,
-                    rating,numberOfTimesPlayed, bestScore, fastestSpeed);
-            changed =true;
+            String id = i.getExtras().getString("id");
+            String title = i.getExtras().getString("title");
+            String text = i.getExtras().getString("text");
+            String composer = i.getExtras().getString("composer");
+            String theme = i.getExtras().getString("theme");
+            String date = i.getExtras().getString("date");
+            Double rating = i.getExtras().getDouble("rating");
+            String numberOfTimesPlayed = i.getExtras().getString("playCount");
+            String bestScore = i.getExtras().getString("bestScore");
+            String fastestSpeed = i.getExtras().getString("fastestSpeed");
+            selectedTextItem = new TextDataRow(id, title, theme, text, date, composer,
+                    rating, numberOfTimesPlayed, bestScore, fastestSpeed);
+            changed = true;
         }
-        if(changed==true){
+        if (changed == true) {
             gameTextView.setText(selectedTextItem.getText());
-            changed=false;
+            changed = false;
         }
     }
 
@@ -339,10 +338,6 @@ public class GameActivity extends AppCompatActivity {
         isPreviousActionIsCorrectOrGameJustStarted = true;
 
         currentWordEditor = findViewById(R.id.currentWord);
-        editorMutableSpannable = new SpannableStringBuilder();
-        currentWordEditor.setText(editorMutableSpannable);
-        wordColorSpans = new ArrayList<>();
-
         gameTextView = findViewById(R.id.displayText);
         pointTextView = findViewById(R.id.pointsValue);
         wpmTextView = findViewById(R.id.WPMValue);
@@ -350,7 +345,6 @@ public class GameActivity extends AppCompatActivity {
         gameLoadingLayout = findViewById(R.id.gameLoadingLayout);
         gamePlayingLayout = findViewById(R.id.gameTextLayout);
         gameReportLayout = findViewById(R.id.gameReportLayout);
-        gameLoadingText = findViewById(R.id.gameLoadingText);
         gameReportText = findViewById(R.id.gameReportTextLayout);
         correctOutOfTotalTextView = findViewById(R.id.correctOutOfTotalTextView);
         correctOutOfTotalPercentageTextView = findViewById(R.id.correctOutOfTotalPercentageTextView);
@@ -398,25 +392,15 @@ public class GameActivity extends AppCompatActivity {
                     gameTextWordOffset++;
 
                     if (!needClearance) {
-                        paintEditorTextBasedOnLastAction(true);
+                        paintGameTextBasedOnWordFlags();
                     } else {
-                        currentWordEditor.removeTextChangedListener(this);
-
-                        currentWordEditor.getText().clear();
-                        currentWordEditor.setSelection(0);
-                        currentWordEditor.setText(editorMutableSpannable);
+                        s.clear();
                         needClearance = false;
-
-                        currentWordEditor.addTextChangedListener(this);
 
                         if (currentWordIndex + 1 != wordsMapper.size()) {
                             moveMarkerToNextWord(colorBackGround);
                             spaceKeyIncreaseCorrectKeysWhenFullyCorrectWordTyped();
                         }
-
-                        editorMutableSpannable = new SpannableStringBuilder();
-                        wordColorSpans = new ArrayList<>();
-
 
                         paintGameTextBasedOnWordFlags();
 
@@ -437,7 +421,7 @@ public class GameActivity extends AppCompatActivity {
                         gameTextWordOffset--;
                     }
 
-                    paintEditorTextBasedOnLastAction(false);
+                    paintGameTextBasedOnWordFlags();
 
                     forwardCommand = true;
                 }
@@ -544,9 +528,7 @@ public class GameActivity extends AppCompatActivity {
         String currentExpectedWord = wordsMapper.get(currentWordIndex).first;
 
         if (pressedKey.equals(" ")) {
-            if (currentWordIndex + 1 != wordsMapper.size()) {
-//                moveMarkerToNextWord(colorBackGround);
-            } else {
+            if (currentWordIndex + 1 == wordsMapper.size()) {
                 Spannable gameTextSpannable = (Spannable) gameTextView.getText();
                 gameTextSpannable.removeSpan(colorBackGround);
             }
@@ -584,14 +566,14 @@ public class GameActivity extends AppCompatActivity {
 
         correctOutOfTotalPercentageTextView.setText(correctPercentage + "%");
 
-        ((TextView)(findViewById(R.id.reportWPMValue))).setText(wpmTextView.getText());
-        ((TextView)(findViewById(R.id.reportCPMValue))).setText(cpmTextView.getText());
-        ((TextView)(findViewById(R.id.reportPointsValue))).setText(pointTextView.getText());
+        ((TextView) (findViewById(R.id.reportWPMValue))).setText(wpmTextView.getText());
+        ((TextView) (findViewById(R.id.reportCPMValue))).setText(cpmTextView.getText());
+        ((TextView) (findViewById(R.id.reportPointsValue))).setText(pointTextView.getText());
 
         Double wpm = Double.valueOf(wpmTextView.getText().toString());
         Double cpm = Double.valueOf(cpmTextView.getText().toString());
         Double points = Double.valueOf(pointTextView.getText().toString());
-        updateUserStats(Double.valueOf(correctPercentage),wpm,cpm,points);
+        updateUserStats(Double.valueOf(correctPercentage), wpm, cpm, points);
         updateComposerTextBestScoreAndWPM(wpm, points);
     }
 
@@ -640,7 +622,7 @@ public class GameActivity extends AppCompatActivity {
 
         Map<String, Object> updatedStatistics = new HashMap<>();
         updatedStatistics.put(uidField, getUid());
-        if(mAuth.getCurrentUser() !=null){
+        if (mAuth.getCurrentUser() != null) {
             updatedStatistics.put(emailField, mAuth.getCurrentUser().getEmail());
         }
         updatedStatistics.put(dateField, gameTimeStamp);
@@ -672,7 +654,7 @@ public class GameActivity extends AppCompatActivity {
     private void writeToUserStatistics(long numOfGames, Double newAvgAccuracy, Double newAvgWPM, Double newAvgCPM, Double newTotalScore) {
         Map<String, Object> updatedStatistics = new HashMap<>();
         updatedStatistics.put(uidField, getUid());
-        if(mAuth.getCurrentUser() !=null){
+        if (mAuth.getCurrentUser() != null) {
             updatedStatistics.put(emailField, mAuth.getCurrentUser().getEmail());
         }
         updatedStatistics.put(dateField, gameTimeStamp);
@@ -700,7 +682,7 @@ public class GameActivity extends AppCompatActivity {
         if (mAuth.getCurrentUser() != null) {
             return db.collection(usersCollection)
                     .document(getUid()).collection(statsCollection);
-        }else{
+        } else {
             return db.collection(usersCollection)
                     .document(getUid()).collection(statsCollection);
         }
@@ -713,9 +695,9 @@ public class GameActivity extends AppCompatActivity {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         if (currentUser != null) {
             return mAuth.getUid();
-        } else if (account != null){
+        } else if (account != null) {
             return account.getId();
-        }else{
+        } else {
             return accessToken.getUserId();
         }
     }
@@ -726,90 +708,6 @@ public class GameActivity extends AppCompatActivity {
             InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
-    }
-
-
-    private void paintEditorTextBasedOnLastAction(boolean isForwardTyping) {
-        paintGameTextBasedOnWordFlags();
-
-//        int index;
-
-//        if (isForwardTyping) {
-//            index = gameTextWordOffset + 1;
-//
-//        } else {
-//            index = gameTextWordOffset;
-//        }
-//
-//        currentWordEditor.setSelection(index);
-    }
-
-    private void paintEditorTextBasedOnWordFlags(boolean isForwardTyping) {
-        Editable text = currentWordEditor.getText();
-
-        String wordText = text.toString();
-
-        for (int i = 0; i < wordText.length(); i++) {
-            SpannableString immutableSpannable;
-
-            if (i >= wordFlags.length) {
-                ForegroundColorSpan red = new ForegroundColorSpan(Color.RED);
-
-                String suffix = wordText.substring(i);
-                immutableSpannable = new SpannableString(suffix);
-                immutableSpannable.setSpan(red, 0, suffix.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-
-                editorMutableSpannable.append(immutableSpannable);
-
-                break;
-            }
-
-            immutableSpannable = new SpannableString(String.valueOf(wordText.charAt(i)));
-
-            GameWordStatus currentKeyFlag = wordFlags[i];
-
-            switch (currentKeyFlag) {
-                case CORRECT:
-                    ForegroundColorSpan green = new ForegroundColorSpan(Color.GREEN);
-                    immutableSpannable.setSpan(green, 0, 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-
-                    break;
-
-                case WRONG:
-                    ForegroundColorSpan red = new ForegroundColorSpan(Color.RED);
-                    immutableSpannable.setSpan(red, 0, 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-
-                    break;
-
-                case NO_STATUS:
-                case ALREADY_SEEN:
-                    ForegroundColorSpan black = new ForegroundColorSpan(Color.BLACK);
-                    immutableSpannable.setSpan(black, 0, 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-
-                    break;
-
-                case CORRECT_BUT_BEEN_HERE_BEFORE:
-                    ForegroundColorSpan yellow = new ForegroundColorSpan(Color.YELLOW);
-                    immutableSpannable.setSpan(yellow, 0, 1, Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-
-                    break;
-            }
-
-            editorMutableSpannable.append(immutableSpannable);
-        }
-
-        currentWordEditor.setText(editorMutableSpannable);
-
-        int index;
-
-        if (isForwardTyping) {
-            index = gameTextWordOffset + 1;
-
-        } else {
-            index = gameTextWordOffset;
-        }
-
-        currentWordEditor.setSelection(index);
     }
 
     private void logicOnCurrentWordAddedKey(String pressedKey, String expectedKey) {
@@ -828,7 +726,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void vibrateOnKeyPressedMistake() {
-        if(isVibrateOnMistakeOn){
+        if (isVibrateOnMistakeOn) {
             Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
             // Vibrate for 500 milliseconds
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -940,19 +838,19 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void comboMakePositiveSound() {
-        if(soundsOn){
+        if (soundsOn) {
             comboMakeSound(positiveMediaPlayer);
         }
     }
 
     private void comboMakeNegativeSound() {
-        if(soundsOn){
+        if (soundsOn) {
             comboMakeSound(negativeMediaPlayer);
         }
     }
 
     private void comboMakeSound(MediaPlayer mediaPlayer) {
-        if(soundsOn){
+        if (soundsOn) {
             mediaPlayer.start();
             setUpSounds();
         }
@@ -1131,7 +1029,7 @@ public class GameActivity extends AppCompatActivity {
                 });
     }
 
-    private void updateComposerTextBestScoreAndWPM(final Double wpm, final Double score){
+    private void updateComposerTextBestScoreAndWPM(final Double wpm, final Double score) {
         db.collection("themes").document(selectedTextItem.getThemeName()).collection("texts")
                 .whereEqualTo("mainThemeID", selectedTextItem.getID())
                 .get()
@@ -1144,13 +1042,13 @@ public class GameActivity extends AppCompatActivity {
                                 Double bestScore = document.getDouble("best");
                                 Double bestWPM = document.getDouble("fastestSpeed");
                                 if (bestScore != null && bestWPM != null) {
-                                    if(bestScore < score)
+                                    if (bestScore < score)
                                         writeBestScoreInComposerTextsCollection(score, document.getId());
-                                    if(bestWPM < wpm)
-                                        writeBestWPMInComposerTextsCollection(wpm,document.getId());
+                                    if (bestWPM < wpm)
+                                        writeBestWPMInComposerTextsCollection(wpm, document.getId());
                                 } else {
                                     writeBestScoreInComposerTextsCollection(score, document.getId());
-                                    writeBestWPMInComposerTextsCollection(wpm,document.getId());
+                                    writeBestWPMInComposerTextsCollection(wpm, document.getId());
                                 }
                             }
                         } else {
@@ -1180,7 +1078,8 @@ public class GameActivity extends AppCompatActivity {
                     }
                 });
     }
-    private void writeBestWPMInComposerTextsCollection(Double currentWPM, String documentId){
+
+    private void writeBestWPMInComposerTextsCollection(Double currentWPM, String documentId) {
         Map<String, Object> temp = new HashMap<>();
         temp.put("fastestSpeed", currentWPM);
         db.collection("users").document(selectedTextItem.getComposer())
