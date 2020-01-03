@@ -1,60 +1,107 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:android="http://schemas.android.com/apk/res/android">
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/textCard"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginBottom="5dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?android:attr/selectableItemBackground"
+    app:cardCornerRadius="5dp"
+    app:cardElevation="5dp">
 
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:padding="20dp">
         <LinearLayout
-            android:id="@+id/parent"
+            android:id="@+id/basicRow"
             android:focusable="true"
             android:clickable="true"
             android:minHeight="?attr/actionBarSize"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:layout_width="match_parent"
+            android:weightSum="1"
             android:layout_height="?attr/actionBarSize">
-
-            <View
-                android:layout_width="15dp"
-                android:layout_height="wrap_content"/>
-
-            <TextView
-                android:id="@+id/title"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="3"
-                android:text="Title of the text here"
-                style="@style/BlackTextHeader" />
-
-            <View
-                android:layout_width="15dp"
-                android:layout_height="wrap_content"/>
-
-            <TextView
-                android:id="@+id/rate"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.5"
-                android:text="rate"
-                android:gravity="end"
-                style="@style/BlackTextHeader" />
 
 
             <ImageView
-                android:id="@+id/imageView"
-                android:tint="@color/secondaryColor"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.5"
+                android:id="@+id/textTheme"
+                android:layout_width="0dp"
+                android:layout_weight="0.2"
+                android:layout_height="match_parent"
                 android:gravity="start"
                 android:contentDescription="@string/starsIcon"
-                android:src="@drawable/ic_stars_24dp" />
+                android:scaleType="fitXY"/>
 
-            <View
-                android:layout_width="15dp"
-                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/textTitle"
+                android:layout_height="match_parent"
+                android:layout_width="0dp"
+                android:layout_weight="0.69"
+                android:textSize="17sp"
+                android:text="Title of the text here"
+                android:gravity="center"
+                style="@style/BlackTextHeader" />
+
+            <LinearLayout
+                android:id="@+id/startLayout"
+                android:layout_height="match_parent"
+                android:layout_width="wrap_content"
+                android:layout_weight="0.10">
+                <ImageView
+                android:id="@+id/starsRanking1"
+                android:tint="@color/secondaryColor"
+                android:layout_height="wrap_content"
+                android:layout_width="wrap_content"
+                android:layout_gravity="center"
+                android:gravity="start"
+                android:contentDescription="@string/starsIcon"
+                android:src="@drawable/ic_stars_24dp"
+                android:scaleType="center"/>
+                <ImageView
+                    android:id="@+id/starsRanking2"
+                    android:tint="@color/secondaryColor"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="start"
+                    android:contentDescription="@string/starsIcon"
+                    android:src="@drawable/ic_stars_24dp"
+                    android:scaleType="center"/>
+                <ImageView
+                    android:id="@+id/starsRanking3"
+                    android:tint="@color/secondaryColor"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="start"
+                    android:contentDescription="@string/starsIcon"
+                    android:src="@drawable/ic_stars_24dp"
+                    android:scaleType="center"/>
+                <ImageView
+                    android:id="@+id/starsRanking4"
+                    android:tint="@color/secondaryColor"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="start"
+                    android:contentDescription="@string/starsIcon"
+                    android:src="@drawable/ic_stars_24dp"
+                    android:scaleType="center"/>
+                <ImageView
+                    android:id="@+id/starsRanking5"
+                    android:tint="@color/secondaryColor"
+                    android:layout_height="wrap_content"
+                    android:layout_width="wrap_content"
+                    android:layout_gravity="center"
+                    android:gravity="start"
+                    android:contentDescription="@string/starsIcon"
+                    android:src="@drawable/ic_stars_24dp"
+                    android:scaleType="center"/>
+            </LinearLayout>
 
             <ImageButton
                 android:id="@+id/viewMoreButton"
@@ -63,29 +110,156 @@
                 android:contentDescription="@string/dropDownArrowIcon"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:layout_width="?attr/actionBarSize"
-                android:layout_height="?attr/actionBarSize" />
+                android:layout_weight="0.01"
+                android:layout_height="?attr/actionBarSize"
+                android:scaleType="center"/>
 
         </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#f2f2f2"/>
 
         <LinearLayout
-            android:layout_below="@id/parent"
-            android:visibility="gone"
-            android:orientation="vertical"
-            android:id="@+id/layoutExpand"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:id="@+id/text"
+                android:layout_below="@id/basicRow"
+                android:id="@+id/textLayoutExpand"
+                android:focusable="true"
+                android:clickable="true"
+                android:minHeight="?attr/actionBarSize"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:visibility="gone"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="wrap_content">
+
+                <TextView
+                    android:id="@+id/textDescription"
+                    android:minHeight="?attr/actionBarSize"
+                    android:layout_height="wrap_content"
+                    android:layout_width="match_parent"
+                    android:text="text"
+                    android:textColor="@color/secondaryTextColor"
+                    android:gravity="center"
+                    android:textSize="15sp"
+                    android:layout_margin="15dp" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_below="@id/textLayoutExpand"
+            android:id="@+id/titleLayoutExpand"
+            android:focusable="true"
+            android:clickable="true"
+            android:minHeight="?attr/actionBarSize"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:weightSum="1"
+            android:layout_height="?attr/actionBarSize">
+                <TextView
+                    android:id="@+id/itemNumberOfPlaysTitle"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.33"
+                    android:layout_height="?attr/actionBarSize"
+                    android:text="number Of Times played:"
+                    android:textAllCaps="true"
+                    android:textColor="@color/secondaryTextColor"
+                    android:gravity="center"
+                    android:textStyle="bold"
+                    android:layout_margin="15dp" />
+                <TextView
+                    android:id="@+id/itemFastestSpeedTitle"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.33"
+                    android:layout_height="?attr/actionBarSize"
+                    android:text="fastest speed:"
+                    android:textAllCaps="true"
+                    android:textColor="@color/secondaryTextColor"
+                    android:gravity="center"
+                    android:textStyle="bold"
+                    android:layout_margin="15dp" />
+                <TextView
+                    android:id="@+id/itemBestScoreTitle"
+                    android:layout_width="0dp"
+                    android:layout_weight="0.34"
+                    android:layout_height="?attr/actionBarSize"
+                    android:text="best score:"
+                    android:textAllCaps="true"
+                    android:textColor="@color/secondaryTextColor"
+                    android:gravity="center"
+                    android:textStyle="bold"
+                    android:layout_margin="15dp" />
+        </LinearLayout>
+        <LinearLayout
+            android:layout_below="@id/titleLayoutExpand"
+            android:id="@+id/statsLayoutExpand"
+            android:focusable="true"
+            android:clickable="true"
+            android:minHeight="?attr/actionBarSize"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:weightSum="1"
+            android:layout_height="?attr/actionBarSize">
+            <TextView
+                android:id="@+id/itemNumberOfPlays"
+                android:layout_width="0dp"
+                android:layout_weight="0.33"
+                android:layout_height="?attr/actionBarSize"
+                android:text="numberOfPlays"
+                android:textColor="@color/secondaryTextColor"
+                android:gravity="center"
+                android:layout_margin="15dp" />
+            <TextView
+                android:id="@+id/itemFastestSpeed"
+                android:layout_width="0dp"
+                android:layout_weight="0.33"
+                android:layout_height="?attr/actionBarSize"
+                android:text="fastestSpeed"
+                android:textColor="@color/secondaryTextColor"
+                android:gravity="center"
+                android:layout_margin="15dp" />
+            <TextView
+                android:id="@+id/itemBestScore"
+                android:layout_width="0dp"
+                android:layout_weight="0.34"
+                android:layout_height="?attr/actionBarSize"
+                android:text="bestScore"
+                android:textColor="@color/secondaryTextColor"
+                android:gravity="center"
                 android:layout_margin="15dp" />
         </LinearLayout>
+        <LinearLayout
+            android:layout_below="@id/statsLayoutExpand"
+            android:id="@+id/playLayout"
+            android:focusable="true"
+            android:clickable="true"
+            android:minHeight="?attr/actionBarSize"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:weightSum="1"
+            android:layout_height="?attr/actionBarSize">
+            <TextView
+                android:id="@+id/challengeUserText"
+                android:layout_width="0dp"
+                android:layout_weight="0.90"
+                android:layout_height="?attr/actionBarSize"
+                android:text="Think you can do better? Play now on this text"
+                android:textSize="12sp"
+                android:textColor="@color/primaryColor"
+                android:gravity="center"
+                android:layout_margin="0dp" />
+            <ImageButton
+                android:id="@+id/playTextButton"
+                app:srcCompat="@android:drawable/ic_media_play"
+                android:contentDescription="play Now"
+                android:background="@color/transparent"
+                android:layout_width="0dp"
+                android:layout_weight="0.10"
+                android:layout_height="?attr/actionBarSize"
+                android:gravity="center"
+                android:layout_margin="0dp" />
 
-    </LinearLayout>
-</layout>
+
+
+        </LinearLayout>
+    </RelativeLayout>
+</androidx.cardview.widget.CardView>

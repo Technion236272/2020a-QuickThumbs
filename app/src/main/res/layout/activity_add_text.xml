@@ -1,106 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".AddTextActivity">
+    android:fillViewport="true">
+
     <RelativeLayout
-        android:id="@+id/first"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center|top"
-        android:orientation="horizontal">
-
-        <include
-            layout= "@layout/toolbar"
-            android:id="@+id/AddTextToolbar"
+            android:id="@+id/addTextScreenLayout"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            tools:context="androidCourse.technion.quickthumbs.AddTextActivity"
+            android:background="@drawable/gradiant_color"
+            tools:layout_editor_absoluteY="1dp"
+            android:visibility="visible">
+        <include
+            android:id="@+id/AddTextToolbar"
+            layout="@layout/toolbar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-        <RelativeLayout
-            android:id="@+id/topRightToolbar"
+
+        <EditText
+            android:id="@+id/titleValue"
+            android:layout_below="@id/AddTextToolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_toRightOf="@+id/topLeftToolbar"
-            android:orientation="horizontal">
+            android:ems="10"
+            android:gravity="start"
+            android:hint="@string/type_the_text_title"
+            android:inputType="textVisiblePassword"
+            android:singleLine="true"
+            android:textColor="@color/primaryTextColor"
+            android:textColorHint="@color/primaryTextColor"
+            android:textSize="17sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/AddTextToolbar" />
 
-            <ImageView
-                android:id="@+id/iconButton"
-                android:layout_width="200dip"
-                android:layout_height="50dip"
-                android:layout_marginStart="71dp"
-                android:layout_marginLeft="71dp"
-                android:scaleType="fitXY"
-                app:srcCompat="@drawable/name_icon" />
+        <Spinner
+            android:id="@+id/themeSelectorspinner"
+            android:layout_below="@id/titleValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginLeft="5dp"
+            android:spinnerMode="dropdown"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/titleValue" />
+
+        <EditText
+            android:layout_below="@id/themeSelectorspinner"
+            android:id="@+id/addedText"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/primaryTextColor"
+            android:textAlignment="gravity"
+            android:textColor="@color/secondaryTextColor"
+            android:textColorHint="@color/secondaryTextColor"
+            android:textSize="17sp"
+            app:layout_constraintTop_toBottomOf="@id/themeSelectorspinner"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+
+        <RelativeLayout
+        android:id="@+id/addTextLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="20dp"
+        android:paddingRight="10dp"
+        android:layout_alignBottom="@+id/addedText"
+        android:layout_alignParentRight="true"
+        android:visibility="visible"
+        android:paddingEnd="10dp"
+        android:layout_alignParentEnd="true">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/addButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="10dp"
+            android:layout_marginRight="20dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="submit"
+            android:src="@drawable/ic_add_circle_24dp"
+            android:background="@color/transparent"
+            app:backgroundTint="@color/secondaryColor"
+            android:layout_marginEnd="5dp"
+            app:tint="@color/secondaryTextColor"
+            android:layout_alignParentStart="false"
+            android:layout_alignParentLeft="false"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
         </RelativeLayout>
-        </include>
-
     </RelativeLayout>
-    <TextView
-        android:id="@+id/titleHeadline"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:background="@color/secondaryColor"
-        android:textColor="@color/secondaryTextColor"
-        android:gravity="center"
-        android:layout_below="@id/first"
-        android:text="Text title: "
-        android:paddingLeft="50dp"
-        android:textSize="20dp"/>
-    <EditText
-        android:id="@+id/titleValue"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/secondaryColor"
-        android:textColor="@color/secondaryTextColor"
-        android:gravity="center"
-        android:layout_alignBaseline="@id/titleHeadline"
-        android:layout_toRightOf="@id/titleHeadline"
-        android:layout_toEndOf="@id/titleHeadline"
-        android:ems="10"
-        android:textSize="20sp"
-        android:hint="Type here..."
-        android:textColorHint="@color/secondaryTextColor"
-        android:inputType="textAutoComplete"
-        android:layout_alignParentBottom="true"
-        android:singleLine="true"
-        />
-
-    <TextView
-        android:id="@+id/addedText"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/primaryDarkColor"
-        android:textColor="@color/primaryTextColor"
-        android:gravity="center"
-        android:textSize="17sp"
-        android:layout_below="@id/titleHeadline"
-        android:layout_above="@id/addedWord"
-        android:text="Remember when you were young\n  You shone like the Sun\n   Shine on, you crazy diamond\n    Now there's a look in your eyes\n     Like black holes in the sky\n      Shine on, you crazy diamond"/>
-    <EditText
-        android:id="@+id/addedWord"
-        android:layout_width="wrap_content"
-        android:layout_height="62dp"
-        android:background="@color/primaryTextColor"
-        android:textColor="@color/secondaryTextColor"
-        android:ems="18"
-        android:hint="Type here..."
-        android:inputType="textAutoComplete"
-        android:layout_alignParentBottom="true"
-
-        android:singleLine="true"
-        />
-
-    <ImageButton
-        android:id="@+id/imageButton2"
-        android:layout_width="62dp"
-        android:layout_height="62dp"
-        android:layout_below="@id/addedText"
-        android:layout_alignEnd="@id/addedWord"
-        android:layout_alignRight="@id/addedWord"
-        android:layout_marginTop="0dp"
-        android:layout_marginRight="-30dp"
-        android:background="@color/primaryDarkColor"
-        app:srcCompat="@android:drawable/ic_input_add" />
-</RelativeLayout>
+</ScrollView>

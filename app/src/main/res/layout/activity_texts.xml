@@ -4,18 +4,56 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".TextsActivity">
-
-    <include
-        layout= "@layout/toolbar"
-        android:id="@+id/textsToolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    android:background="@drawable/gradiant_color"
+    tools:context="androidCourse.technion.quickthumbs.personalArea.TextsActivity">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/texts_recycler_view"
+        android:id="@+id/personalTextsRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@id/textsToolbar"
-        android:scrollbars="vertical" />
+        android:scrollbars="vertical"
+        android:fastScrollEnabled="true"/>
+
+    <RelativeLayout
+        android:id="@+id/personalListLoadingLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="visible">
+
+        <TextView
+            android:id="@+id/personalListLoadingText"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Loading the texts..."
+            android:background="@drawable/gradiant_color"
+            android:gravity="center"
+            android:textColor="@color/primaryTextColor"
+            android:layout_centerHorizontal="true"
+            android:textSize="17sp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/addTextLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="20dp"
+        android:paddingRight="10dp"
+        android:layout_alignBottom="@+id/personalTextsRecyclerView"
+        android:layout_alignParentRight="true"
+        android:visibility="visible">
+
+        <ImageButton
+            android:id="@+id/addTextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginRight="5dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/logo"
+            android:src="@drawable/icons8_create_document_100"
+            android:background="@color/transparent"
+            android:layout_marginEnd="5dp" />
+    </RelativeLayout>
 </RelativeLayout>

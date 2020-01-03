@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/pop_up_background"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id = "@+id/selectThemesTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="5dp"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:textColor="@color/secondaryTextColor"
+        android:text="Select your favorite text themes:" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/themeRecycleView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="vertical"
+        android:layout_below="@id/selectThemesTitle"
+        android:layout_above="@id/startGamePopUpButton"/>
+
+    <TextView
+        android:id="@+id/startGamePopUpButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:textColor="@color/primaryColor"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:text="Start Game"
+        android:layout_marginRight="5dp"
+        android:layout_marginBottom="10dp"
+        android:layout_toLeftOf="@id/timer" />
+
+    <TextView
+        android:id="@+id/backToMainPopUpButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="Cancel"
+        android:textSize="20sp"
+        android:layout_marginRight="20dp"
+        android:textColor="@color/primaryColor"
+        android:textStyle="bold"
+        android:layout_toLeftOf="@id/startGamePopUpButton"
+        android:layout_marginBottom="10dp"
+        />
+
+    <TextView
+        android:id="@+id/timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/themeRecycleView"
+        android:layout_alignParentBottom="true"
+        android:layout_alignBaseline="@id/startGamePopUpButton"
+        android:layout_alignParentRight="true"
+        android:layout_marginTop="21dp"
+        android:layout_marginRight="5dp"
+        android:foregroundGravity="bottom"
+        android:gravity="bottom"
+        android:text="5"
+        android:textColor="@color/primaryColor"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+</RelativeLayout>
+

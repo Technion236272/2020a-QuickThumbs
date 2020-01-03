@@ -1,106 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@drawable/gradiant_color"
     android:id="@+id/RelativeLayout1"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
 
-    <include
-        android:id="@+id/MainUserToolbar"
-        layout= "@layout/toolbar"
+    <RelativeLayout
+        android:id="@+id/userLoadingLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="invisible">
+
+        <TextView
+            android:id="@+id/gameLoadingText"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="Loading ..."
+            android:background="@color/primaryDarkColor"
+            android:gravity="center"
+            android:textColor="@color/primaryTextColor"
+            android:textSize="17sp" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/relative_2"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true">
+
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="50dp"
+        android:layout_alignParentTop="true"
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/logo"
+        android:src="@drawable/logo" />
 
     <RelativeLayout
         android:id="@+id/relative_1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"></RelativeLayout>
-
-    <Button
-        android:id="@+id/themeSelectorButton"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/textAdderButton"
-        android:layout_alignBottom="@+id/textAdderButton"
-        android:layout_alignLeft="@+id/relative_1"
-        android:text="Select\nTheme" />
-
-    <Button
-        android:id="@+id/textAdderButton"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="140dp"
-        android:layout_toLeftOf="@+id/themeSelectorButton"
-        android:text="+ Add\nText" />
+        android:layout_below="@id/logo"
+        android:paddingLeft="50dp"
+        android:paddingRight="50dp">
 
     <Button
         android:id="@+id/startGameButton"
-        style="?android:attr/buttonStyleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/textAdderButton"
         android:layout_centerHorizontal="true"
-        android:text="Start\nGame" />
-
-</RelativeLayout>
-
-    <!--
-    <?xml version="1.0" encoding="utf-8"?>
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/RelativeLayout1"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <RelativeLayout
-            android:id="@+id/relative_1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"></RelativeLayout>
-
-        <Button
-            android:id="@+id/button3"
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/button2"
-            android:layout_alignLeft="@+id/relative_1"
-            android:layout_alignBottom="@+id/button2"
-            android:text="3" />
-
-        <Button
-            android:id="@+id/button2"
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/button1"
-            android:layout_alignBottom="@+id/button1"
-            android:layout_toLeftOf="@+id/button3"
-            android:text="2" />
-
-        <Button
-            android:id="@+id/button1"
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_marginBottom="28dp"
-            android:layout_toLeftOf="@+id/button2"
-            android:text="1" />
-
-        <Button
-            android:id="@+id/button4"
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignBaseline="@+id/button3"
-            android:layout_alignBottom="@+id/button3"
-            android:layout_toRightOf="@+id/button3"
-            android:text="4" />
-
+        style="@style/SecondaryColorRoundedButton"
+        android:layout_width="fill_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:text="@string/startGame" />
     </RelativeLayout>
-    -->
+    </RelativeLayout>
+</RelativeLayout>
+</ScrollView>

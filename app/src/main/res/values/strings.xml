@@ -3,10 +3,8 @@
     <string name="main_heading">Login to QuickThumbs</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
-    <string name="sign_in">SIGN IN</string>
-    <string name="create_account">CREATE AN ACCOUNT</string>
+    <string name="sign_in">Login</string>
     <string name="create_an_account">Create an account</string>
-    <string name="sign_up">SIGN UP</string>
     <string name="logout">LOGOUT</string>
     <string name="insert">INSERT</string>
 
@@ -16,8 +14,23 @@
     <string name="CurrentScoreRanking">Current Score Ranking:</string>
     <string name="Friends">Friends</string>
     <string name="Texts">Texts</string>
+    <string name="LogOut">Log Out</string>
     <string name="Profile">Profile</string>
     <string name="starsIcon">stars Icon</string>
     <string name="dropDownArrowIcon">drop down arrow icon</string>
+    <string name="CPM">Average CPM:</string>
+    <string name="Accuracy">Average Accuracy:</string>
+    <string name="playAgain">Play Again</string>
+    <string name="rateTheText">How would you rate this text?</string>
+    <string name="logo">Logo</string>
+    <string name="startGame">Start Game</string>
+    <string name="type_the_text_title">Type the text title...</string>
+    <string name="added_text_hint">Every word that you will insert in the bottom text will be shown here.\nYou can add up to 300 characters.</string>
+    <string name="insert_the_text_here">Insert the text here...</string>
+    <string name="no_personal_texts">There are no personal texts.</string>
+    <string name="facebook_app_id">2769332536457773</string>
+    <string name="fb_login_protocol_scheme">fb2769332536457773</string>
+    <string name="quick_thumbs">Quick Thumbs</string>
+    <string name="emptyText">--</string>
 
 </resources>

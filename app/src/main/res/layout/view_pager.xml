@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:orientation="horizontal">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/PagerToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/primaryColor"
+            android:gravity="center"
+            android:theme="@style/ToolbarTheme"/>
+
+        <ImageButton
+            android:id ="@+id/statsImageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="3dp"
+            android:layout_marginLeft="10dp"
+            android:layout_alignParentLeft="true"
+            android:background="@color/primaryColor"
+            android:src = "@drawable/ic_account_circle_24dp" />
+
+        <TextView
+            android:id = "@+id/statsTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="10dp"
+            android:text= "Stats"
+            android:textColor="@color/primaryTextColor"
+            android:layout_below = "@id/statsImageButton" />
+
+        <ImageButton
+            android:id ="@+id/textsImageButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="3dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:background="@color/primaryColor"
+            android:src = "@drawable/ic_library_books_24dp" />
+
+        <TextView
+            android:id = "@+id/textsTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text= "Texts"
+            android:layout_marginRight="10dp"
+            android:textColor="@color/primaryTextColor"
+            android:layout_below = "@id/textsImageButton" />
+
+        <TextView
+            android:id="@+id/PageTile"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            android:layout_centerHorizontal="true"
+            android:textColor="@color/primaryTextColor"/>
+
+        <com.google.android.material.tabs.TabLayout
+            android:layout_below="@id/PageTile"
+            android:id="@+id/view_pager_tab"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/statsTitle"
+            android:layout_toLeftOf="@id/textsTitle"
+            app:tabBackground="@drawable/tab_selector"
+            app:tabGravity="center"
+            app:tabIndicatorHeight="0dp" />
+
+    </RelativeLayout>
+
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/vpPager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+    </androidx.viewpager.widget.ViewPager>
+</LinearLayout>

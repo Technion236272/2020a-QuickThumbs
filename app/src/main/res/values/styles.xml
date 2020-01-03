@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
@@ -36,5 +36,28 @@
         <item name="android:layout_marginBottom">5dp</item>
     </style>
 
+    <style name="SecondaryColorRoundedButton" >
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/rounded_secondary_color_button</item>
+        <item name="android:textColor">@color/secondaryTextColor</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:layout_marginEnd">5dp</item>
+        <item name="android:layout_marginRight">5dp</item>
+        <item name="android:layout_marginStart">5dp</item>
+        <item name="android:layout_marginLeft">5dp</item>
+        <item name="android:layout_marginTop">5dp</item>
+        <item name="android:layout_marginBottom">5dp</item>
+    </style>
 
+    <style name="RatingBar" parent="Theme.AppCompat">
+        <item name="colorControlActivated">@color/secondaryColor</item>
+    </style>
+
+    <style name="CustomActivityAnimation" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/slide_in_right</item>
+        <item name="android:activityOpenExitAnimation">@anim/slide_out_left</item>
+        <item name="android:activityCloseEnterAnimation">@anim/slide_in_left</item>
+        <item name="android:activityCloseExitAnimation">@anim/slide_out_right</item>
+    </style>
 </resources>

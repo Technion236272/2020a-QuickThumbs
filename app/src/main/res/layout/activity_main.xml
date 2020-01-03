@@ -1,60 +1,114 @@
 <?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fillViewport="true">
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/gradiant_color"
     android:orientation="vertical"
-    tools:context=".MainActivity">
+    tools:context="androidCourse.technion.quickthumbs.MainActivity">
 
-    <include
-        android:id="@+id/signInToolbar"
-        layout= "@layout/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
 
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/logo"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:layout_marginTop="20dp"
-        android:gravity="center"
-        android:text="@string/main_heading"
-        android:textSize="30sp" />
+        android:adjustViewBounds="true"
+        android:contentDescription="@string/logo"
+        android:src="@drawable/logo" />
 
-    <EditText
-        android:id="@+id/emailMainActivity"
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="120dp"
-        android:layout_marginRight="120dp"
-        android:ems="10"
-        android:hint="@string/email"
-        android:inputType="textEmailAddress" />
+        android:paddingLeft="50dip"
+        android:paddingRight="50dip"
+        android:orientation="vertical">
 
-    <EditText
-        android:id="@+id/passwordMainActivity"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="120dp"
-        android:layout_marginRight="120dp"
-        android:ems="10"
-        android:hint="@string/password"
-        android:inputType="textPassword" />
+        <EditText
+            android:id="@+id/emailMainActivity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="5dp"
+            android:drawableLeft="@drawable/ic_adb_24dp"
+            android:ems="10"
+            android:textSize="17sp"
+            android:hint="@string/email"
+            android:inputType="textEmailAddress"
+            android:textColor="@color/primaryTextColor"
+            android:textColorHint="@color/primaryTextColor" />
 
-    <Button
-        android:id="@+id/sign_in_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="@string/sign_in" />
+        <EditText
+            android:id="@+id/passwordMainActivity"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_marginRight="10dp"
+            android:layout_marginBottom="10dp"
+            android:textSize="17sp"
+            android:drawableLeft="@drawable/ic_lock_24dp"
+            android:ems="10"
+            android:hint="@string/password"
+            android:inputType="textPassword"
+            android:textColor="@color/primaryTextColor"
+            android:textColorHint="@color/primaryTextColor" />
 
-    <Button
-        android:id="@+id/create_account_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="40dp"
-        android:text="@string/create_account" />
+        <Button
+            android:id="@+id/sign_in_button"
+            style="@style/SecondaryColorRoundedButton"
+            android:layout_width="fill_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:layout_gravity="center"
+            android:text="@string/sign_in" />
+
+        <TextView
+            android:id="@+id/create_account_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:onClick="moveToCreateAccount"
+            android:text="@string/create_an_account"
+            android:textColor="@color/primaryTextColor" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:text ="Or:"
+            android:textSize="17sp"
+            android:layout_gravity="center"
+            android:textColor="@color/primaryTextColor"
+            android:paddingTop="20dp"
+            android:gravity="center"
+            />
+
+        <com.google.android.gms.common.SignInButton
+            android:id="@+id/google_sign_in_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            />
+
+        <com.facebook.login.widget.LoginButton
+            android:id="@+id/facebook_login_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="10dp" />
+    </LinearLayout>
 
 </LinearLayout>
+</ScrollView>
