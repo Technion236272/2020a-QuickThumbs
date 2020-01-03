@@ -42,9 +42,7 @@
         android:paddingRight="10dp"
         android:layout_alignBottom="@+id/personalTextsRecyclerView"
         android:layout_alignParentRight="true"
-        android:visibility="visible"
-        android:paddingEnd="10dp"
-        android:layout_alignParentEnd="true">
+        android:visibility="visible">
 
         <ImageButton
             android:id="@+id/addTextButton"

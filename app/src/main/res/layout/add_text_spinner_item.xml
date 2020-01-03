@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:textSize="17sp"
-    android:gravity="start"
+    android:gravity="left"
+    android:layout_gravity="left"
     android:textColor="@color/primaryTextColor"
-     />
+/>

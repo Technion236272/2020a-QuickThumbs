@@ -24,45 +24,40 @@
 
     <TextView
         android:id="@+id/Accuracy"
-        style="@style/BlackTextHeader"
         android:layout_below="@id/achievementBadge"
         android:layout_marginTop="5dp"
-        android:layout_marginStart="15dp"
         android:layout_marginLeft="15dp"
         android:textColor="@color/primaryTextColor"
-        android:text="@string/Accuracy"/>
+        android:text="@string/Accuracy"
+        android:layout_alignParentLeft="true"
+        style = "@style/BlackTextHeader" />
 
     <TextView
         android:id="@+id/AccuracyValue"
         style="@style/BlackTextHeader"
         android:textColor="@color/primaryTextColor"
         android:layout_toRightOf="@id/Accuracy"
-        android:layout_toEndOf="@id/Accuracy"
-        android:layout_below="@id/achievementBadge"
-        android:layout_marginTop="5dp"
         android:layout_marginLeft="5dp"
-        android:layout_marginStart="5dp"
+        android:layout_alignBaseline="@id/Accuracy"
+        android:layout_marginTop="5dp"
         android:text="@string/emptyText" />
-
     <TextView
         android:id="@+id/WPM"
         style="@style/BlackTextHeader"
         android:layout_below="@id/Accuracy"
         android:layout_marginTop="5dp"
-        android:layout_marginStart="15dp"
         android:textColor="@color/primaryTextColor"
+        android:layout_alignParentLeft="true"
         android:layout_marginLeft="15dp"
         android:text="@string/WPM"/>
 
     <TextView
         android:id="@+id/WPMValue"
         style="@style/BlackTextHeader"
-        android:layout_below="@id/AccuracyValue"
+        android:layout_alignBaseline="@id/WPM"
         android:layout_toRightOf="@id/WPM"
-        android:layout_toEndOf="@id/WPM"
         android:layout_marginTop="5dp"
         android:layout_marginLeft="5dp"
-        android:layout_marginStart="5dp"
         android:textColor="@color/primaryTextColor"
         android:text="@string/emptyText" />
 
@@ -70,21 +65,19 @@
         android:id="@+id/CPM"
         style="@style/BlackTextHeader"
         android:layout_below="@id/WPM"
-        android:layout_marginTop="5dp"
-        android:layout_marginStart="15dp"
         android:layout_marginLeft="15dp"
+        android:layout_marginTop="5dp"
+        android:layout_alignParentLeft="true"
         android:textColor="@color/primaryTextColor"
         android:text="@string/CPM"/>
 
     <TextView
         android:id="@+id/CPMValue"
         style="@style/BlackTextHeader"
-        android:layout_below="@id/WPMValue"
         android:layout_toRightOf="@id/CPM"
-        android:layout_toEndOf="@id/CPM"
         android:layout_marginTop="5dp"
         android:layout_marginLeft="5dp"
-        android:layout_marginStart="5dp"
+        android:layout_alignBaseline="@id/CPM"
         android:textColor="@color/primaryTextColor"
         android:text="@string/emptyText" />
 
@@ -93,21 +86,19 @@
         style="@style/BlackTextHeader"
         android:layout_below="@id/CPM"
         android:layout_marginTop="5dp"
-        android:layout_marginStart="15dp"
         android:textColor="@color/primaryTextColor"
         android:layout_marginLeft="15dp"
+        android:layout_alignParentLeft="true"
         android:text="@string/Score" />
 
     <TextView
         android:id="@+id/ScoreValue"
         style="@style/BlackTextHeader"
-        android:layout_below="@id/CPMValue"
         android:layout_toRightOf="@id/Score"
-        android:layout_toEndOf="@id/Score"
         android:layout_marginTop="5dp"
         android:layout_marginLeft="5dp"
-        android:layout_marginStart="5dp"
         android:text="@string/emptyText"
+        android:layout_alignBaseline="@id/Score"
         android:textColor="@color/primaryTextColor"
         />
 
@@ -125,7 +116,6 @@
         android:layout_below="@id/Score"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
-        android:layout_gravity="start"
         android:layout_centerHorizontal="true"/>
 </RelativeLayout>
 </ScrollView>

@@ -39,7 +39,6 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_marginBottom="5dp"
-            android:drawableStart="@drawable/ic_adb_24dp"
             android:drawableLeft="@drawable/ic_adb_24dp"
             android:ems="10"
             android:textSize="17sp"
@@ -56,7 +55,6 @@
             android:layout_marginRight="10dp"
             android:layout_marginBottom="10dp"
             android:textSize="17sp"
-            android:drawableStart="@drawable/ic_lock_24dp"
             android:drawableLeft="@drawable/ic_lock_24dp"
             android:ems="10"
             android:hint="@string/password"
@@ -91,10 +89,7 @@
             android:textSize="17sp"
             android:layout_gravity="center"
             android:textColor="@color/primaryTextColor"
-            android:layout_alignBaseline="@id/google_sign_in_button"
-            android:layout_toRightOf="@id/google_sign_in_button"
             android:paddingTop="20dp"
-            android:layout_toEndOf="@id/google_sign_in_button"
             android:gravity="center"
             />
 
