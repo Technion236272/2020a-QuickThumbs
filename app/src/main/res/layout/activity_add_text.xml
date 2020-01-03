@@ -1,116 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:background="@drawable/gradiant_color"
-    tools:context="androidCourse.technion.quickthumbs.AddTextActivity">
 
-    <include
-        android:id="@+id/AddTextToolbar"
-        layout= "@layout/toolbar"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <RelativeLayout
+            android:id="@+id/addTextScreenLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            tools:context="androidCourse.technion.quickthumbs.AddTextActivity"
+            android:background="@drawable/gradiant_color"
+            tools:layout_editor_absoluteY="1dp"
+            android:visibility="visible">
+        <include
+            android:id="@+id/AddTextToolbar"
+            layout="@layout/toolbar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
-        android:id="@+id/titleValue"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="10dp"
-        android:layout_marginLeft="10dp"
-        android:ems="10"
-        android:gravity="start"
-        android:hint="@string/type_the_text_title"
-        android:inputType="textVisiblePassword"
-        android:singleLine="true"
-        android:textColor="@color/primaryTextColor"
-        android:textColorHint="@color/primaryTextColor"
-        android:textSize="17sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/AddTextToolbar"/>
 
-    <Spinner
-        android:id="@+id/themeSelectorspinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:spinnerMode="dropdown"
-        android:layout_marginRight="10dp"
-        android:layout_marginLeft="10dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/titleValue" />
-
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/textLayout"
-        android:layout_width="match_parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/themeSelectorspinner"
-        app:layout_constraintBottom_toTopOf="@id/wordAdding">
-
-        <TextView
-            android:id="@+id/addedText"
+        <EditText
+            android:id="@+id/titleValue"
+            android:layout_below="@id/AddTextToolbar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:gravity="center"
+            android:ems="10"
+            android:gravity="start"
+            android:hint="@string/type_the_text_title"
+            android:inputType="textVisiblePassword"
+            android:singleLine="true"
             android:textColor="@color/primaryTextColor"
             android:textColorHint="@color/primaryTextColor"
             android:textSize="17sp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="@id/textLayout"
-            app:layout_constraintStart_toStartOf="@id/textLayout" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/AddTextToolbar" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <RelativeLayout
-        android:id="@+id/wordAdding"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginBottom="5dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent">
+        <Spinner
+            android:id="@+id/themeSelectorspinner"
+            android:layout_below="@id/titleValue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginLeft="5dp"
+            android:spinnerMode="dropdown"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/titleValue" />
 
         <EditText
-            android:id="@+id/addedWord"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_below="@id/themeSelectorspinner"
+            android:id="@+id/addedText"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:background="@color/primaryTextColor"
-            android:ems="10"
-            android:gravity="center"
-            android:layout_alignParentLeft="true"
-            android:layout_centerVertical="true"
-            android:hint="@string/insert_the_text_here"
-            android:inputType="textVisiblePassword"
-            android:singleLine="true"
-            android:layout_gravity="center_vertical"
+            android:textAlignment="gravity"
             android:textColor="@color/secondaryTextColor"
-            android:textSize="20sp"
-            android:layout_marginRight="5dp"
-            android:layout_toLeftOf="@id/addButton" />
+            android:textColorHint="@color/secondaryTextColor"
+            android:textSize="17sp"
+            app:layout_constraintTop_toBottomOf="@id/themeSelectorspinner"
+            app:layout_constraintEnd_toEndOf="parent"/>
+
+
+        <RelativeLayout
+        android:id="@+id/addTextLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="20dp"
+        android:paddingRight="10dp"
+        android:layout_alignBottom="@+id/addedText"
+        android:layout_alignParentRight="true"
+        android:visibility="visible"
+        android:paddingEnd="10dp"
+        android:layout_alignParentEnd="true">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/addButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_gravity="center"
+            android:layout_marginBottom="10dp"
+            android:layout_marginRight="20dp"
+            android:adjustViewBounds="true"
             android:contentDescription="submit"
-            app:tint="@color/secondaryTextColor"
+            android:src="@drawable/ic_add_circle_24dp"
+            android:background="@color/transparent"
             app:backgroundTint="@color/secondaryColor"
-            android:src="@drawable/ic_add_circle_24dp" />
+            android:layout_marginEnd="5dp"
+            app:tint="@color/secondaryTextColor"
+            android:layout_alignParentStart="false"
+            android:layout_alignParentLeft="false"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"/>
+        </RelativeLayout>
     </RelativeLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
 </ScrollView>

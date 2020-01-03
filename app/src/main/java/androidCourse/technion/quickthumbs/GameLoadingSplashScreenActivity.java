@@ -72,13 +72,16 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
             new FetchRandomText().execute();
         }else{
             TextDataRow selectedTextItem = setTextDataFromSelectedText(fromWhichActivityYouCameFrom);
+
             final Intent intent=setIntentForTheGame(selectedTextItem);
-            showBestStatsOnScreen(selectedTextItem);
 
             countDownFromSelectedTheme =4000;
             String beforeLogoText="You choose the text: "+selectedTextItem.getTitle();
             int selected_IconId =getThemePictureId(selectedTextItem.getThemeName());
             initializeSplashScreen(countDownFromSelectedTheme, beforeLogoText, selected_IconId);
+
+            showBestStatsOnScreen(selectedTextItem);
+
             splashScreenSettings();
             setContentView(easySplashScreen);
 
