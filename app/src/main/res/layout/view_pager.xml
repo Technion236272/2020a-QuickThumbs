@@ -29,6 +29,18 @@
             android:background="@color/primaryColor"
             android:src = "@drawable/ic_account_circle_24dp" />
 
+        <ImageButton
+            android:id ="@+id/backToMainFromTextsImgButton"
+            android:visibility="invisible"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="3dp"
+            android:layout_marginLeft="10dp"
+            android:layout_alignParentLeft="true"
+            android:background="@color/primaryColor"
+            android:src = "@drawable/ic_arrow_back_24dp" />
+
         <TextView
             android:id = "@+id/statsTitle"
             android:layout_width="wrap_content"
@@ -38,6 +50,17 @@
             android:text= "Stats"
             android:textColor="@color/primaryTextColor"
             android:layout_below = "@id/statsImageButton" />
+
+        <TextView
+            android:id = "@+id/backToMainFomTextsTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="10dp"
+            android:text= "Main"
+            android:textColor="@color/primaryTextColor"
+            android:layout_below = "@id/statsImageButton"
+            android:visibility="invisible"/>
 
         <ImageButton
             android:id ="@+id/textsImageButton"
@@ -50,6 +73,18 @@
             android:background="@color/primaryColor"
             android:src = "@drawable/ic_library_books_24dp" />
 
+        <ImageButton
+            android:id ="@+id/backToMainFromStatisticsImgButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="3dp"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="10dp"
+            android:background="@color/primaryColor"
+            android:visibility="invisible"
+            android:src = "@drawable/ic_arrow_forward_24dp" />
+
         <TextView
             android:id = "@+id/textsTitle"
             android:layout_width="wrap_content"
@@ -58,6 +93,17 @@
             android:text= "Texts"
             android:layout_marginRight="10dp"
             android:textColor="@color/primaryTextColor"
+            android:layout_below = "@id/textsImageButton" />
+
+        <TextView
+            android:id = "@+id/backToMainFromStatisticsTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:text= "Main"
+            android:layout_marginRight="10dp"
+            android:textColor="@color/primaryTextColor"
+            android:visibility="invisible"
             android:layout_below = "@id/textsImageButton" />
 
         <TextView

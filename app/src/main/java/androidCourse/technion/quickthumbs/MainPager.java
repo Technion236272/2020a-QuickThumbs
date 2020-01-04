@@ -8,10 +8,13 @@ import androidCourse.technion.quickthumbs.R;
 import androidCourse.technion.quickthumbs.personalArea.ProfileActivity;
 import androidCourse.technion.quickthumbs.personalArea.TextsActivity;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
@@ -21,12 +24,17 @@ import com.google.android.material.tabs.TabLayout;
 
 
 public class MainPager extends AppCompatActivity {
-    FragmentPagerAdapter adapterViewPager;
-    TextView pageTitle;
-    ImageButton statsButton;
-    TextView statsTitle;
-    ImageButton textsButton;
-    TextView textsTitle;
+    private FragmentPagerAdapter adapterViewPager;
+    private TextView pageTitle;
+    private ImageButton statsButton;
+    private TextView statsTitle;
+    private ImageButton textsButton;
+    private TextView textsTitle;
+    private TextView backToMainTitleFromTexts;
+    private TextView backToMainTitleFromStatistics;
+    private ImageButton backToMainButtonFromTexts;
+    private ImageButton backToMainButtonFromStatistics;
+
     ViewPager vpPager;
 
     @Override
@@ -37,13 +45,13 @@ public class MainPager extends AppCompatActivity {
         adapterViewPager = new MyPagerAdapter(getSupportFragmentManager());
         vpPager.setAdapter(adapterViewPager);
 
-        if(Build.VERSION.SDK_INT>=17){
-            TabLayout tabLayout = findViewById(R.id.view_pager_tab);
-            tabLayout.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
-        }
-
         TabLayout tabLayout = findViewById(R.id.view_pager_tab);
         tabLayout.setupWithViewPager(vpPager, true);
+        if(Build.VERSION.SDK_INT>=17){
+            tabLayout.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+        }else{
+            turnDotIndicatorToInvisible(tabLayout);
+        }
 
         initializeFields();
 
@@ -51,6 +59,21 @@ public class MainPager extends AppCompatActivity {
 
         setPagerOnChangeListener();
         vpPager.setCurrentItem(1);
+    }
+
+    private void turnDotIndicatorToInvisible(TabLayout tabLayout) {
+        ViewGroup tabStrip = (ViewGroup) tabLayout.getChildAt(0);
+        for (int i = 0; i < tabStrip.getChildCount(); i++) {
+            View tabView = tabStrip.getChildAt(i);
+            if (tabView != null) {
+                int paddingStart = tabView.getPaddingLeft();
+                int paddingTop = tabView.getPaddingTop();
+                int paddingEnd = tabView.getPaddingRight();
+                int paddingBottom = tabView.getPaddingBottom();
+                ViewCompat.setBackground(tabView, AppCompatResources.getDrawable(tabView.getContext(), R.color.primaryColor));
+                ViewCompat.setPaddingRelative(tabView, paddingStart, paddingTop, paddingEnd, paddingBottom);
+            }
+        }
     }
 
     private void setPagerOnChangeListener() {
@@ -63,15 +86,21 @@ public class MainPager extends AppCompatActivity {
                 switch (position) {
                     case 0:
                         pageTitle.setText("Statistics");
-                        makeAllToolbarButtonsInvisible();
+                        setToolbarMainActivityButtonsVisibility(View.INVISIBLE);
+                        setToolbarStatisticsButtonsVisibility(View.VISIBLE);
+                        setToolbarTextsButtonsVisibility(View.INVISIBLE);
                         break;
                     case 1:
                         pageTitle.setText("");
-                        makeAllToolbarButtonsVisible();
+                        setToolbarMainActivityButtonsVisibility(View.VISIBLE);
+                        setToolbarStatisticsButtonsVisibility(View.INVISIBLE);
+                        setToolbarTextsButtonsVisibility(View.INVISIBLE);
                         break;
                     case 2:
                         pageTitle.setText("Texts");
-                        makeAllToolbarButtonsInvisible();
+                        setToolbarMainActivityButtonsVisibility(View.INVISIBLE);
+                        setToolbarStatisticsButtonsVisibility(View.INVISIBLE);
+                        setToolbarTextsButtonsVisibility(View.VISIBLE);
                         break;
                 }
             }
@@ -81,18 +110,21 @@ public class MainPager extends AppCompatActivity {
         });
     }
 
-    private void makeAllToolbarButtonsVisible() {
-        statsTitle.setVisibility(View.VISIBLE);
-        textsTitle.setVisibility(View.VISIBLE);
-        textsButton.setVisibility(View.VISIBLE);
-        statsButton.setVisibility(View.VISIBLE);
+    private void setToolbarMainActivityButtonsVisibility(int visibility) {
+        statsTitle.setVisibility(visibility);
+        textsTitle.setVisibility(visibility);
+        textsButton.setVisibility(visibility);
+        statsButton.setVisibility(visibility);
     }
 
-    private void makeAllToolbarButtonsInvisible() {
-        statsTitle.setVisibility(View.INVISIBLE);
-        textsTitle.setVisibility(View.INVISIBLE);
-        textsButton.setVisibility(View.INVISIBLE);
-        statsButton.setVisibility(View.INVISIBLE);
+    private void setToolbarStatisticsButtonsVisibility(int visibility){
+        backToMainButtonFromStatistics.setVisibility(visibility);
+        backToMainTitleFromStatistics.setVisibility(visibility);
+    }
+
+    private void setToolbarTextsButtonsVisibility(int visibility){
+        backToMainButtonFromTexts.setVisibility(visibility);
+        backToMainTitleFromTexts.setVisibility(visibility);
     }
 
     private void setToolbarButtonListeners() {
@@ -100,7 +132,48 @@ public class MainPager extends AppCompatActivity {
         setStatsTitleListener();
         setTextsButtonListener();
         setTextsTitleListener();
+        setBackToMainFromTextsTitleListener();
+        setBackToMainFromTextsImgButtonListener();
+        setBackToMainFromStatisticsImgButtonListener();
+        setBackToMainFromStatisticsTitleListener();
     }
+
+    private void setBackToMainFromTextsTitleListener() {
+        backToMainTitleFromTexts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                vpPager.setCurrentItem(1);
+            }
+        });
+    }
+
+    private void setBackToMainFromTextsImgButtonListener() {
+        backToMainButtonFromTexts.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                vpPager.setCurrentItem(1);
+            }
+        });
+    }
+
+    private void setBackToMainFromStatisticsImgButtonListener() {
+        backToMainButtonFromStatistics.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                vpPager.setCurrentItem(1);
+            }
+        });
+    }
+
+    private void setBackToMainFromStatisticsTitleListener() {
+        backToMainTitleFromStatistics.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                vpPager.setCurrentItem(1);
+            }
+        });
+    }
+
 
     private void setTextsTitleListener() {
         textsTitle.setOnClickListener(new View.OnClickListener() {
@@ -144,6 +217,10 @@ public class MainPager extends AppCompatActivity {
         statsTitle = findViewById(R.id.statsTitle);
         textsButton = findViewById(R.id.textsImageButton);
         textsTitle = findViewById(R.id.textsTitle);
+        backToMainButtonFromStatistics = findViewById(R.id.backToMainFromStatisticsImgButton);
+        backToMainButtonFromTexts = findViewById(R.id.backToMainFromTextsImgButton);
+        backToMainTitleFromStatistics = findViewById(R.id.backToMainFromStatisticsTitle);
+        backToMainTitleFromTexts = findViewById(R.id.backToMainFomTextsTitle);
     }
 
     public static class MyPagerAdapter extends FragmentPagerAdapter {
