@@ -49,6 +49,10 @@ dependencies {
     implementation 'gr.pantrif:easy-android-splash-screen:0.0.1'
     implementation 'com.google.firebase:firebase-ml-natural-language:22.0.0'
     implementation 'com.google.firebase:firebase-ml-natural-language-language-id-model:20.0.7'
+    implementation 'de.hdodenhof:circleimageview:3.0.1'
+    implementation 'com.google.firebase:firebase-storage:19.1.0'
+    implementation 'com.firebaseui:firebase-ui-storage:4.3.1'
+
 }
 
 apply plugin: 'com.google.gms.google-services'
