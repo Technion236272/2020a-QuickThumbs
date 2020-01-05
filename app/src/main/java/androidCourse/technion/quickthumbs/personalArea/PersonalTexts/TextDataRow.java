@@ -15,9 +15,14 @@ public class TextDataRow {
     private String fastestSpeed;
     public boolean isClicked;
     public boolean isExpanded;
+    private String roomKey;
+
+
+    private int indexInRoom;
 
     public TextDataRow(String id,String title,String themeName, String text,String date,String composer,
-                       double rating,String numberOfTimesPlayed, String bestScore, String fastestSpeed) {
+                       double rating,String numberOfTimesPlayed, String bestScore, String fastestSpeed,
+                       String roomKey, int indexInRoom) {
         this.setID(id);
         this.setTitle(title);
         this.setThemeName(themeName);
@@ -28,6 +33,8 @@ public class TextDataRow {
         this.setNumberOfTimesPlayed(numberOfTimesPlayed);
         this.setBestScore(bestScore);
         this.setFastestSpeed(fastestSpeed);
+        this.setRoomKey(roomKey);
+        this.setIndexInRoom(indexInRoom);
         this.isClicked = false;
         this.isExpanded = false;
     }
@@ -104,6 +111,25 @@ public class TextDataRow {
         this.fastestSpeed = fastestSpeed;
     }
 
+    public String getRoomKey() {
+        return roomKey;
+    }
+
+    public void setRoomKey(String roomKey) {
+        this.roomKey = roomKey;
+    }
+
+    public int getIndexInRoom() {
+        return indexInRoom;
+    }
+
+    public void setIndexInRoom(int indexInRoom) {
+        this.indexInRoom = indexInRoom;
+    }
+
+
+
+
 
     public static TextDataRow createTextCardItem(DocumentSnapshot document) {
         String id = document.getId();
@@ -126,7 +152,7 @@ public class TextDataRow {
             bestScore = document.getLong("bestScore").toString();
         }
         TextDataRow item = new TextDataRow(id,title, theme, text,date,composer, rating,
-                numberOfPlays, bestScore, fastestSpeed);
+                numberOfPlays, bestScore, fastestSpeed,null,0);
 
         return item;
     }
