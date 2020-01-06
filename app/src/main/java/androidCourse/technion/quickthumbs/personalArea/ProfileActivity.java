@@ -86,6 +86,7 @@ public class ProfileActivity extends Fragment {
     private SharedPreferences sharedpreferences;
     private UploadTask uploadTask;
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -95,18 +96,21 @@ public class ProfileActivity extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+    }
 
+    public void onViewCreated (View view,
+                               Bundle savedInstanceState){
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         uploadTask = null;
 
-        displayStatistics();
+        displayStatistics(view);
 
-        setLogOutButton();
+        setLogOutButton(view);
 
 
-        profilePicture = getActivity().findViewById(R.id.profilePicture);
+        profilePicture = view.findViewById(R.id.profilePicture);
 
         profilePicture.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -431,12 +435,12 @@ public class ProfileActivity extends Fragment {
         Toast.makeText(getContext(),message,Toast.LENGTH_LONG).show();
     }
 
-    private void setLogOutButton() {
+    private void setLogOutButton(View view) {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         boolean isLoggedInOnFacebook = accessToken != null && !accessToken.isExpired();
         if (isLoggedInOnFacebook){
-            getView().findViewById(R.id.logOutButton).setVisibility(View.INVISIBLE);
-            getView().findViewById(R.id.facebook_log_out_button).setOnClickListener(
+            view.findViewById(R.id.logOutButton).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.facebook_log_out_button).setOnClickListener(
                     new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -445,8 +449,8 @@ public class ProfileActivity extends Fragment {
                     }
             );
         }else{
-            getView().findViewById(R.id.facebook_log_out_button).setVisibility(View.INVISIBLE);
-            getView().findViewById(R.id.logOutButton).setOnClickListener(
+            view.findViewById(R.id.facebook_log_out_button).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.logOutButton).setOnClickListener(
                     new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -473,7 +477,7 @@ public class ProfileActivity extends Fragment {
 //        return null;
     }
 
-    private void displayStatistics() {
+    private void displayStatistics(final View view) {
         getUserDocument().collection("stats").document("statistics").get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
@@ -486,7 +490,7 @@ public class ProfileActivity extends Fragment {
                                 Double avgWPM = document.getDouble("avgWPM");
                                 Double avgCPM = document.getDouble("avgCPM");
                                 Double totalScore = document.getDouble("TotalScore");
-                                setStatisticsTextViews(avgAccuracy,avgWPM,avgCPM,totalScore);
+                                setStatisticsTextViews(view,avgAccuracy,avgWPM,avgCPM,totalScore);
                             } else {
                                 Log.d(TAG, "No such document - reading statistics");
                             }
@@ -497,15 +501,15 @@ public class ProfileActivity extends Fragment {
                 });
     }
 
-    private void setStatisticsTextViews(Double avgAccuracy, Double avgWPM, Double avgCPM, Double totalScore) {
+    private void setStatisticsTextViews(View view, Double avgAccuracy, Double avgWPM, Double avgCPM, Double totalScore) {
         DecimalFormat df = new DecimalFormat("#.##");
-        TextView avgAccuracyText = getView().findViewById(R.id.AccuracyValue);
+        TextView avgAccuracyText = view.findViewById(R.id.AccuracyValue);
         avgAccuracyText.setText(String.valueOf(df.format(avgAccuracy)));
-        TextView avgWPMText = getView().findViewById(R.id.WPMValue);
+        TextView avgWPMText = view.findViewById(R.id.WPMValue);
         avgWPMText.setText(String.valueOf(df.format(avgWPM)));
-        TextView avgCPMText = getView().findViewById(R.id.CPMValue);
+        TextView avgCPMText = view.findViewById(R.id.CPMValue);
         avgCPMText.setText(String.valueOf(df.format(avgCPM)));
-        TextView totalScoreText = getView().findViewById(R.id.ScoreValue);
+        TextView totalScoreText = view.findViewById(R.id.ScoreValue);
         totalScoreText.setText(String.valueOf(df.format(totalScore)));
     }
 
