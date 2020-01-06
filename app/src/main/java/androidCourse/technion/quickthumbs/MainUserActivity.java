@@ -40,16 +40,21 @@ public class MainUserActivity extends Fragment {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+    }
 
+    @Override
+    public void onViewCreated (View view,
+                               Bundle savedInstanceState){
+        final View fragmentView = view;
         fireBaseAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        gameBtn = getView().findViewById(R.id.startGameButton);
+        gameBtn = view.findViewById(R.id.startGameButton);
         gameBtn.setOnClickListener(new View.OnClickListener() {
                                        @Override
                                        public void onClick(View v) {
                                            ThemeSelectPopUp popUpWindow = new ThemeSelectPopUp();
-                                           popUpWindow.showPopupWindow(v,getView().findViewById(R.id.RelativeLayout1));
+                                           popUpWindow.showPopupWindow(v,fragmentView.findViewById(R.id.RelativeLayout1));
                                        }
                                    }
         );

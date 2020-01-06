@@ -64,15 +64,20 @@ public class TextsActivity extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+    }
+
+    @Override
+    public void onViewCreated (View view,
+                               Bundle savedInstanceState){
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
         howMuchToLoadEachScroll = 3;
         noMoreLoading =false;
 
-        personalListLoadingLayout = getView().findViewById(R.id.personalListLoadingLayout);
-        loadingText = getView().findViewById(R.id.personalListLoadingText);
-        textCard = getView().findViewById(R.id.textCard);
-        recyclerView = getView().findViewById(R.id.personalTextsRecyclerView);
+        personalListLoadingLayout = view.findViewById(R.id.personalListLoadingLayout);
+        loadingText = view.findViewById(R.id.personalListLoadingText);
+        textCard = view.findViewById(R.id.textCard);
+        recyclerView = view.findViewById(R.id.personalTextsRecyclerView);
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         recyclerView.setHasFixedSize(true);
@@ -81,11 +86,11 @@ public class TextsActivity extends Fragment {
 
         checkIfUserHasPersonalTexts();
 
-        setAddTextButton();
+        setAddTextButton(view);
     }
 
-    private void setAddTextButton() {
-        addTextButton = getView().findViewById(R.id.addTextButton);
+    private void setAddTextButton(View view) {
+        addTextButton = view.findViewById(R.id.addTextButton);
         addTextButton.setOnClickListener(new View.OnClickListener() {
                                              @Override
                                              public void onClick(View v) {
