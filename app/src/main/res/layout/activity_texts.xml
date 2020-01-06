@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:background="@drawable/gradiant_color"
     tools:context="androidCourse.technion.quickthumbs.personalArea.TextsActivity">
@@ -44,7 +45,7 @@
         android:layout_alignParentRight="true"
         android:visibility="visible">
 
-        <ImageButton
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/addTextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -52,8 +53,8 @@
             android:layout_marginRight="5dp"
             android:adjustViewBounds="true"
             android:contentDescription="@string/logo"
-            android:src="@drawable/icons8_create_document_100"
-            android:background="@color/transparent"
+            android:src="@drawable/ic_add_circle_24dp"
+            app:tint="@color/secondaryTextColor"
             android:layout_marginEnd="5dp" />
     </RelativeLayout>
 </RelativeLayout>
