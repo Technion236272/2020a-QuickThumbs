@@ -56,6 +56,8 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 
+import org.w3c.dom.Document;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -1032,26 +1034,26 @@ public class GameActivity extends AppCompatActivity {
 
     private void updateComposerTextBestScoreAndWPM(final Double wpm, final Double score) {
         db.collection("themes").document(selectedTextItem.getThemeName()).collection("texts")
-                .whereEqualTo("mainThemeID", selectedTextItem.getID())
+                .document(selectedTextItem.getID())
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                                Double bestScore = document.getDouble("best");
-                                Double bestWPM = document.getDouble("fastestSpeed");
-                                if (bestScore != null && bestWPM != null) {
-                                    if (bestScore < score)
-                                        writeBestScoreInComposerTextsCollection(score, document.getId());
-                                    if (bestWPM < wpm)
-                                        writeBestWPMInComposerTextsCollection(wpm, document.getId());
-                                } else {
+                            DocumentSnapshot document = task.getResult();
+                            Log.d(TAG, document.getId() + " => " + document.getData());
+                            Double bestScore = document.getDouble("best");
+                            Double bestWPM = document.getDouble("fastestSpeed");
+                            if (bestScore != null && bestWPM != null) {
+                                if (bestScore < score)
                                     writeBestScoreInComposerTextsCollection(score, document.getId());
+                                if (bestWPM < wpm)
                                     writeBestWPMInComposerTextsCollection(wpm, document.getId());
-                                }
+                            } else {
+                                writeBestScoreInComposerTextsCollection(score, document.getId());
+                                writeBestWPMInComposerTextsCollection(wpm, document.getId());
                             }
+
                         } else {
                             Log.d(TAG, "Error getting text document to write best score and wpm: ", task.getException());
                         }
