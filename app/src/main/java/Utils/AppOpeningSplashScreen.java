@@ -1,5 +1,7 @@
 package Utils;
 
+import android.app.ActionBar;
+//import androidx.appcompat.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -21,7 +23,6 @@ import android.view.animation.ScaleAnimation;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.core.content.ContextCompat;
 
 import com.appus.splash.CAnimatorListener;
@@ -68,8 +69,8 @@ public class AppOpeningSplashScreen {
     private static boolean isOneShot = true;
     private static boolean hasBeenPerformed = false;
 
-    public AppOpeningSplashScreen(Activity activity, ActionBar actionBar) {
-        this.mActionBar = actionBar;
+    public AppOpeningSplashScreen(Activity activity) {
+//        this.mActionBar = actionBar;
         this.mContext = activity.getApplicationContext();
 
         initScreenSize(activity);
@@ -138,14 +139,14 @@ public class AppOpeningSplashScreen {
      * @param show Boolean which is responsible for toggling. (true - to show)
      */
     private void toggleActionbar(boolean show) {
-        if (mActionBar != null) {
-            if (show) {
-                mActionBar.show();
-            } else {
-                mActionBar.hide();
-            }
-
-        }
+//        if (mActionBar != null) {
+//            if (show) {
+//                mActionBar.show();
+//            } else {
+//                mActionBar.hide();
+//            }
+//
+//        }
     }
 
     /**
@@ -280,8 +281,8 @@ public class AppOpeningSplashScreen {
     public static class Builder {
         private AppOpeningSplashScreen mSplashInstance;
 
-        public Builder(Activity activity, ActionBar actionBar) {
-            mSplashInstance = new AppOpeningSplashScreen(activity, actionBar);
+        public Builder(Activity activity) {
+            mSplashInstance = new AppOpeningSplashScreen(activity);
         }
 
         public Builder setSplashImage(Drawable splashImage) {

@@ -71,10 +71,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setFacebookSignInConfigurations();
 
         setButtonsListeners();
+
     }
 
     private void setOpeningSplashScreen() {
-        AppOpeningSplashScreen.Builder splash = new AppOpeningSplashScreen.Builder(this, getSupportActionBar());
+        AppOpeningSplashScreen.Builder splash = new AppOpeningSplashScreen.Builder(this);
         //        Set custom color of background:
         splash.setBackgroundColor(getResources().getColor(R.color.primaryColor));
         //Set custom image for background:

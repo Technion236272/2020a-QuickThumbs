@@ -10,6 +10,8 @@
         tools:ignore="ManifestOrder" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:allowBackup="true"
@@ -19,6 +21,15 @@
         android:theme="@style/AppTheme"
         android:supportsRtl="true"
         tools:ignore="AllowBackup">
+        <provider
+            android:name=".GenericFileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths"/>
+        </provider>
         <activity android:name="androidCourse.technion.quickthumbs.GameLoadingSplashScreenActivity"
             android:windowSoftInputMode="stateAlwaysHidden"
             android:screenOrientation="portrait"/>
