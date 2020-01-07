@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.FileProvider;
 import androidx.core.view.GestureDetectorCompat;
 import androidx.fragment.app.Fragment;
 
@@ -14,6 +15,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -24,6 +26,7 @@ import androidCourse.technion.quickthumbs.MainActivity;
 import androidCourse.technion.quickthumbs.R;
 import androidCourse.technion.quickthumbs.game.GameActivity;
 
+import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.util.Base64;
@@ -31,6 +34,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -61,24 +65,34 @@ import com.google.firebase.storage.UploadTask;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import static android.app.Activity.RESULT_OK;
+import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
+import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
 
 public class ProfileActivity extends Fragment {
     static int PReqCode = 1;
+    static int CReqCode = 2;
     static int REQUESCODE = 1;
+    static int CAMERACODE = 2;
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private FirebaseStorage storage;
     private static final String TAG = GameActivity.class.getSimpleName();
     private ImageView profilePicture;
+    private ImageView galleryButton;
+    private ImageButton cameraButton;
     private Uri pickedImgUri;
+    private Uri cameraPhotoURI;
     //Next lines are Strings used as params
     public static String FACEBOOK_FIELD_PROFILE_IMAGE = "picture.type(large)";
     public static String FACEBOOK_FIELDS = "fields";
@@ -98,34 +112,23 @@ public class ProfileActivity extends Fragment {
         super.onActivityCreated(savedInstanceState);
     }
 
-    public void onViewCreated (View view,
-                               Bundle savedInstanceState){
+    public void onViewCreated(View view,
+                              Bundle savedInstanceState) {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         uploadTask = null;
+        cameraPhotoURI = null;
+        profilePicture = view.findViewById(R.id.profilePicture);
 
         displayStatistics(view);
 
         setLogOutButton(view);
 
 
-        profilePicture = view.findViewById(R.id.profilePicture);
+        setGalleryPictureLoadListener(view);
 
-        profilePicture.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if (Build.VERSION.SDK_INT >= 22) {
-
-                    checkAndRequestForPermission();
-                } else {
-                    openGallery();
-                }
-
-
-            }
-        });
+        setCameraPictureLoadListener(view);
 
 
         StrictMode.ThreadPolicy policy = new
@@ -134,6 +137,44 @@ public class ProfileActivity extends Fragment {
 
         loadPictureFromSharedPrefrences();
 
+    }
+
+    private void setCameraPictureLoadListener(View view) {
+        cameraButton = view.findViewById(R.id.cameraButton);
+
+        cameraButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (Build.VERSION.SDK_INT >= 22) {
+
+                    checkAndRequestForCameraPermission();
+                } else {
+                    openCamera();
+                }
+
+
+            }
+        });
+    }
+
+    private void setGalleryPictureLoadListener(View view) {
+        galleryButton = view.findViewById(R.id.galleryButton);
+
+        galleryButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                if (Build.VERSION.SDK_INT >= 22) {
+
+                    checkAndRequestForGalleyPermission();
+                } else {
+                    openGallery();
+                }
+
+
+            }
+        });
     }
 
     private void loadPictureFromSharedPrefrences() {
@@ -202,7 +243,7 @@ public class ProfileActivity extends Fragment {
                 profilePicture.setImageBitmap(bitmap);
 
                 Bitmap bmpCopy = bitmap.copy(bitmap.getConfig(), true);
-                MyTaskParams myTaskParams = new MyTaskParams("google",bmpCopy);
+                MyTaskParams myTaskParams = new MyTaskParams("google", bmpCopy);
                 new UploadToStorage().execute(myTaskParams);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
@@ -244,7 +285,7 @@ public class ProfileActivity extends Fragment {
                                             profilePicture.setImageBitmap(bitmap);
                                             savePictureOnSharedPrefrences("facebookProfilePicture", bitmap);
 
-                                            MyTaskParams myTaskParams = new MyTaskParams("facebook",bitmap);
+                                            MyTaskParams myTaskParams = new MyTaskParams("facebook", bitmap);
                                             new UploadToStorage().execute(myTaskParams);
                                         }
                                     }
@@ -262,7 +303,7 @@ public class ProfileActivity extends Fragment {
     }
 
 
-    private void checkAndRequestForPermission() {
+    private void checkAndRequestForGalleyPermission() {
         if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) {
@@ -278,12 +319,82 @@ public class ProfileActivity extends Fragment {
         }
     }
 
+    private void checkAndRequestForCameraPermission() {
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.CAMERA)) {
+                Toast.makeText(this.getActivity(), "Please accept for required permission", Toast.LENGTH_SHORT).show();
+            } else {
+                ActivityCompat.requestPermissions(getActivity(),
+                        new String[]{Manifest.permission.CAMERA},
+                        CReqCode);
+            }
+
+        } else {
+            openCamera();
+        }
+    }
+
     private void openGallery() {
         //TODO: open gallery intent and wait for user to pick an image !
 
         Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
         galleryIntent.setType("image/*");
         startActivityForResult(galleryIntent, REQUESCODE);
+    }
+
+    private void openCamera() {
+        //TODO: open gallery intent and wait for user to pick an image !
+        Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        cameraPhotoURI = FileProvider.getUriForFile(getContext(), getContext().getApplicationContext().getPackageName() + ".provider", getOutputMediaFile(MEDIA_TYPE_IMAGE));
+        cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraPhotoURI);
+        cameraIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        cameraIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+        startActivityForResult(cameraIntent, CAMERACODE);
+
+    }
+
+    private static File getOutputMediaFile(int type) {
+        // To be safe, you should check that the SDCard is mounted
+        // using Environment.getExternalStorageState() before doing this.
+
+        File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
+                Environment.DIRECTORY_PICTURES), "MyCameraApp");
+        // This location works best if you want the created images to be shared
+        // between applications and persist after your app has been uninstalled.
+
+        // Create the storage directory if it does not exist
+        if (!mediaStorageDir.exists()) {
+            if (!mediaStorageDir.mkdirs()) {
+                Log.d("MyCameraApp", "failed to create directory");
+                return null;
+            }
+        }
+
+        // Create a media file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        File mediaFile;
+        if (type == MEDIA_TYPE_IMAGE) {
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                    "IMG_" + timeStamp + ".jpg");
+        } else if (type == MEDIA_TYPE_VIDEO) {
+            mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+                    "VID_" + timeStamp + ".mp4");
+        } else {
+            return null;
+        }
+
+        return mediaFile;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (requestCode == 0) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED
+                    && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+                cameraButton.setEnabled(true);
+            }
+        }
     }
 
     @Override
@@ -296,17 +407,44 @@ public class ProfileActivity extends Fragment {
             // we need to save its reference to a Uri variable
             pickedImgUri = data.getData();
             try {
-                Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), pickedImgUri);
+                Bitmap bitmapOriginal = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), cameraPhotoURI);
+                Matrix matrix = new Matrix();
+                matrix.postScale(0.5f, 0.5f);
+                Bitmap bitmap = Bitmap.createBitmap(bitmapOriginal, 100, 100,100, 100, matrix, true);
                 savePictureOnSharedPrefrences("galleryProfilePicture", bitmap);
                 profilePicture.setImageBitmap(bitmap);
 
                 Bitmap bmpCopy = bitmap.copy(bitmap.getConfig(), true);
-                MyTaskParams myTaskParams = new MyTaskParams("gallery",bmpCopy);
+                MyTaskParams myTaskParams = new MyTaskParams("gallery", bmpCopy);
                 new UploadToStorage().execute(myTaskParams);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
+            }
+
+
+        } else if (resultCode == RESULT_OK && requestCode == CAMERACODE) {
+
+            // the user has successfully picked an image
+            // we need to save its reference to a Uri variable
+            if (cameraPhotoURI != null) {
+                try {
+                    Bitmap bitmapOriginal = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), cameraPhotoURI);
+                    Matrix matrix = new Matrix();
+                    matrix.postScale(0.5f, 0.5f);
+                    Bitmap bitmap = Bitmap.createBitmap(bitmapOriginal, 100, 100,100, 100, matrix, true);
+                    savePictureOnSharedPrefrences("galleryProfilePicture", bitmap);
+                    profilePicture.setImageBitmap(bitmap);
+
+                    Bitmap bmpCopy = bitmap.copy(bitmap.getConfig(), true);
+                    MyTaskParams myTaskParams = new MyTaskParams("gallery", bmpCopy);
+                    new UploadToStorage().execute(myTaskParams);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
 
 
@@ -367,10 +505,10 @@ public class ProfileActivity extends Fragment {
         @Override
         protected Void doInBackground(MyTaskParams... params) {
             //cancel ongoing upload
-            if (uploadTask != null && (uploadTask.isInProgress() || uploadTask.isPaused()) ) {
+            if (uploadTask != null && (uploadTask.isInProgress() || uploadTask.isPaused())) {
                 uploadTask.cancel();
             }
-            storeProfilePhoto(params[0].photoSource,params[0].imageBitmap);
+            storeProfilePhoto(params[0].photoSource, params[0].imageBitmap);
             return null;
         }
 
@@ -379,7 +517,7 @@ public class ProfileActivity extends Fragment {
         }
 
         protected void onPostExecute() {
-        //            showDialog("Downloaded " + result + " bytes");
+            //            showDialog("Downloaded " + result + " bytes");
         }
 
     }
@@ -388,7 +526,7 @@ public class ProfileActivity extends Fragment {
         @Override
         protected Void doInBackground(Void... voids) {
             //cancel ongoing upload
-            if (uploadTask != null && (uploadTask.isInProgress() || uploadTask.isPaused()) ) {
+            if (uploadTask != null && (uploadTask.isInProgress() || uploadTask.isPaused())) {
                 uploadTask.cancel();
             }
             loadProfilePhoto();
@@ -410,7 +548,7 @@ public class ProfileActivity extends Fragment {
         StorageReference userStorage = storageRef.child(getUid());
         StorageReference profilePictureRef = userStorage.child(getUid() + "/profilePicture.JPEG");
 
-        storageRef.child("users/"+getUid()+"/profilePicture.JPEG").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+        storageRef.child("users/" + getUid() + "/profilePicture.JPEG").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override
             public void onSuccess(Uri uri) {
                 // Got the download URL for 'users/Uid/profilePicture.JPEG'
@@ -432,13 +570,13 @@ public class ProfileActivity extends Fragment {
 
     // simple method to show toast message
     private void showMessage(String message) {
-        Toast.makeText(getContext(),message,Toast.LENGTH_LONG).show();
+        Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
     }
 
     private void setLogOutButton(View view) {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         boolean isLoggedInOnFacebook = accessToken != null && !accessToken.isExpired();
-        if (isLoggedInOnFacebook){
+        if (isLoggedInOnFacebook) {
             view.findViewById(R.id.logOutButton).setVisibility(View.INVISIBLE);
             view.findViewById(R.id.facebook_log_out_button).setOnClickListener(
                     new View.OnClickListener() {
@@ -448,7 +586,7 @@ public class ProfileActivity extends Fragment {
                         }
                     }
             );
-        }else{
+        } else {
             view.findViewById(R.id.facebook_log_out_button).setVisibility(View.INVISIBLE);
             view.findViewById(R.id.logOutButton).setOnClickListener(
                     new View.OnClickListener() {
@@ -464,13 +602,13 @@ public class ProfileActivity extends Fragment {
     private DocumentReference getUserDocument() {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(getActivity());
-        if(mAuth.getCurrentUser() !=null){
+        if (mAuth.getCurrentUser() != null) {
             return db.collection("users")
                     .document(mAuth.getUid());
-        }else if (googleAccount != null) {
+        } else if (googleAccount != null) {
             return db.collection("users")
                     .document(googleAccount.getId());
-        }else{
+        } else {
             return db.collection("users")
                     .document(accessToken.getUserId());
         }
@@ -490,7 +628,7 @@ public class ProfileActivity extends Fragment {
                                 Double avgWPM = document.getDouble("avgWPM");
                                 Double avgCPM = document.getDouble("avgCPM");
                                 Double totalScore = document.getDouble("TotalScore");
-                                setStatisticsTextViews(view,avgAccuracy,avgWPM,avgCPM,totalScore);
+                                setStatisticsTextViews(view, avgAccuracy, avgWPM, avgCPM, totalScore);
                             } else {
                                 Log.d(TAG, "No such document - reading statistics");
                             }
@@ -513,12 +651,12 @@ public class ProfileActivity extends Fragment {
         totalScoreText.setText(String.valueOf(df.format(totalScore)));
     }
 
-    public void moveToFriendsActivity(View view){
-        Intent intent = new Intent(getActivity(),FriendsActivity.class);
+    public void moveToFriendsActivity(View view) {
+        Intent intent = new Intent(getActivity(), FriendsActivity.class);
         startActivity(intent);
     }
 
-    public void facebookLogOut(View view){
+    public void facebookLogOut(View view) {
         new GraphRequest(AccessToken.getCurrentAccessToken(), "/me/permissions/", null, HttpMethod.DELETE, new GraphRequest
                 .Callback() {
             @Override
@@ -532,22 +670,22 @@ public class ProfileActivity extends Fragment {
         }).executeAsync();
     }
 
-    public void logOut(View view){
+    public void logOut(View view) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(getActivity());
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         boolean isLoggedInOnFacebook = accessToken != null && !accessToken.isExpired();
-        if(currentUser != null && account==null){
+        if (currentUser != null && account == null) {
             mAuth.signOut();
             Intent i = new Intent(getActivity(), MainActivity.class);
             getActivity().finish();
             startActivity(i);
-        }else{
+        } else {
             GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestIdToken(getString(R.string.default_web_client_id))
                     .requestEmail()
                     .build();
-            GoogleSignInClient client = GoogleSignIn.getClient(getActivity(),gso);
+            GoogleSignInClient client = GoogleSignIn.getClient(getActivity(), gso);
             client.signOut()
                     .addOnCompleteListener(getActivity(), new OnCompleteListener<Void>() {
                         @Override
@@ -565,13 +703,16 @@ public class ProfileActivity extends Fragment {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(getContext());
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        if (currentUser!=null){
+        if (currentUser != null) {
             return mAuth.getUid();
-        }else if (account != null){
+        } else if (account != null) {
             return account.getId();
-        }else{
+        } else {
             return accessToken.getUserId();
         }
     }
 
+
 }
+
+

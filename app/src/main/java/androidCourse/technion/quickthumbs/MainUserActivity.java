@@ -2,6 +2,7 @@ package androidCourse.technion.quickthumbs;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
@@ -283,7 +284,7 @@ public class MainUserActivity extends Fragment {
     }
 
     private void setOpeningSplashScreen() {
-        AppOpeningSplashScreen.Builder splash = new AppOpeningSplashScreen.Builder(getActivity(), null);
+        AppOpeningSplashScreen.Builder splash = new AppOpeningSplashScreen.Builder(getActivity());
         //        Set custom color of background:
         splash.setBackgroundColor(getResources().getColor(R.color.primaryColor));
         //Set custom image for background:
