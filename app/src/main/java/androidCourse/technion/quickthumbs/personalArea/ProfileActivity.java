@@ -54,6 +54,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.dynamiclinks.DynamicLink;
+import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -137,6 +139,14 @@ public class ProfileActivity extends Fragment {
 
         loadPictureFromSharedPrefrences();
 
+        view.findViewById(R.id.shareButton).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        onShareClicked();
+                    }
+                }
+        );
     }
 
     private void setCameraPictureLoadListener(View view) {
@@ -713,6 +723,32 @@ public class ProfileActivity extends Fragment {
     }
 
 
+    private static Uri generateContentLink() {
+        Uri baseUrl = Uri.parse("https:///invite-quick-thumbs.page.link");
+        String domain = "https://quickthumbs.page.link";
+
+        DynamicLink link = FirebaseDynamicLinks.getInstance()
+                .createDynamicLink()
+                .setLink(baseUrl)
+                .setDomainUriPrefix(domain)
+                .setAndroidParameters
+                        (new DynamicLink.AndroidParameters.Builder("androidCourse.technion.quickthumbs").build())
+                .buildDynamicLink();
+
+        return link.getUri();
+    }
+
+    private void onShareClicked() {
+        Uri link = generateContentLink();
+
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        intent.setType("text/plain");
+        intent.putExtra(Intent.EXTRA_TEXT, link.toString());
+
+        startActivity(Intent.createChooser(intent, "Share Link"));
+    }
+
 }
+
 
 
