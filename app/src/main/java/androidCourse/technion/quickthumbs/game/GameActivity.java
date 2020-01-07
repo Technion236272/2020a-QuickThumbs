@@ -56,10 +56,6 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -68,8 +64,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import io.opencensus.trace.Span;
 
 import static androidCourse.technion.quickthumbs.FirestoreConstants.accuracyField;
 import static androidCourse.technion.quickthumbs.FirestoreConstants.CPMField;
@@ -148,7 +142,8 @@ public class GameActivity extends AppCompatActivity {
     private boolean soundsOn = false;
     MediaPlayer positiveMediaPlayer;
     MediaPlayer negativeMediaPlayer;
-
+    private String gameRoomKey;
+    private int playerIndexInRoom;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -313,8 +308,14 @@ public class GameActivity extends AppCompatActivity {
             String numberOfTimesPlayed = i.getExtras().getString("playCount");
             String bestScore = i.getExtras().getString("bestScore");
             String fastestSpeed = i.getExtras().getString("fastestSpeed");
+            String roomKey = i.getExtras().getString("roomKey");
+            int indexInRoom = i.getExtras().getInt("indexInRoom");
             selectedTextItem = new TextDataRow(id, title, theme, text, date, composer,
-                    rating, numberOfTimesPlayed, bestScore, fastestSpeed);
+                    rating, numberOfTimesPlayed, bestScore, fastestSpeed,roomKey,indexInRoom);
+
+            gameRoomKey = roomKey;
+            playerIndexInRoom = indexInRoom;
+
             changed = true;
         }
         if (changed == true) {

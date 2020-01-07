@@ -46,6 +46,7 @@ public class ThemeSelectPopUp {
     private CountDownTimer timer;
     private TextView timerTextView;
     private View contextView;
+
     public void showPopupWindow(final View view, View callingLayout) {
         this.contextView = view;
         LayoutInflater inflater = (LayoutInflater) view.getContext()
@@ -91,6 +92,7 @@ public class ThemeSelectPopUp {
 
             }
         };
+
         timer.start();
     }
 

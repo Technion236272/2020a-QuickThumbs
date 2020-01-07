@@ -4,64 +4,73 @@
     android:layout_height="match_parent"
     android:fillViewport="true">
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="@drawable/gradiant_color"
-    android:id="@+id/RelativeLayout1"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-
-    <RelativeLayout
-        android:id="@+id/userLoadingLayout"
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/RelativeLayout1"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:visibility="invisible">
+        android:layout_height="wrap_content"
+        android:background="@drawable/gradiant_color">
 
-        <TextView
-            android:id="@+id/gameLoadingText"
+        <RelativeLayout
+            android:id="@+id/userLoadingLayout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:text="Loading ..."
-            android:background="@color/primaryDarkColor"
-            android:gravity="center"
-            android:textColor="@color/primaryTextColor"
-            android:textSize="17sp" />
+            android:orientation="vertical"
+            android:visibility="invisible">
+
+            <TextView
+                android:id="@+id/gameLoadingText"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/primaryDarkColor"
+                android:gravity="center"
+                android:text="Loading ..."
+                android:textColor="@color/primaryTextColor"
+                android:textSize="17sp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/relative_2"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true">
+
+            <ImageView
+                android:id="@+id/logo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginBottom="50dp"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/logo"
+                android:src="@drawable/logo" />
+
+            <RelativeLayout
+                android:id="@+id/relative_1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/logo"
+                android:layout_centerHorizontal="true"
+                android:paddingLeft="50dp"
+                android:paddingRight="50dp">
+
+                <Button
+                    android:id="@+id/startGameButton"
+                    style="@style/SecondaryColorRoundedButton"
+                    android:layout_width="fill_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:layout_centerHorizontal="true"
+                    android:text="@string/startGame" />
+
+                <Button
+                    android:id="@+id/startMultiGameButton"
+                    style="@style/SecondaryColorRoundedButton"
+                    android:layout_width="fill_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:text="start multiplayer"
+                    android:layout_below="@id/startGameButton"/>
+
+            </RelativeLayout>
+        </RelativeLayout>
     </RelativeLayout>
-
-    <RelativeLayout
-        android:id="@+id/relative_2"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true">
-
-    <ImageView
-        android:id="@+id/logo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="50dp"
-        android:layout_alignParentTop="true"
-        android:adjustViewBounds="true"
-        android:contentDescription="@string/logo"
-        android:src="@drawable/logo" />
-
-    <RelativeLayout
-        android:id="@+id/relative_1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@id/logo"
-        android:paddingLeft="50dp"
-        android:paddingRight="50dp">
-
-    <Button
-        android:id="@+id/startGameButton"
-        android:layout_centerHorizontal="true"
-        style="@style/SecondaryColorRoundedButton"
-        android:layout_width="fill_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:text="@string/startGame" />
-    </RelativeLayout>
-    </RelativeLayout>
-</RelativeLayout>
 </ScrollView>
