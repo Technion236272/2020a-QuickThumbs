@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
@@ -15,7 +14,6 @@ import androidCourse.technion.quickthumbs.R;
 
 import androidCourse.technion.quickthumbs.multiplayerSearch.Room;
 import androidCourse.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
-import androidCourse.technion.quickthumbs.personalArea.ProfileActivity;
 import androidCourse.technion.quickthumbs.theme.ThemeSelectPopUp;
 
 import android.util.Log;
@@ -48,8 +46,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.SetOptions;
-import com.google.firebase.firestore.WriteBatch;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -57,7 +53,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.function.Function;
 
 
 public class MainUserActivity extends Fragment {
@@ -90,7 +85,7 @@ public class MainUserActivity extends Fragment {
         fireBaseAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         FirebaseDatabase instance = FirebaseDatabase.getInstance();
-//        instance.setPersistenceEnabled(true);
+
         mDatabase = instance.getReference().child("searchAndGame");
         searchingRooms = mDatabase.child("searchingRooms");
         searchingRoomsLevel1 = searchingRooms.child("level1");
@@ -198,30 +193,32 @@ public class MainUserActivity extends Fragment {
 
     private void startMultiplayerGameWhenGameCreatedForThisRoom(final String roomKey, final String textId, final int indexInRoom) {
         gameRooms.child(roomKey).addValueEventListener(new ValueEventListener() {
-                                                           @Override
-                                                           public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                               if (!dataSnapshot.exists() ||
-                                                                       dataSnapshot.getValue(Room.class).user2 == null) {
-                                                                   return;
-                                                               }
+                                                                                                   @Override
+                                                                                                   public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                                                       if (!dataSnapshot.exists() ||
+                                                                                                               dataSnapshot.getValue(Room.class).user2 == null) {
+                                                                                                           return;
+                                                                                                       }
 
-                                                               startMultiGameButton.setClickable(true);
-                                                               //game starts here;
-                                                               Context context = getActivity().getApplicationContext();
-                                                               Intent i = new Intent(context, GameLoadingSplashScreenActivity.class);
-                                                               i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                                                               i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                               i.putExtra("id", textId);
-                                                               i.putExtra("roomKey", roomKey);
-                                                               i.putExtra("indexInRoom", indexInRoom);
-                                                               context.startActivity(i);
-                                                           }
+                                                                                                       startMultiGameButton.setClickable(true);
+                                                                                                       //game starts here;
+                                                                                                       Context context = getActivity().getApplicationContext();
+                                                                                                       Intent i = new Intent(context, GameLoadingSplashScreenActivity.class);
+                                                                                                       i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                                                                                                       i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                                                                       i.putExtra("id", textId);
+                                                                                                       i.putExtra("roomKey", roomKey);
+                                                                                                       i.putExtra("indexInRoom", indexInRoom);
+                                                                                                       context.startActivity(i);
 
-                                                           @Override
-                                                           public void onCancelled(@NonNull DatabaseError databaseError) {
+                                                                                                       gameRooms.child(roomKey).removeEventListener(this);
+                                                                                                   }
 
-                                                           }
-                                                       }
+                                                                                                   @Override
+                                                                                                   public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                                                   }
+                                                                                               }
 
         );
     }
@@ -457,7 +454,7 @@ public class MainUserActivity extends Fragment {
                             fetchRandomTextSpecifiedForUsers();
                         } else {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                textCardItem = TextDataRow.createTextCardItem(document);
+                                textCardItem = TextDataRow.createTextCardItem(document, null, -1);
                                 String textId = document.getId();
                                 try {
                                     Class<?> c = MainUserActivity.class;

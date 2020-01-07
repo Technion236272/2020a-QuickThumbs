@@ -195,7 +195,7 @@ public class TextsActivity extends Fragment {
     private void fillTextCardList(@NonNull Task<QuerySnapshot> task) {
         for (DocumentSnapshot document:task.getResult()) {
             if ( document.getString("text") == null ) continue;
-            TextDataRow item = TextDataRow.createTextCardItem(document);
+            TextDataRow item = TextDataRow.createTextCardItem(document, null, -1);
             if (loadedRTextsIDs.get(document.getId()) == null ) {
                 loadedRTextsIDs.put(document.getId(),true);
                 textsList.add(item);

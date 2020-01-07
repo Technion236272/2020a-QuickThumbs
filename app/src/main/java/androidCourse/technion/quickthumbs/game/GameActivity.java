@@ -1,6 +1,7 @@
 package androidCourse.technion.quickthumbs.game;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -15,14 +16,13 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 
 import androidCourse.technion.quickthumbs.GameLoadingSplashScreenActivity;
-import androidCourse.technion.quickthumbs.MainUserActivity;
 import androidCourse.technion.quickthumbs.R;
+import androidCourse.technion.quickthumbs.multiplayerSearch.Room;
 import androidCourse.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
 
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextWatcher;
 import android.text.style.BackgroundColorSpan;
@@ -49,6 +49,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -113,7 +120,8 @@ public class GameActivity extends AppCompatActivity {
     private GameWordStatus[] wordFlags;
     private int gameTextWordOffset;
 
-    private final BackgroundColorSpan colorBackGround = new BackgroundColorSpan(Color.rgb(255, 102, 0));
+    private final BackgroundColorSpan wordMarkerForCurrentUser = new BackgroundColorSpan(Color.rgb(255, 102, 0));
+    private final BackgroundColorSpan wordMarkerForOtherGameRoomUser = new BackgroundColorSpan(Color.GRAY);
 
     private long gameStartTimeStamp;    //changing, don't trust this value if you wish to get real starting time.
     private long gameStopTimeStamp;
@@ -144,8 +152,11 @@ public class GameActivity extends AppCompatActivity {
     private boolean soundsOn = false;
     MediaPlayer positiveMediaPlayer;
     MediaPlayer negativeMediaPlayer;
+
+    private DatabaseReference roomReference;
     private String gameRoomKey;
-    private int playerIndexInRoom;
+    private int currentPlayerIndexInRoom;
+    private int previousOtherPlayerIndex;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -155,7 +166,6 @@ public class GameActivity extends AppCompatActivity {
         initializeFields();
 
         setGameTextAndLogicAndEnding(gameTextView);
-
 
         currentWordEditor.setActivated(false);
         gameLoadingLayout.setVisibility(View.VISIBLE);
@@ -170,7 +180,6 @@ public class GameActivity extends AppCompatActivity {
     }
 
     public void gameCreationSequence() {
-
         String gameText = gameTextView.getText().toString();
         ss = new SpannableString(gameText);
         gameTextView.setText(ss, TextView.BufferType.SPANNABLE);
@@ -189,14 +198,88 @@ public class GameActivity extends AppCompatActivity {
         wordsMapper = setWordsMapper(words);
 
         currentWordIndex = -1;
-        moveMarkerToNextWord(colorBackGround);
+        moveMarkerToNextWord(wordMarkerForCurrentUser);
         currentWordIndex = 0;
+
+        if (gameRoomKey != null) {
+            moveUserMarkerToNextWord(wordMarkerForOtherGameRoomUser, 0);
+            setRealTimeListenerForRoomInformationChanges();
+        }
 
         initializeWordFlagsAndPointsDefaultValue(words[0]);
         gameTextWordOffset = 0;
 
         setUpSounds();  //any future sound features should be added here;
+    }
 
+    private void setRealTimeListenerForRoomInformationChanges() {
+        roomReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.exists()) {
+                    return;
+                }
+
+                Room room = dataSnapshot.getValue(Room.class);
+                int toPosition;
+
+                switch (currentPlayerIndexInRoom) {
+                    case 1:
+                        toPosition = room.location2;
+
+                        break;
+                    case 2:
+                        toPosition = room.location1;
+
+                        break;
+                    default:
+                        throw new IllegalStateException("Unexpected value: " + currentPlayerIndexInRoom);
+                }
+
+                if (previousOtherPlayerIndex == toPosition) {   //other player didn't change his position
+                    return;
+                }
+
+                moveUserMarkerToNextWord(wordMarkerForOtherGameRoomUser, toPosition);
+
+                previousOtherPlayerIndex++;
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void updateRemoteUserPosition() {
+        roomReference.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                Room room = mutableData.getValue(Room.class);
+
+                switch (currentPlayerIndexInRoom) {
+                    case 1:
+                        room.location1++;
+
+                        break;
+                    case 2:
+                        room.location2++;
+
+                        break;
+                }
+
+                mutableData.setValue(room);
+
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
+
+            }
+        });
     }
 
     private void comboDisplayChange() {
@@ -313,10 +396,16 @@ public class GameActivity extends AppCompatActivity {
             String roomKey = i.getExtras().getString("roomKey");
             int indexInRoom = i.getExtras().getInt("indexInRoom");
             selectedTextItem = new TextDataRow(id, title, theme, text, date, composer,
-                    rating, numberOfTimesPlayed, bestScore, fastestSpeed,roomKey,indexInRoom);
+                    rating, numberOfTimesPlayed, bestScore, fastestSpeed, roomKey, indexInRoom);
 
             gameRoomKey = roomKey;
-            playerIndexInRoom = indexInRoom;
+            currentPlayerIndexInRoom = indexInRoom;
+
+            if (gameRoomKey != null) {
+                FirebaseDatabase instance = FirebaseDatabase.getInstance();
+                roomReference = instance.getReference().child("searchAndGame").child("GameRooms").child(gameRoomKey);
+                roomReference.keepSynced(true);
+            }
 
             changed = true;
         }
@@ -336,6 +425,7 @@ public class GameActivity extends AppCompatActivity {
         gameTextWordStart = 0;
         gameStartTimeStamp = 0;
         gameStopTimeStamp = 0;
+        previousOtherPlayerIndex = 0;
         needClearance = false;
         forwardCommand = true;
         isPreviousActionIsCorrectOrGameJustStarted = true;
@@ -401,7 +491,7 @@ public class GameActivity extends AppCompatActivity {
                         needClearance = false;
 
                         if (currentWordIndex + 1 != wordsMapper.size()) {
-                            moveMarkerToNextWord(colorBackGround);
+                            moveMarkerToNextWord(wordMarkerForCurrentUser);
                             spaceKeyIncreaseCorrectKeysWhenFullyCorrectWordTyped();
                         }
 
@@ -413,6 +503,10 @@ public class GameActivity extends AppCompatActivity {
                         if (gameTextWordStart != -1) {
                             String currentExpectedWord = wordsMapper.get(currentWordIndex).first;
                             initializeWordFlagsAndPointsDefaultValue(currentExpectedWord);
+
+                            if (gameRoomKey != null) {
+                                updateRemoteUserPosition();
+                            }
 
                         } else {
                             finishGame();
@@ -427,10 +521,6 @@ public class GameActivity extends AppCompatActivity {
                     paintGameTextBasedOnWordFlags();
 
                     forwardCommand = true;
-                }
-
-                if (needClearance) {
-
                 }
 
                 Log.d(TAG, "afterTextChanged finish ...");
@@ -533,7 +623,7 @@ public class GameActivity extends AppCompatActivity {
         if (pressedKey.equals(" ")) {
             if (currentWordIndex + 1 == wordsMapper.size()) {
                 Spannable gameTextSpannable = (Spannable) gameTextView.getText();
-                gameTextSpannable.removeSpan(colorBackGround);
+                gameTextSpannable.removeSpan(wordMarkerForCurrentUser);
             }
 
             needClearance = true;
@@ -883,7 +973,11 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void moveMarkerToNextWord(BackgroundColorSpan color) {
-        Pair<String, Integer> pair = wordsMapper.get(currentWordIndex + 1);
+        moveUserMarkerToNextWord(color, currentWordIndex + 1);
+    }
+
+    private void moveUserMarkerToNextWord(BackgroundColorSpan color, int toIndex) {
+        Pair<String, Integer> pair = wordsMapper.get(toIndex);
         Integer nextWordStartIndex = pair.second;
         String nextWord = pair.first;
 
@@ -891,8 +985,6 @@ public class GameActivity extends AppCompatActivity {
 
         Spannable gameTextSpannable = (Spannable) gameTextView.getText();
         gameTextSpannable.setSpan(color, nextWordStartIndex, lastIndex, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-
-//        gameTextView.setText(ss);
     }
 
     private int getNextStartWordIndex() {
