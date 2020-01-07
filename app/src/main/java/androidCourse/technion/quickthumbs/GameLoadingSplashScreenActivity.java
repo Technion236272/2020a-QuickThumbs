@@ -41,9 +41,6 @@ import java.util.concurrent.TimeUnit;
 
 import gr.net.maroulis.library.EasySplashScreen;
 
-import static android.widget.ImageView.ScaleType.CENTER;
-import static android.widget.ImageView.ScaleType.CENTER_CROP;
-import static android.widget.ImageView.ScaleType.CENTER_INSIDE;
 import static android.widget.ImageView.ScaleType.FIT_XY;
 
 
@@ -67,7 +64,10 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
 
         if (!fromWhichActivityYouCameFrom.hasExtra("text")) {
             if (fromWhichActivityYouCameFrom.hasExtra("id")) {
-                makeIntentFromSelectedText(fromWhichActivityYouCameFrom.getExtras().getString("id"));
+                String textId = fromWhichActivityYouCameFrom.getExtras().getString("id");
+                String roomKey = fromWhichActivityYouCameFrom.getExtras().getString("roomKey");
+                int indexInRoom = fromWhichActivityYouCameFrom.getExtras().getInt("indexInRoom");
+                makeIntentFromSelectedText(textId, roomKey, indexInRoom);
             } else {
                 countDownFromSelectedTheme = 7000;
                 String beforeLogoText = "Choosing From Preferred themes";
@@ -96,7 +96,7 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
         }
     }
 
-    private void makeIntentFromSelectedText(String id) {
+    private void makeIntentFromSelectedText(String id, final String roomKey, final int indexInRoom) {
         db.collection("texts").document(id).
                 get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -107,7 +107,7 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
                     if (data == null) {
                         Log.d(TAG, "getRandomText: another round");
                     } else {
-                        TextDataRow textCardItem = TextDataRow.createTextCardItem(data);
+                        TextDataRow textCardItem = TextDataRow.createTextCardItem(data, roomKey, indexInRoom);
                         final Intent intent = setIntentForTheGame(textCardItem);
                         countDownFromSelectedTheme = 4000;
                         String beforeLogoText = "You choose the text: " + textCardItem.getTitle();
@@ -343,7 +343,7 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
                         } else {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 Log.d(TAG, "getRandomText: " + "DocumentSnapshot data: " + document.getData());
-                                TextDataRow textCardItem = TextDataRow.createTextCardItem(document);
+                                TextDataRow textCardItem = TextDataRow.createTextCardItem(document, null, -1);
                                 int playCount = Integer.parseInt(textCardItem.getNumberOfTimesPlayed());
                                 String composer = textCardItem.getComposer();
                                 changedTextData(playCount, composer, choosenTheme, document.getId());

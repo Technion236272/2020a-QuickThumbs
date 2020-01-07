@@ -20,8 +20,8 @@ public class TextDataRow {
 
     private int indexInRoom;
 
-    public TextDataRow(String id,String title,String themeName, String text,String date,String composer,
-                       double rating,String numberOfTimesPlayed, String bestScore, String fastestSpeed,
+    public TextDataRow(String id, String title, String themeName, String text, String date, String composer,
+                       double rating, String numberOfTimesPlayed, String bestScore, String fastestSpeed,
                        String roomKey, int indexInRoom) {
         this.setID(id);
         this.setTitle(title);
@@ -71,13 +71,21 @@ public class TextDataRow {
         this.text = text;
     }
 
-    public String getDate() { return date; }
+    public String getDate() {
+        return date;
+    }
 
-    public void setDate(String date) {this.date = date;  }
+    public void setDate(String date) {
+        this.date = date;
+    }
 
-    public String getComposer() { return composer; }
+    public String getComposer() {
+        return composer;
+    }
 
-    public void setComposer(String composer) {this.composer = composer;  }
+    public void setComposer(String composer) {
+        this.composer = composer;
+    }
 
     public double getRating() {
         return rating;
@@ -128,10 +136,7 @@ public class TextDataRow {
     }
 
 
-
-
-
-    public static TextDataRow createTextCardItem(DocumentSnapshot document) {
+    public static TextDataRow createTextCardItem(DocumentSnapshot document, String roomKey, int positionInRoom) {
         String id = document.getId();
         String title = document.get("title").toString();
         String theme = document.get("theme").toString();
@@ -151,8 +156,8 @@ public class TextDataRow {
         if (document.getLong("bestScore") != null) {
             bestScore = document.getLong("bestScore").toString();
         }
-        TextDataRow item = new TextDataRow(id,title, theme, text,date,composer, rating,
-                numberOfPlays, bestScore, fastestSpeed,null,0);
+        TextDataRow item = new TextDataRow(id, title, theme, text, date, composer, rating,
+                numberOfPlays, bestScore, fastestSpeed, roomKey, positionInRoom);
 
         return item;
     }
