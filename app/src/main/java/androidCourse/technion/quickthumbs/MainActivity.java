@@ -5,6 +5,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+
+import Utils.AppOpeningSplashScreen;
 import androidCourse.technion.quickthumbs.R;
 import android.util.Log;
 import android.view.View;
@@ -56,6 +58,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        setOpeningSplashScreen();
+
         FirebaseApp.initializeApp(this);
         fireBaseAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
@@ -67,6 +71,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setFacebookSignInConfigurations();
 
         setButtonsListeners();
+    }
+
+    private void setOpeningSplashScreen() {
+        AppOpeningSplashScreen.Builder splash = new AppOpeningSplashScreen.Builder(this, getSupportActionBar());
+        //        Set custom color of background:
+        splash.setBackgroundColor(getResources().getColor(R.color.primaryColor));
+        //Set custom image for background:
+//        splash.setBackgroundImage(getResources().getDrawable(R.mipmap.ic_launcher_foreground));
+        //Set custom image for splash:
+        splash.setSplashImage(getResources().getDrawable(R.drawable.ic_launcher_foreground));
+        //Set custom color of splash image:
+        splash.setSplashImageColor(getResources().getColor(R.color.primaryDarkColor));
+        splash.create();
+//        splash.setOneShotStart(false);
+        splash.perform();
     }
 
 

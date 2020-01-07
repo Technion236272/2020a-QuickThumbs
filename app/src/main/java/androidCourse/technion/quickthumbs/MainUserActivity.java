@@ -10,6 +10,9 @@ import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
+import Utils.AppOpeningSplashScreen;
+import androidCourse.technion.quickthumbs.R;
+
 import androidCourse.technion.quickthumbs.multiplayerSearch.Room;
 import androidCourse.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
 import androidCourse.technion.quickthumbs.personalArea.ProfileActivity;
@@ -114,7 +117,10 @@ public class MainUserActivity extends Fragment {
         );
 
         closeKeyboard();
+
+        setOpeningSplashScreen();
     }
+
 
     private void startSearchForGame() {
         triesCounter = 0;
@@ -277,6 +283,21 @@ public class MainUserActivity extends Fragment {
         boolean isLoggedIn = accessToken != null && !accessToken.isExpired();
         if (checkIfUserLoggedIn(currentUser, account, isLoggedIn)) return;
         //the part where i insert the user to the db just ot make sure he's there in case no user has been made
+    }
+
+    private void setOpeningSplashScreen() {
+        AppOpeningSplashScreen.Builder splash = new AppOpeningSplashScreen.Builder(getActivity(), null);
+        //        Set custom color of background:
+        splash.setBackgroundColor(getResources().getColor(R.color.primaryColor));
+        //Set custom image for background:
+//        splash.setBackgroundImage(getResources().getDrawable(R.mipmap.ic_launcher_foreground));
+        //Set custom image for splash:
+        splash.setSplashImage(getResources().getDrawable(R.drawable.ic_launcher_foreground));
+        //Set custom color of splash image:
+        splash.setSplashImageColor(getResources().getColor(R.color.primaryDarkColor));
+        splash.create();
+//        splash.setOneShotStart(false);
+        splash.perform();
     }
 
     private boolean checkIfUserLoggedIn(FirebaseUser currentUser, GoogleSignInAccount account, boolean isLoggedIn) {
