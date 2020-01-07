@@ -407,12 +407,12 @@ public class ProfileActivity extends Fragment {
             // we need to save its reference to a Uri variable
             pickedImgUri = data.getData();
             try {
-                Bitmap bitmapOriginal = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), cameraPhotoURI);
+                Bitmap bitmapOriginal = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), pickedImgUri  );
                 Matrix matrix = new Matrix();
                 matrix.postScale(0.5f, 0.5f);
                 Bitmap bitmap = Bitmap.createBitmap(bitmapOriginal, 100, 100,100, 100, matrix, true);
-                savePictureOnSharedPrefrences("galleryProfilePicture", bitmap);
-                profilePicture.setImageBitmap(bitmap);
+                savePictureOnSharedPrefrences("galleryProfilePicture", bitmapOriginal);
+                profilePicture.setImageBitmap(Bitmap.createScaledBitmap(bitmapOriginal, 200, 200, false));
 
                 Bitmap bmpCopy = bitmap.copy(bitmap.getConfig(), true);
                 MyTaskParams myTaskParams = new MyTaskParams("gallery", bmpCopy);
@@ -434,8 +434,8 @@ public class ProfileActivity extends Fragment {
                     Matrix matrix = new Matrix();
                     matrix.postScale(0.5f, 0.5f);
                     Bitmap bitmap = Bitmap.createBitmap(bitmapOriginal, 100, 100,100, 100, matrix, true);
-                    savePictureOnSharedPrefrences("galleryProfilePicture", bitmap);
-                    profilePicture.setImageBitmap(bitmap);
+                    savePictureOnSharedPrefrences("galleryProfilePicture", bitmapOriginal);
+                    profilePicture.setImageBitmap(Bitmap.createScaledBitmap(bitmapOriginal, 200, 200, false));
 
                     Bitmap bmpCopy = bitmap.copy(bitmap.getConfig(), true);
                     MyTaskParams myTaskParams = new MyTaskParams("gallery", bmpCopy);
