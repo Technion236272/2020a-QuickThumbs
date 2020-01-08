@@ -724,7 +724,7 @@ public class ProfileActivity extends Fragment {
 
 
     private static Uri generateContentLink() {
-        Uri baseUrl = Uri.parse("https:///invite-quick-thumbs.page.link");
+        Uri baseUrl = Uri.parse("https://play.google.com/store/apps/details?id=androidCourse.technion.quickthumbs");
         String domain = "https://quickthumbs.page.link";
 
         DynamicLink link = FirebaseDynamicLinks.getInstance()
