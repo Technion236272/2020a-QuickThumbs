@@ -1,4 +1,4 @@
-package Utils;
+package androidCourse.technion.quickthumbs.Utils;
 
 import android.app.ActionBar;
 //import androidx.appcompat.app.ActionBar;
@@ -8,8 +8,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Point;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
