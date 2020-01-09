@@ -8,4 +8,11 @@
     <color name="secondaryDarkColor">#c56000</color>
     <color name="primaryTextColor">#ffffff</color>
     <color name="secondaryTextColor">#000000</color>
+    <color name="circle_menu_button_color_normal">#bdbdbd</color>
+    <color name="circle_menu_button_color_pressed">#9e9e9e</color>
+    <color name="circle_menu_button_color_disabled">#ffffff</color>
+
+    <color name="circle_menu_center_button_color_normal">#ffffff</color>
+    <color name="circle_menu_center_button_color_pressed">#eeeeee</color>
+    <color name="circle_menu_center_button_icon_color">#444444</color>
 </resources>

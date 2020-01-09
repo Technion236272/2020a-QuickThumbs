@@ -1,4 +1,4 @@
-package androidCourse.technion.quickthumbs;
+package androidCourse.technion.quickthumbs.Utils;
 
 import android.app.Activity;
 import android.content.Context;

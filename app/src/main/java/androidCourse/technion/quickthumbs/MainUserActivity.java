@@ -2,7 +2,6 @@ package androidCourse.technion.quickthumbs;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
@@ -10,9 +9,8 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 
-import Utils.AppOpeningSplashScreen;
-import androidCourse.technion.quickthumbs.R;
-
+import androidCourse.technion.quickthumbs.Utils.AppOpeningSplashScreen;
+import androidCourse.technion.quickthumbs.Utils.CircleMenuView;
 import androidCourse.technion.quickthumbs.multiplayerSearch.Room;
 import androidCourse.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
 import androidCourse.technion.quickthumbs.theme.ThemeSelectPopUp;
@@ -23,6 +21,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.ImageView;
 
 import androidx.fragment.app.Fragment;
 
@@ -48,12 +47,16 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
+
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+
+import static android.view.View.INVISIBLE;
+import static android.view.View.VISIBLE;
 
 
 public class MainUserActivity extends Fragment {
@@ -67,7 +70,8 @@ public class MainUserActivity extends Fragment {
     DatabaseReference searchingRoomsLevel1;
     DatabaseReference gameRooms;
     private int triesCounter;
-
+    CircleMenuView menu;
+    private View fragmentViewForButton;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -83,38 +87,101 @@ public class MainUserActivity extends Fragment {
     public void onViewCreated (View view,
                                Bundle savedInstanceState){
         final View fragmentView = view;
+        fragmentViewForButton = view;
         fireBaseAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         FirebaseDatabase instance = FirebaseDatabase.getInstance();
+
 
         mDatabase = instance.getReference().child("searchAndGame");
         searchingRooms = mDatabase.child("searchingRooms");
         searchingRoomsLevel1 = searchingRooms.child("level1");
         gameRooms = mDatabase.child("GameRooms");
 
-        gameBtn = view.findViewById(R.id.startGameButton);
-        gameBtn.setOnClickListener(new View.OnClickListener() {
-                                       @Override
-                                       public void onClick(View v) {
-                                           ThemeSelectPopUp popUpWindow = new ThemeSelectPopUp();
-                                           popUpWindow.showPopupWindow(v,fragmentView.findViewById(R.id.RelativeLayout1));
-                                       }
-                                   }
-        );
+        setCircleMenu();
 
-        startMultiGameButton = view.findViewById(R.id.startMultiGameButton);
-        startMultiGameButton.setOnClickListener(new View.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(View v) {
-                                                        startMultiGameButton.setClickable(false);
-                                                        startSearchForGame();
-                                                    }
-                                                }
-        );
+        oldUnUsedButtonsToBeRemoved();
 
         closeKeyboard();
 
         setOpeningSplashScreen();
+    }
+
+    private void oldUnUsedButtonsToBeRemoved() {
+        //        gameBtn = view.findViewById(R.id.startGameButton);
+//        gameBtn.setOnClickListener(new View.OnClickListener() {
+//                                       @Override
+//                                       public void onClick(View v) {
+//                                           ThemeSelectPopUp popUpWindow = new ThemeSelectPopUp();
+//                                           popUpWindow.showPopupWindow(v,fragmentView.findViewById(R.id.RelativeLayout1));
+//                                       }
+//                                   }
+//        );
+//
+//        startMultiGameButton = view.findViewById(R.id.startMultiGameButton);
+//        startMultiGameButton.setOnClickListener(new View.OnClickListener() {
+//                                                    @Override
+//                                                    public void onClick(View v) {
+//                                                        startMultiGameButton.setClickable(false);
+//                                                        startSearchForGame();
+//                                                    }
+//                                                }
+//        );
+    }
+
+    private void setCircleMenu() {
+        menu = getActivity().findViewById(R.id.circle_menu);
+        menu.setEventListener(new CircleMenuView.EventListener() {
+            @Override
+            public void onMenuOpenAnimationStart(@NonNull CircleMenuView view) {
+                Log.d("D", "onMenuOpenAnimationStart");
+            }
+
+            @Override
+            public void onMenuOpenAnimationEnd(@NonNull CircleMenuView view) {
+                Log.d("D", "onMenuOpenAnimationEnd");
+            }
+
+            @Override
+            public void onMenuCloseAnimationStart(@NonNull CircleMenuView view) {
+                Log.d("D", "onMenuCloseAnimationStart");
+            }
+
+            @Override
+            public void onMenuCloseAnimationEnd(@NonNull CircleMenuView view) {
+                Log.d("D", "onMenuCloseAnimationEnd");
+            }
+
+            @Override
+            public void onButtonClickAnimationStart(@NonNull CircleMenuView view, int index) {
+                Log.d("D", "onButtonClickAnimationStart| index: " + index);
+
+            }
+
+            @Override
+            public void onButtonClickAnimationEnd(@NonNull CircleMenuView view, int index) {
+                Log.d("D", "onButtonClickAnimationEnd| index: " + index);
+                switch (index){
+                    case 0:
+                        ThemeSelectPopUp popUpWindow = new ThemeSelectPopUp();
+                        popUpWindow.showPopupWindow(fragmentViewForButton,fragmentViewForButton.findViewById(R.id.RelativeLayout1));
+
+                        break;
+                    case 1:
+                        menu.setClickable(false);
+                        startSearchForGame();
+
+                        break;
+
+                    case 2:
+                    default:
+                        menu.setClickable(false);
+                        startSearchForGame();
+
+                        break;
+                }
+            }
+        });
     }
 
 
@@ -157,7 +224,7 @@ public class MainUserActivity extends Fragment {
                             @Override
                             public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
                                 if (b) {  //was committed
-                                    startMultiGameButton.setClickable(true);
+                                    menu.setClickable(true);
 
                                     Room gameRoom = dataSnapshot.child("GameRooms").child(roomKey).getValue(Room.class);
                                     String textId = gameRoom.textId;
@@ -201,7 +268,7 @@ public class MainUserActivity extends Fragment {
                                                                                                            return;
                                                                                                        }
 
-                                                                                                       startMultiGameButton.setClickable(true);
+                                                                                                       menu.setClickable(true);
                                                                                                        //game starts here;
                                                                                                        Context context = getActivity().getApplicationContext();
                                                                                                        Intent i = new Intent(context, GameLoadingSplashScreenActivity.class);
@@ -253,17 +320,17 @@ public class MainUserActivity extends Fragment {
         if (checkIfUserLoggedIn(currentUser, account, isLoggedIn)) return;
     }
 
-    private void setButtonListener(Button button, final Class<? extends AppCompatActivity> moveToActivityClass) {
-        button.setOnClickListener(new View.OnClickListener() {
-                                      @Override
-                                      public void onClick(View v) {
-                                          if (v.getId() == R.id.startGameButton) {
-                                              startActivity(new Intent(getActivity(), moveToActivityClass));
-                                          }
-                                      }
-                                  }
-        );
-    }
+//    private void setButtonListener(Button button, final Class<? extends AppCompatActivity> moveToActivityClass) {
+//        button.setOnClickListener(new View.OnClickListener() {
+//                                      @Override
+//                                      public void onClick(View v) {
+//                                          if (v.getId() == R.id.startGameButton) {
+//                                              startActivity(new Intent(getActivity(), moveToActivityClass));
+//                                          }
+//                                      }
+//                                  }
+//        );
+//    }
 
 
     @Override

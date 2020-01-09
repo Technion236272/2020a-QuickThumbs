@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:fillViewport="true">
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -11,66 +13,73 @@
         android:background="@drawable/gradiant_color">
 
         <RelativeLayout
-            android:id="@+id/userLoadingLayout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:visibility="invisible">
-
-            <TextView
-                android:id="@+id/gameLoadingText"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@color/primaryDarkColor"
-                android:gravity="center"
-                android:text="Loading ..."
-                android:textColor="@color/primaryTextColor"
-                android:textSize="17sp" />
-        </RelativeLayout>
-
-        <RelativeLayout
             android:id="@+id/relative_2"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_centerVertical="true">
 
-            <ImageView
-                android:id="@+id/logo"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_marginBottom="50dp"
+<!--            <ImageView-->
+<!--                android:id="@+id/mainLogo"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:adjustViewBounds="true"-->
+<!--                android:contentDescription="@string/logo"-->
+<!--                android:layout_centerInParent="true"-->
+<!--                android:src="@drawable/logo" />-->
+
+            <androidCourse.technion.quickthumbs.Utils.CircleMenuView
+                android:id="@+id/circle_menu"
+                android:layout_width="420dp"
+                android:layout_height="300dp"
                 android:adjustViewBounds="true"
-                android:contentDescription="@string/logo"
-                android:src="@drawable/logo" />
+                app:button_colors="@array/colors"
+                app:button_icons="@array/icons"
+                android:layout_centerInParent="true"
+                android:src="@drawable/logo"/>
 
-            <RelativeLayout
-                android:id="@+id/relative_1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/logo"
-                android:layout_centerHorizontal="true"
-                android:paddingLeft="50dp"
-                android:paddingRight="50dp">
+<!--            <com.google.android.material.floatingactionbutton.FloatingActionButton-->
+<!--                android:id="@+id/circle_menu_main_button"-->
+<!--                android:layout_gravity="center"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:src="@drawable/logo"-->
+<!--                app:backgroundTint="@android:color/white"/>-->
 
-                <Button
-                    android:id="@+id/startGameButton"
-                    style="@style/SecondaryColorRoundedButton"
-                    android:layout_width="fill_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:layout_centerHorizontal="true"
-                    android:text="@string/startGame" />
+<!--            <RelativeLayout-->
+<!--                android:id="@+id/relative_1"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_below="@id/logo"-->
+<!--                android:layout_centerHorizontal="true"-->
+<!--                android:paddingLeft="50dp"-->
+<!--                android:paddingRight="50dp">-->
 
-                <Button
-                    android:id="@+id/startMultiGameButton"
-                    style="@style/SecondaryColorRoundedButton"
-                    android:layout_width="fill_parent"
-                    android:layout_height="?attr/actionBarSize"
-                    android:text="start multiplayer"
-                    android:layout_below="@id/startGameButton"/>
+<!--                <Button-->
+<!--                    android:id="@+id/startGameButton"-->
+<!--                    style="@style/SecondaryColorRoundedButton"-->
+<!--                    android:layout_width="fill_parent"-->
+<!--                    android:layout_height="?attr/actionBarSize"-->
+<!--                    android:layout_centerHorizontal="true"-->
+<!--                    android:text="@string/startGame" />-->
 
-            </RelativeLayout>
+<!--                <Button-->
+<!--                    android:id="@+id/startMultiGameButton"-->
+<!--                    style="@style/SecondaryColorRoundedButton"-->
+<!--                    android:layout_width="fill_parent"-->
+<!--                    android:layout_height="?attr/actionBarSize"-->
+<!--                    android:text="start multiplayer"-->
+<!--                    android:layout_below="@id/startGameButton"/>-->
+
+<!--            </RelativeLayout>-->
+<!--            <RelativeLayout-->
+<!--                android:id="@+id/relative_3"-->
+<!--                android:layout_width="match_parent"-->
+<!--                android:layout_height="match_parent"-->
+<!--                android:layout_centerHorizontal="true"-->
+<!--                android:layout_centerVertical="true">-->
+<!--            </RelativeLayout>-->
+
         </RelativeLayout>
     </RelativeLayout>
 </ScrollView>
