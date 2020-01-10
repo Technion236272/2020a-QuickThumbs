@@ -60,7 +60,7 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        CacheHandler cacheHandler = new CacheHandler(getApplicationContext(), db, mAuth);
+        CacheHandler cacheHandler = new CacheHandler(getApplicationContext());
         allUserThemes = cacheHandler.loadThemesFromSharedPreferences();
 
         setScreenModifications();

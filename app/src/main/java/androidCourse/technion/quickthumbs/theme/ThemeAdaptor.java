@@ -54,7 +54,7 @@ public class ThemeAdaptor extends RecyclerView.Adapter<ThemeViewHolder> {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 //        selectedThemes=selected;
-        cacheHandler = new CacheHandler(context, db, mAuth);
+        cacheHandler = new CacheHandler(context);
         selectedThemes = cacheHandler.loadThemesFromSharedPreferences();
 
         countDownTimer=timer;
