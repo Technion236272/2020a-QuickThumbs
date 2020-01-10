@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 
+import androidCourse.technion.quickthumbs.Utils.CacheHandler;
 import androidCourse.technion.quickthumbs.game.GameActivity;
 import androidCourse.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
 
@@ -59,6 +60,9 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        CacheHandler cacheHandler = new CacheHandler(getApplicationContext(), db, mAuth);
+        allUserThemes = cacheHandler.loadThemesFromSharedPreferences();
+
         setScreenModifications();
         Intent fromWhichActivityYouCameFrom = getIntent();
 
@@ -226,67 +230,24 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
             return null;
         }
 
-        public void fetchRandomTextSpecifiedForUsers() {
-            getAllThemes();
+        public void changeSplashUI(String choosenTheme) {
+            final String choosenThemeName = choosenTheme;
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    // Stuff that updates the UI
+                    config.getLogo().setImageResource(getThemePictureId(choosenThemeName));
+//            config.getLogo().setScaleType(CENTER);
+                    config.getBeforeLogoTextView().setText("Chosen Theme is: " + choosenThemeName);
+                    config.getAfterLogoTextView().setText("Loading the text");                }
+            });
         }
 
-        private void getAllThemes() {
-            CollectionReference themesCollection = getThemesCollection();
-            themesCollection.get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if (task.isSuccessful()) {
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    insertThemesFromAllThemes(document, true);
-                                }
-                                getUserThemes();
-                            } else {
-                                insertBasicThemes(task);
-                                getUserThemes();
-                            }
-                        }
-                    });
-        }
-
-        private void insertBasicThemes(@NonNull Task<QuerySnapshot> task) {
-            for (int i = 0; i < basicThemes.length; i++) {
-                allUserThemes.put(basicThemes[i], true);
-            }
-        }
-
-        public void insertThemesFromAllThemes(QueryDocumentSnapshot document, Boolean isChosen) {
-            String currentThemeName = document.getId();
-            allUserThemes.put(currentThemeName, isChosen);
-        }
-
-        private void getUserThemes() {
-            getUserCollection(getUid(), "themes").get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if (task.isSuccessful()) {
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    Log.d(TAG, "getUserThemes:" + document.getId() + " => " + document.getData());
-                                    insertThemesFromAllThemes(document, document.getBoolean("isChosen"));
-                                }
-                                getRandomTheme();
-                            } else {
-                                //there is no user prefences- take all -> don't change the themes
-                                Log.d(TAG, "getUserThemes:" + "Error getting documents: ", task.getException());
-                                getRandomTheme();
-                            }
-                        }
-                    });
-        }
-
-        private void getRandomTheme() {
+        private void fetchRandomTextSpecifiedForUsers() {
             sleep(1);
             final String choosenTheme = getRandomThemeName();
-            config.getLogo().setImageResource(getThemePictureId(choosenTheme));
-//            config.getLogo().setScaleType(CENTER);
-            config.getBeforeLogoTextView().setText("Chosen Theme is: " + choosenTheme);
-            config.getAfterLogoTextView().setText("Loading the text");
+            changeSplashUI(choosenTheme);
+
             //now reach for the theme texts and check the number of texts in the theme
             getThemesCollection().document(choosenTheme).
                     get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -320,7 +281,7 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
             }
             // if the user has no themes selected we will choose all for him
             if (userChosenThemes.isEmpty()) {
-                for (String theme : allUserThemes.keySet()) {
+                for (String theme : basicThemes) {
                     userChosenThemes.add(theme);
                 }
             }
