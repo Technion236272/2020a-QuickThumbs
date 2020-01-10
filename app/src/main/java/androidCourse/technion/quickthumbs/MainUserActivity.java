@@ -383,7 +383,7 @@ public class MainUserActivity extends Fragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            CacheHandler cacheHandler = new CacheHandler(getContext(), db, fireBaseAuth);
+            CacheHandler cacheHandler = new CacheHandler(getContext());
             allUserThemes = cacheHandler.loadThemesFromSharedPreferences();
             fetchRandomTextSpecifiedForUsers();
 

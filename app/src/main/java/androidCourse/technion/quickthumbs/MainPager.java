@@ -25,6 +25,8 @@ import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import static androidCourse.technion.quickthumbs.personalArea.ProfileActivity.profilePicture;
+
 
 public class MainPager extends AppCompatActivity {
     private FragmentPagerAdapter adapterViewPager;
@@ -62,6 +64,16 @@ public class MainPager extends AppCompatActivity {
 
         setPagerOnChangeListener();
         vpPager.setCurrentItem(1);
+
+        getDataFromDB();
+    }
+
+    private void getDataFromDB() {
+        FirebaseAuth fireBaseAuth = FirebaseAuth.getInstance();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CacheHandler cacheHandler = new CacheHandler(getApplicationContext());
+        cacheHandler.getPersonalThemesDataFromDB();
+        new CacheHandler.DownloadFromStorage().execute();
     }
 
     private void turnDotIndicatorToInvisible(TabLayout tabLayout) {
@@ -260,17 +272,18 @@ public class MainPager extends AppCompatActivity {
         super.finish();
         FirebaseAuth fireBaseAuth = FirebaseAuth.getInstance();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
-        CacheHandler cacheHandler = new CacheHandler(getApplicationContext(), db, fireBaseAuth);
+        CacheHandler cacheHandler = new CacheHandler(getApplicationContext());
         cacheHandler.updateUserThemesSelectionOnDB();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        FirebaseAuth fireBaseAuth = FirebaseAuth.getInstance();
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        CacheHandler cacheHandler = new CacheHandler(getApplicationContext(), db, fireBaseAuth);
-        cacheHandler.getPersonalThemesDataFromDB();
+//        FirebaseAuth fireBaseAuth = FirebaseAuth.getInstance();
+//        FirebaseFirestore db = FirebaseFirestore.getInstance();
+//        CacheHandler cacheHandler = new CacheHandler(getApplicationContext());
+//        cacheHandler.getPersonalThemesDataFromDB();
+//        new CacheHandler.DownloadFromStorage().execute();
     }
 }
 

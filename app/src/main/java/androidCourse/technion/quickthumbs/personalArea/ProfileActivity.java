@@ -24,6 +24,7 @@ import android.os.Bundle;
 
 import androidCourse.technion.quickthumbs.MainActivity;
 import androidCourse.technion.quickthumbs.R;
+import androidCourse.technion.quickthumbs.Utils.CacheHandler;
 import androidCourse.technion.quickthumbs.game.GameActivity;
 
 import android.os.Environment;
@@ -90,7 +91,7 @@ public class ProfileActivity extends Fragment {
     private FirebaseAuth mAuth;
     private FirebaseStorage storage;
     private static final String TAG = GameActivity.class.getSimpleName();
-    private ImageView profilePicture;
+    public static ImageView profilePicture;
     private ImageView galleryButton;
     private ImageButton cameraButton;
     private Uri pickedImgUri;
@@ -98,10 +99,8 @@ public class ProfileActivity extends Fragment {
     //Next lines are Strings used as params
     public static String FACEBOOK_FIELD_PROFILE_IMAGE = "picture.type(large)";
     public static String FACEBOOK_FIELDS = "fields";
-    public static final String MyPREFERENCES = "ProfilePrefs";
     private SharedPreferences sharedpreferences;
-    private UploadTask uploadTask;
-
+    private CacheHandler cacheHandler;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -119,25 +118,16 @@ public class ProfileActivity extends Fragment {
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
-        uploadTask = null;
         cameraPhotoURI = null;
         profilePicture = view.findViewById(R.id.profilePicture);
+        cacheHandler = new CacheHandler(getContext());
 
         displayStatistics(view);
 
         setLogOutButton(view);
 
 
-        setGalleryPictureLoadListener(view);
-
-        setCameraPictureLoadListener(view);
-
-
-        StrictMode.ThreadPolicy policy = new
-                StrictMode.ThreadPolicy.Builder().permitAll().build();
-        StrictMode.setThreadPolicy(policy);
-
-        loadPictureFromSharedPrefrences();
+        profilePictureSettings(view);
 
         view.findViewById(R.id.shareButton).setOnClickListener(
                 new View.OnClickListener() {
@@ -147,6 +137,29 @@ public class ProfileActivity extends Fragment {
                     }
                 }
         );
+    }
+
+    private void profilePictureSettings(View view) {
+        setGalleryPictureLoadListener(view);
+
+        setCameraPictureLoadListener(view);
+
+        StrictMode.ThreadPolicy policy = new
+                StrictMode.ThreadPolicy.Builder().permitAll().build();
+        StrictMode.setThreadPolicy(policy);
+
+        boolean isImageLoaded = cacheHandler.loadPictureFromSharedPrefrences(profilePicture);
+        if (isImageLoaded){
+            return;
+        }
+//        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+//        boolean isLoggedInOnFacebook = accessToken != null && !accessToken.isExpired();
+//        GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(getActivity());
+//        if (isLoggedInOnFacebook){
+//            setFacebookProfilePicture();
+//        }else if (googleAccount != null){
+//            setGoogleProfilePicture();
+//        }
     }
 
     private void setCameraPictureLoadListener(View view) {
@@ -187,54 +200,7 @@ public class ProfileActivity extends Fragment {
         });
     }
 
-    private void loadPictureFromSharedPrefrences() {
-        SharedPreferences sharedPreferences = getContext().getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
-        Boolean isUsingGalleryPhoto = sharedPreferences.getBoolean("galleryProfilePicture", false);
-        Boolean isUsingFacebookPhoto = sharedPreferences.getBoolean("facebookProfilePicture", false);
-        Boolean isUsingGooglePhoto = sharedPreferences.getBoolean("googleProfilePicture", false);
-        if (isUsingGalleryPhoto || isUsingFacebookPhoto || isUsingGooglePhoto) {
-            String getImageBitmap = sharedPreferences.getString("ProfilePictureBitmapEncoded", "");
-            profilePicture.setImageBitmap(decodeBase64(getImageBitmap));
-            return;
-        }
-        setFacebookProfilePicture();
-        isUsingFacebookPhoto = sharedPreferences.getBoolean("facebookProfilePicture", false);
-        if (!isUsingFacebookPhoto) {
-            setGoogleProfilePicture();
-        }
 
-    }
-
-    private void savePictureOnSharedPrefrences(String checkIfAccountTypeUsed, Bitmap yourbitmap) {
-        sharedpreferences = getContext().getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedpreferences.edit();
-        editor.putBoolean("isLoadedToStorage", false);
-        editor.putBoolean("galleryProfilePicture", false);
-        editor.putBoolean("facebookProfilePicture", false);
-        editor.putBoolean("googleProfilePicture", false);
-        editor.putBoolean(checkIfAccountTypeUsed, true);//set the profile picture type
-        editor.putString("ProfilePictureBitmapEncoded", encodeTobase64(yourbitmap));
-        editor.apply();
-    }
-
-    // method for base64 to bitmap
-    public static Bitmap decodeBase64(String input) {
-        byte[] decodedByte = Base64.decode(input, 0);
-        return BitmapFactory
-                .decodeByteArray(decodedByte, 0, decodedByte.length);
-    }
-
-    // method for bitmap to base64
-    public static String encodeTobase64(Bitmap image) {
-        Bitmap immage = image;
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        immage.compress(Bitmap.CompressFormat.PNG, 100, baos);
-        byte[] b = baos.toByteArray();
-        String imageEncoded = Base64.encodeToString(b, Base64.DEFAULT);
-
-        Log.d("Image Log:", imageEncoded);
-        return imageEncoded;
-    }
 
     private void setGoogleProfilePicture() {
         GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(getActivity());
@@ -249,12 +215,12 @@ public class ProfileActivity extends Fragment {
             try {
                 InputStream in = (InputStream) url.getContent();
                 Bitmap bitmap = BitmapFactory.decodeStream(in);
-                savePictureOnSharedPrefrences("googleProfilePicture", bitmap);
+                cacheHandler.savePictureOnSharedPrefrences("googleProfilePicture", bitmap);
                 profilePicture.setImageBitmap(bitmap);
 
                 Bitmap bmpCopy = bitmap.copy(bitmap.getConfig(), true);
-                MyTaskParams myTaskParams = new MyTaskParams("google", bmpCopy);
-                new UploadToStorage().execute(myTaskParams);
+                CacheHandler.MyTaskParams myTaskParams = new CacheHandler.MyTaskParams("google", bmpCopy, profilePicture);
+                new CacheHandler.UploadToStorage().execute(myTaskParams);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -293,10 +259,10 @@ public class ProfileActivity extends Fragment {
                                             InputStream in = (InputStream) profilePicUrl.getContent();
                                             Bitmap bitmap = BitmapFactory.decodeStream(in);
                                             profilePicture.setImageBitmap(bitmap);
-                                            savePictureOnSharedPrefrences("facebookProfilePicture", bitmap);
+                                            cacheHandler.savePictureOnSharedPrefrences("facebookProfilePicture", bitmap);
 
-                                            MyTaskParams myTaskParams = new MyTaskParams("facebook", bitmap);
-                                            new UploadToStorage().execute(myTaskParams);
+                                            CacheHandler.MyTaskParams myTaskParams = new CacheHandler.MyTaskParams("facebook", bitmap, profilePicture);
+                                            new CacheHandler.UploadToStorage().execute(myTaskParams);
                                         }
                                     }
 
@@ -421,12 +387,12 @@ public class ProfileActivity extends Fragment {
                 Matrix matrix = new Matrix();
                 matrix.postScale(0.5f, 0.5f);
                 Bitmap bitmap = Bitmap.createBitmap(bitmapOriginal, 100, 100,100, 100, matrix, true);
-                savePictureOnSharedPrefrences("galleryProfilePicture", bitmapOriginal);
+                cacheHandler.savePictureOnSharedPrefrences("galleryProfilePicture", bitmapOriginal);
                 profilePicture.setImageBitmap(Bitmap.createScaledBitmap(bitmapOriginal, 200, 200, false));
 
                 Bitmap bmpCopy = bitmap.copy(bitmap.getConfig(), true);
-                MyTaskParams myTaskParams = new MyTaskParams("gallery", bmpCopy);
-                new UploadToStorage().execute(myTaskParams);
+                CacheHandler.MyTaskParams myTaskParams = new CacheHandler.MyTaskParams("gallery", bmpCopy, profilePicture);
+                new CacheHandler.UploadToStorage().execute(myTaskParams);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -444,12 +410,12 @@ public class ProfileActivity extends Fragment {
                     Matrix matrix = new Matrix();
                     matrix.postScale(0.5f, 0.5f);
                     Bitmap bitmap = Bitmap.createBitmap(bitmapOriginal, 100, 100,100, 100, matrix, true);
-                    savePictureOnSharedPrefrences("galleryProfilePicture", bitmapOriginal);
+                    cacheHandler.savePictureOnSharedPrefrences("galleryProfilePicture", bitmapOriginal);
                     profilePicture.setImageBitmap(Bitmap.createScaledBitmap(bitmapOriginal, 200, 200, false));
 
                     Bitmap bmpCopy = bitmap.copy(bitmap.getConfig(), true);
-                    MyTaskParams myTaskParams = new MyTaskParams("gallery", bmpCopy);
-                    new UploadToStorage().execute(myTaskParams);
+                    CacheHandler.MyTaskParams myTaskParams = new CacheHandler.MyTaskParams("gallery", bmpCopy, profilePicture);
+                    new CacheHandler.UploadToStorage().execute(myTaskParams);
                 } catch (FileNotFoundException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
@@ -459,123 +425,6 @@ public class ProfileActivity extends Fragment {
 
 
         }
-    }
-
-    // update user photo and name
-    private void storeProfilePhoto(final String source, Bitmap pickedImgBitmap) {
-        StorageReference storageRef = storage.getReference().child("users");
-        StorageReference userStorage = storageRef.child(getUid());
-        StorageReference profilePictureRef = userStorage.child("/profilePicture.JPEG");
-
-        // Get the data from an ImageView as bytes
-//        profilePicture.setDrawingCacheEnabled(true);
-//        profilePicture.buildDrawingCache();
-        Bitmap bitmap = ((BitmapDrawable) profilePicture.getDrawable()).getBitmap();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-//        pickedImgBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        byte[] data = baos.toByteArray();
-
-        // Create the file metadata
-        StorageMetadata metadata = new StorageMetadata.Builder()
-                .setCustomMetadata("source", source)
-                .build();
-
-        // Upload file and metadata to the path 'users/user_id/profilePicture.JPEG'
-        uploadTask = profilePictureRef.putBytes(data, metadata);
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle unsuccessful uploads
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
-                sharedpreferences = getContext().getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedpreferences.edit();
-                editor.putBoolean("isLoadedToStorage", true);
-                showMessage("Profile picture uploaded successfully!");
-            }
-        });
-
-    }
-
-    private static class MyTaskParams {
-        String photoSource;
-        Bitmap imageBitmap;
-
-        MyTaskParams(String photoSource, Bitmap imageUri) {
-            this.photoSource = photoSource;
-            this.imageBitmap = imageBitmap;
-        }
-    }
-
-    private class UploadToStorage extends AsyncTask<MyTaskParams, Void, Void> {
-        @Override
-        protected Void doInBackground(MyTaskParams... params) {
-            //cancel ongoing upload
-            if (uploadTask != null && (uploadTask.isInProgress() || uploadTask.isPaused())) {
-                uploadTask.cancel();
-            }
-            storeProfilePhoto(params[0].photoSource, params[0].imageBitmap);
-            return null;
-        }
-
-        protected void onProgressUpdate() {
-            //            setProgressPercent(progress[0]);
-        }
-
-        protected void onPostExecute() {
-            //            showDialog("Downloaded " + result + " bytes");
-        }
-
-    }
-
-    private class DownloadFromStorage extends AsyncTask<Void, Void, Void> {
-        @Override
-        protected Void doInBackground(Void... voids) {
-            //cancel ongoing upload
-            if (uploadTask != null && (uploadTask.isInProgress() || uploadTask.isPaused())) {
-                uploadTask.cancel();
-            }
-            loadProfilePhoto();
-            return null;
-        }
-
-        protected void onProgressUpdate() {
-            //            setProgressPercent(progress[0]);
-        }
-
-        protected void onPostExecute() {
-            //            showDialog("Downloaded " + result + " bytes");
-        }
-
-    }
-
-    private void loadProfilePhoto() {
-        StorageReference storageRef = storage.getReference().child("users");
-        StorageReference userStorage = storageRef.child(getUid());
-        StorageReference profilePictureRef = userStorage.child(getUid() + "/profilePicture.JPEG");
-
-        storageRef.child("users/" + getUid() + "/profilePicture.JPEG").getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-            @Override
-            public void onSuccess(Uri uri) {
-                // Got the download URL for 'users/Uid/profilePicture.JPEG'
-                Bitmap bitmap = null;
-                try {
-                    bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), uri);
-                    savePictureOnSharedPrefrences("galleryProfilePicture", bitmap);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle any errors
-            }
-        });
     }
 
     // simple method to show toast message
@@ -721,7 +570,6 @@ public class ProfileActivity extends Fragment {
             return accessToken.getUserId();
         }
     }
-
 
     private static Uri generateContentLink() {
         Uri baseUrl = Uri.parse("https://play.google.com/store/apps/details?id=androidCourse.technion.quickthumbs");
