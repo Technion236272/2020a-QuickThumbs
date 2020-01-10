@@ -5,6 +5,7 @@ import android.os.Build;
 import android.os.Bundle;
 import androidCourse.technion.quickthumbs.R;
 
+import androidCourse.technion.quickthumbs.Utils.CacheHandler;
 import androidCourse.technion.quickthumbs.personalArea.ProfileActivity;
 import androidCourse.technion.quickthumbs.personalArea.TextsActivity;
 import android.view.View;
@@ -21,6 +22,8 @@ import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 
 public class MainPager extends AppCompatActivity {
@@ -250,6 +253,24 @@ public class MainPager extends AppCompatActivity {
                     return null;
             }
         }
+    }
+
+    @Override
+    public void finish(){
+        super.finish();
+        FirebaseAuth fireBaseAuth = FirebaseAuth.getInstance();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CacheHandler cacheHandler = new CacheHandler(getApplicationContext(), db, fireBaseAuth);
+        cacheHandler.updateUserThemesSelectionOnDB();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FirebaseAuth fireBaseAuth = FirebaseAuth.getInstance();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CacheHandler cacheHandler = new CacheHandler(getApplicationContext(), db, fireBaseAuth);
+        cacheHandler.getPersonalThemesDataFromDB();
     }
 }
 

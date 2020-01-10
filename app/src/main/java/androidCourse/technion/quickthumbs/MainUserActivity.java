@@ -10,6 +10,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidCourse.technion.quickthumbs.Utils.AppOpeningSplashScreen;
+import androidCourse.technion.quickthumbs.Utils.CacheHandler;
 import androidCourse.technion.quickthumbs.Utils.CircleMenuView;
 import androidCourse.technion.quickthumbs.multiplayerSearch.Room;
 import androidCourse.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
@@ -29,6 +30,8 @@ import com.facebook.AccessToken;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -46,6 +49,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.SetOptions;
 
 
 import java.lang.reflect.Method;
@@ -72,6 +76,8 @@ public class MainUserActivity extends Fragment {
     private int triesCounter;
     CircleMenuView menu;
     private View fragmentViewForButton;
+//    private CacheHandler cacheHandler;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -84,8 +90,8 @@ public class MainUserActivity extends Fragment {
     }
 
     @Override
-    public void onViewCreated (View view,
-                               Bundle savedInstanceState){
+    public void onViewCreated(View view,
+                              Bundle savedInstanceState) {
         final View fragmentView = view;
         fragmentViewForButton = view;
         fireBaseAuth = FirebaseAuth.getInstance();
@@ -100,34 +106,12 @@ public class MainUserActivity extends Fragment {
 
         setCircleMenu();
 
-        oldUnUsedButtonsToBeRemoved();
-
         closeKeyboard();
 
         setOpeningSplashScreen();
+
     }
 
-    private void oldUnUsedButtonsToBeRemoved() {
-        //        gameBtn = view.findViewById(R.id.startGameButton);
-//        gameBtn.setOnClickListener(new View.OnClickListener() {
-//                                       @Override
-//                                       public void onClick(View v) {
-//                                           ThemeSelectPopUp popUpWindow = new ThemeSelectPopUp();
-//                                           popUpWindow.showPopupWindow(v,fragmentView.findViewById(R.id.RelativeLayout1));
-//                                       }
-//                                   }
-//        );
-//
-//        startMultiGameButton = view.findViewById(R.id.startMultiGameButton);
-//        startMultiGameButton.setOnClickListener(new View.OnClickListener() {
-//                                                    @Override
-//                                                    public void onClick(View v) {
-//                                                        startMultiGameButton.setClickable(false);
-//                                                        startSearchForGame();
-//                                                    }
-//                                                }
-//        );
-    }
 
     private void setCircleMenu() {
         menu = getActivity().findViewById(R.id.circle_menu);
@@ -161,10 +145,10 @@ public class MainUserActivity extends Fragment {
             @Override
             public void onButtonClickAnimationEnd(@NonNull CircleMenuView view, int index) {
                 Log.d("D", "onButtonClickAnimationEnd| index: " + index);
-                switch (index){
+                switch (index) {
                     case 0:
                         ThemeSelectPopUp popUpWindow = new ThemeSelectPopUp();
-                        popUpWindow.showPopupWindow(fragmentViewForButton,fragmentViewForButton.findViewById(R.id.RelativeLayout1));
+                        popUpWindow.showPopupWindow(fragmentViewForButton, fragmentViewForButton.findViewById(R.id.RelativeLayout1));
 
                         break;
                     case 1:
@@ -261,32 +245,32 @@ public class MainUserActivity extends Fragment {
 
     private void startMultiplayerGameWhenGameCreatedForThisRoom(final String roomKey, final String textId, final int indexInRoom) {
         gameRooms.child(roomKey).addValueEventListener(new ValueEventListener() {
-                                                                                                   @Override
-                                                                                                   public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                                                                       if (!dataSnapshot.exists() ||
-                                                                                                               dataSnapshot.getValue(Room.class).user2 == null) {
-                                                                                                           return;
-                                                                                                       }
+                                                           @Override
+                                                           public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                               if (!dataSnapshot.exists() ||
+                                                                       dataSnapshot.getValue(Room.class).user2 == null) {
+                                                                   return;
+                                                               }
 
-                                                                                                       menu.setClickable(true);
-                                                                                                       //game starts here;
-                                                                                                       Context context = getActivity().getApplicationContext();
-                                                                                                       Intent i = new Intent(context, GameLoadingSplashScreenActivity.class);
-                                                                                                       i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                                                                                                       i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                                                                       i.putExtra("id", textId);
-                                                                                                       i.putExtra("roomKey", roomKey);
-                                                                                                       i.putExtra("indexInRoom", indexInRoom);
-                                                                                                       context.startActivity(i);
+                                                               menu.setClickable(true);
+                                                               //game starts here;
+                                                               Context context = getActivity().getApplicationContext();
+                                                               Intent i = new Intent(context, GameLoadingSplashScreenActivity.class);
+                                                               i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                                                               i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                               i.putExtra("id", textId);
+                                                               i.putExtra("roomKey", roomKey);
+                                                               i.putExtra("indexInRoom", indexInRoom);
+                                                               context.startActivity(i);
 
-                                                                                                       gameRooms.child(roomKey).removeEventListener(this);
-                                                                                                   }
+                                                               gameRooms.child(roomKey).removeEventListener(this);
+                                                           }
 
-                                                                                                   @Override
-                                                                                                   public void onCancelled(@NonNull DatabaseError databaseError) {
+                                                           @Override
+                                                           public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                                                                                                   }
-                                                                                               }
+                                                           }
+                                                       }
 
         );
     }
@@ -319,18 +303,6 @@ public class MainUserActivity extends Fragment {
         boolean isLoggedIn = accessToken != null && !accessToken.isExpired();
         if (checkIfUserLoggedIn(currentUser, account, isLoggedIn)) return;
     }
-
-//    private void setButtonListener(Button button, final Class<? extends AppCompatActivity> moveToActivityClass) {
-//        button.setOnClickListener(new View.OnClickListener() {
-//                                      @Override
-//                                      public void onClick(View v) {
-//                                          if (v.getId() == R.id.startGameButton) {
-//                                              startActivity(new Intent(getActivity(), moveToActivityClass));
-//                                          }
-//                                      }
-//                                  }
-//        );
-//    }
 
 
     @Override
@@ -384,14 +356,6 @@ public class MainUserActivity extends Fragment {
         }
     }
 
-    private static class TextFetcherParam {
-        Context context;
-
-        TextFetcherParam(Context context) {
-            this.context = context;
-        }
-    }
-
     private class FetchRandomTextId extends AsyncTask<Void, Void, Void> {
         private String[] basicThemes = {"Comedy", "Music", "Movies", "Science", "Games", "Literature"};
         private Map<String, Boolean> allUserThemes = new HashMap<>();
@@ -399,6 +363,8 @@ public class MainUserActivity extends Fragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
+            CacheHandler cacheHandler = new CacheHandler(getContext(), db, fireBaseAuth);
+            allUserThemes = cacheHandler.loadThemesFromSharedPreferences();
             fetchRandomTextSpecifiedForUsers();
 
             return null;
@@ -412,61 +378,7 @@ public class MainUserActivity extends Fragment {
             //            showDialog("Downloaded " + result + " bytes");
         }
 
-        public void fetchRandomTextSpecifiedForUsers() {
-            getAllThemes();
-        }
-
-        private void getAllThemes() {
-            CollectionReference themesCollection = getThemesCollection();
-            themesCollection.get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if (task.isSuccessful()) {
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    insertThemesFromAllThemes(document, true);
-                                }
-                                getUserThemes();
-                            } else {
-                                insertBasicThemes(task);
-                                getUserThemes();
-                            }
-                        }
-                    });
-        }
-
-        private void insertBasicThemes(@NonNull Task<QuerySnapshot> task) {
-            for (int i = 0; i < basicThemes.length; i++) {
-                allUserThemes.put(basicThemes[i], true);
-            }
-        }
-
-        public void insertThemesFromAllThemes(QueryDocumentSnapshot document, Boolean isChosen) {
-            String currentThemeName = document.getId();
-            allUserThemes.put(currentThemeName, isChosen);
-        }
-
-        private void getUserThemes() {
-            getUserCollection(getUid(), "themes").get()
-                    .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                        @Override
-                        public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                            if (task.isSuccessful()) {
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    Log.d(TAG, "getUserThemes:" + document.getId() + " => " + document.getData());
-                                    insertThemesFromAllThemes(document, document.getBoolean("isChosen"));
-                                }
-                                getRandomTheme();
-                            } else {
-                                //there is no user prefences- take all -> don't change the themes
-                                Log.d(TAG, "getUserThemes:" + "Error getting documents: ", task.getException());
-                                getRandomTheme();
-                            }
-                        }
-                    });
-        }
-
-        private void getRandomTheme() {
+        private void fetchRandomTextSpecifiedForUsers() {
             final String choosenTheme = getRandomThemeName();
             //now reach for the theme texts and check the number of texts in the theme
             getThemesCollection().document(choosenTheme).
