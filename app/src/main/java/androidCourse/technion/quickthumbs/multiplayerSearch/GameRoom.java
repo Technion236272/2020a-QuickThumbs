@@ -1,6 +1,6 @@
 package androidCourse.technion.quickthumbs.multiplayerSearch;
 
-public class Room {
+public class GameRoom {
     public String user1;
     public Integer location1;
 
@@ -9,15 +9,23 @@ public class Room {
 
     public String textId;
 
-    public Room() {
+    public boolean started;
+
+    public boolean usr1Online;
+    public boolean usr2Online;
+
+    public GameRoom() {
     }
 
-    public Room(String user1, Integer location1, String user2, Integer location2, String textId) {
+    public GameRoom(String user1, Integer location1, String user2, Integer location2, String textId, boolean started, boolean usr1Online, boolean usr2Online) {
         this.user1 = user1;
         this.location1 = location1;
         this.user2 = user2;
         this.location2 = location2;
         this.textId = textId;
+        this.started = started;
+        this.usr1Online = usr1Online;
+        this.usr2Online = usr2Online;
     }
 
     public String getUser1() {
@@ -58,5 +66,29 @@ public class Room {
 
     public void setTextId(String textId) {
         this.textId = textId;
+    }
+
+    public boolean isStarted() {
+        return started;
+    }
+
+    public void setStarted(boolean started) {
+        this.started = started;
+    }
+
+    public boolean isUsr1Online() {
+        return usr1Online;
+    }
+
+    public void setUsr1Online(boolean usr1Online) {
+        this.usr1Online = usr1Online;
+    }
+
+    public boolean isUsr2Online() {
+        return usr2Online;
+    }
+
+    public void setUsr2Online(boolean usr2Online) {
+        this.usr2Online = usr2Online;
     }
 }
