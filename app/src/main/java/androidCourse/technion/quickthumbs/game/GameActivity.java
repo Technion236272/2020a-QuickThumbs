@@ -17,7 +17,7 @@ import android.os.Vibrator;
 
 import androidCourse.technion.quickthumbs.GameLoadingSplashScreenActivity;
 import androidCourse.technion.quickthumbs.R;
-import androidCourse.technion.quickthumbs.multiplayerSearch.Room;
+import androidCourse.technion.quickthumbs.multiplayerSearch.GameRoom;
 import androidCourse.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
 
 import android.text.Editable;
@@ -62,8 +62,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
-
-import org.w3c.dom.Document;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -213,6 +211,40 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void setRealTimeListenerForRoomInformationChanges() {
+        roomReference.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                if (mutableData.getValue() == null) {
+                    return Transaction.success(mutableData);
+                }
+
+                GameRoom gameRoom = mutableData.getValue(GameRoom.class);
+
+                switch (currentPlayerIndexInRoom) {
+                    case 1:
+                        gameRoom.usr1Online = true;
+
+                        break;
+                    case 2:
+                        gameRoom.usr2Online = true;
+
+                        break;
+                    default:
+                        throw new IllegalStateException("Unexpected value: " + currentPlayerIndexInRoom);
+                }
+
+                mutableData.setValue(gameRoom);
+
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
+
+            }
+        });
+
         roomReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -220,7 +252,7 @@ public class GameActivity extends AppCompatActivity {
                     return;
                 }
 
-                Room room = dataSnapshot.getValue(Room.class);
+                GameRoom room = dataSnapshot.getValue(GameRoom.class);
                 int toPosition;
 
                 switch (currentPlayerIndexInRoom) {
@@ -257,7 +289,7 @@ public class GameActivity extends AppCompatActivity {
             @NonNull
             @Override
             public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
-                Room room = mutableData.getValue(Room.class);
+                GameRoom room = mutableData.getValue(GameRoom.class);
 
                 switch (currentPlayerIndexInRoom) {
                     case 1:
@@ -352,16 +384,70 @@ public class GameActivity extends AppCompatActivity {
 
     @Override
     protected void onStop() {
-        super.onStop();
-
         gameStopTimeStamp = System.currentTimeMillis();
+
+        if (gameRoomKey != null) {
+            removeRoomIfNeeded();
+        }
+
+        super.onStop();
+    }
+
+    private void removeRoomIfNeeded() {
+        roomReference.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                if (mutableData.getValue() == null) {
+                    return Transaction.success(mutableData);
+                }
+
+                GameRoom gameRoom = mutableData.getValue(GameRoom.class);
+                boolean isOtherUserOnline;
+                switch (currentPlayerIndexInRoom) {
+                    case 1:
+                        isOtherUserOnline = gameRoom.usr2Online;
+
+                        break;
+                    case 2:
+                        isOtherUserOnline = gameRoom.usr1Online;
+
+                        break;
+                    default:
+                        throw new IllegalStateException("Unexpected value: " + currentPlayerIndexInRoom);
+                }
+
+                if (!isOtherUserOnline) {
+                    mutableData.setValue(null);
+                } else {
+                    switch (currentPlayerIndexInRoom) {
+                        case 1:
+                            gameRoom.usr1Online = false;
+
+                            break;
+                        case 2:
+                            gameRoom.usr2Online = false;
+
+                            break;
+                    }
+
+                    mutableData.setValue(gameRoom);
+                }
+
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
+
+            }
+        });
     }
 
     @Override
     protected void onPause() {
-        super.onPause();
-
         gameStopTimeStamp = System.currentTimeMillis();
+        super.onPause();
     }
 
     private List<Pair<String, Integer>> setWordsMapper(String[] words) {
@@ -402,9 +488,7 @@ public class GameActivity extends AppCompatActivity {
             currentPlayerIndexInRoom = indexInRoom;
 
             if (gameRoomKey != null) {
-                FirebaseDatabase instance = FirebaseDatabase.getInstance();
-                roomReference = instance.getReference().child("searchAndGame").child("GameRooms").child(gameRoomKey);
-                roomReference.keepSynced(true);
+                roomReference = FirebaseDatabase.getInstance().getReference().child("searchAndGame").child("GameRooms").child(gameRoomKey);
             }
 
             changed = true;

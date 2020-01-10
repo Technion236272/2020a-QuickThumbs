@@ -12,7 +12,8 @@ import android.os.Bundle;
 import androidCourse.technion.quickthumbs.Utils.AppOpeningSplashScreen;
 import androidCourse.technion.quickthumbs.Utils.CacheHandler;
 import androidCourse.technion.quickthumbs.Utils.CircleMenuView;
-import androidCourse.technion.quickthumbs.multiplayerSearch.Room;
+import androidCourse.technion.quickthumbs.multiplayerSearch.GameRoom;
+import androidCourse.technion.quickthumbs.multiplayerSearch.SearchingGrouper;
 import androidCourse.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
 import androidCourse.technion.quickthumbs.theme.ThemeSelectPopUp;
 
@@ -22,7 +23,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
-import android.widget.ImageView;
 
 import androidx.fragment.app.Fragment;
 
@@ -65,17 +65,20 @@ import static android.view.View.VISIBLE;
 
 public class MainUserActivity extends Fragment {
     private static final String TAG = MainUserActivity.class.getSimpleName();
+    private static final String gameRooms = "GameRooms";
     private FirebaseAuth fireBaseAuth;
     private FirebaseFirestore db;
+    public static FirebaseDatabase instance;
     public static Button gameBtn;
     public static Button startMultiGameButton;
     DatabaseReference mDatabase;
     DatabaseReference searchingRooms;
     DatabaseReference searchingRoomsLevel1;
-    DatabaseReference gameRooms;
+    DatabaseReference gameRoomsReference;
     private int triesCounter;
     CircleMenuView menu;
     private View fragmentViewForButton;
+
 //    private CacheHandler cacheHandler;
 
     @Override
@@ -96,13 +99,15 @@ public class MainUserActivity extends Fragment {
         fragmentViewForButton = view;
         fireBaseAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-        FirebaseDatabase instance = FirebaseDatabase.getInstance();
 
+        if (instance == null) {
+            instance = FirebaseDatabase.getInstance();
+        }
 
         mDatabase = instance.getReference().child("searchAndGame");
         searchingRooms = mDatabase.child("searchingRooms");
         searchingRoomsLevel1 = searchingRooms.child("level1");
-        gameRooms = mDatabase.child("GameRooms");
+        gameRoomsReference = mDatabase.child(gameRooms);
 
         setCircleMenu();
 
@@ -170,10 +175,9 @@ public class MainUserActivity extends Fragment {
 
 
     private void startSearchForGame() {
-        triesCounter = 0;
         int magicNumber = 10;
-
         Query potentialRooms = searchingRoomsLevel1.orderByKey().limitToLast(magicNumber);
+
         potentialRooms.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -190,17 +194,30 @@ public class MainUserActivity extends Fragment {
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
                     if (chosenIndex == i) {
                         final String roomKey = data.getKey();
-                        final Room roomPrevious = data.getValue(Room.class);
 
                         mDatabase.runTransaction(new Transaction.Handler() {
                             @NonNull
                             @Override
                             public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
-                                MutableData searchingRoomsLevel1 = mutableData.child("searchingRooms").child("level1");
-                                searchingRoomsLevel1.child(roomKey).setValue(null); //removing from level 1.
+                                if (mutableData.getValue() == null) {
+                                    return Transaction.success(mutableData);
+                                }
 
-                                Room gameRoom = new Room(roomPrevious.user1, roomPrevious.location1, fireBaseAuth.getUid(), 0, roomPrevious.textId);
-                                mutableData.child("GameRooms").child(roomKey).setValue(gameRoom);   //adding as an active multi-player game.
+                                MutableData searchingRoomsLevel1 = mutableData.child("searchingRooms").child("level1");
+                                final SearchingGrouper previousGrouper = searchingRoomsLevel1.child(roomKey).getValue(SearchingGrouper.class);
+
+                                if (previousGrouper.targetRoomSize - 1 == previousGrouper.currentSize) {
+                                    searchingRoomsLevel1.child(roomKey).setValue(null); //removing from level 1.
+
+                                    GameRoom gameRoom = mutableData.child(gameRooms).child(roomKey).getValue(GameRoom.class);
+
+                                    GameRoom gameRoomWithChange = new GameRoom(gameRoom.user1, gameRoom.location1, fireBaseAuth.getUid(), 0, gameRoom.textId, true, false, false);
+                                    mutableData.child(gameRooms).child(roomKey).setValue(gameRoomWithChange);   //adding as an active multi-player game.
+
+
+                                } else {
+                                    throw new RuntimeException("doesn't support more than 2 rooms");
+                                }
 
                                 return Transaction.success(mutableData);
                             }
@@ -210,8 +227,10 @@ public class MainUserActivity extends Fragment {
                                 if (b) {  //was committed
                                     menu.setClickable(true);
 
-                                    Room gameRoom = dataSnapshot.child("GameRooms").child(roomKey).getValue(Room.class);
+                                    GameRoom gameRoom = dataSnapshot.child(gameRooms).child(roomKey).getValue(GameRoom.class);
                                     String textId = gameRoom.textId;
+
+                                    int indexForCurrentUser = 2;
 
                                     Context context = getActivity().getApplicationContext();
                                     Intent i = new Intent(context, GameLoadingSplashScreenActivity.class);
@@ -219,12 +238,11 @@ public class MainUserActivity extends Fragment {
                                     i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                     i.putExtra("id", textId);
                                     i.putExtra("roomKey", roomKey);
-                                    i.putExtra("indexInRoom", 2);
+                                    i.putExtra("indexInRoom", indexForCurrentUser);
                                     context.startActivity(i);
                                 } else {
-                                    if (triesCounter++ == 3) {
+                                    if (dataSnapshot.getValue() != null)
                                         new FetchRandomTextId().execute();
-                                    }
                                 }
                             }
                         });
@@ -244,33 +262,33 @@ public class MainUserActivity extends Fragment {
     }
 
     private void startMultiplayerGameWhenGameCreatedForThisRoom(final String roomKey, final String textId, final int indexInRoom) {
-        gameRooms.child(roomKey).addValueEventListener(new ValueEventListener() {
-                                                           @Override
-                                                           public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                               if (!dataSnapshot.exists() ||
-                                                                       dataSnapshot.getValue(Room.class).user2 == null) {
-                                                                   return;
-                                                               }
+        gameRoomsReference.child(roomKey).addValueEventListener(new ValueEventListener() {
+                                                                    @Override
+                                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                        if (!dataSnapshot.exists() ||
+                                                                                !dataSnapshot.getValue(GameRoom.class).started) {
+                                                                            return;
+                                                                        }
 
-                                                               menu.setClickable(true);
-                                                               //game starts here;
-                                                               Context context = getActivity().getApplicationContext();
-                                                               Intent i = new Intent(context, GameLoadingSplashScreenActivity.class);
-                                                               i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                                                               i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                               i.putExtra("id", textId);
-                                                               i.putExtra("roomKey", roomKey);
-                                                               i.putExtra("indexInRoom", indexInRoom);
-                                                               context.startActivity(i);
+                                                                        menu.setClickable(true);
+                                                                        //game starts here;
+                                                                        Context context = getActivity().getApplicationContext();
+                                                                        Intent i = new Intent(context, GameLoadingSplashScreenActivity.class);
+                                                                        i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                                                                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                                        i.putExtra("id", textId);
+                                                                        i.putExtra("roomKey", roomKey);
+                                                                        i.putExtra("indexInRoom", indexInRoom);
+                                                                        context.startActivity(i);
 
-                                                               gameRooms.child(roomKey).removeEventListener(this);
-                                                           }
+                                                                        gameRoomsReference.child(roomKey).removeEventListener(this);
+                                                                    }
 
-                                                           @Override
-                                                           public void onCancelled(@NonNull DatabaseError databaseError) {
+                                                                    @Override
+                                                                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                                                           }
-                                                       }
+                                                                    }
+                                                                }
 
         );
     }
@@ -278,9 +296,11 @@ public class MainUserActivity extends Fragment {
     public void createSeparateRoom(final String textId) {
         final String key = searchingRoomsLevel1.push().getKey();
 
-        //TODO transaction needed here
-        searchingRoomsLevel1.child(key).setValue(new Room(fireBaseAuth.getUid(), 0, null, 0, textId));
-        gameRooms.child(key).setValue(new Room(fireBaseAuth.getUid(), 0, null, 0, textId))
+        GameRoom newRoom = new GameRoom(fireBaseAuth.getUid(), 0, null, 0, textId, false, false, false);
+        SearchingGrouper newSearchingGrouper = new SearchingGrouper(textId, 2, 1);
+
+        searchingRoomsLevel1.child(key).setValue(newSearchingGrouper);
+        gameRoomsReference.child(key).setValue(newRoom)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
