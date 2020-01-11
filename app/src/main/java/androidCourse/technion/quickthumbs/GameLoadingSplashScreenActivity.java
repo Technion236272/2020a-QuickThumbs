@@ -74,7 +74,8 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
                 String textId = fromWhichActivityYouCameFrom.getExtras().getString("id");
                 String roomKey = fromWhichActivityYouCameFrom.getExtras().getString("roomKey");
                 int indexInRoom = fromWhichActivityYouCameFrom.getExtras().getInt("indexInRoom");
-                makeIntentFromSelectedText(textId, roomKey, indexInRoom);
+                long startingTimeStamp = fromWhichActivityYouCameFrom.getExtras().getLong("startingTimeStamp");
+                makeIntentFromSelectedText(textId, roomKey, indexInRoom, startingTimeStamp);
             } else {
                 countDownFromSelectedTheme = 7000;
                 String beforeLogoText = "Choosing From Preferred themes";
@@ -103,7 +104,7 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
         }
     }
 
-    private void makeIntentFromSelectedText(String id, final String roomKey, final int indexInRoom) {
+    private void makeIntentFromSelectedText(String id, final String roomKey, final int indexInRoom, final long startingTimeStamp) {
         db.collection("texts").document(id).
                 get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
@@ -114,7 +115,7 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
                     if (data == null) {
                         Log.d(TAG, "getRandomText: another round");
                     } else {
-                        TextDataRow textCardItem = TextDataRow.createTextCardItem(data, roomKey, indexInRoom);
+                        TextDataRow textCardItem = TextDataRow.createTextCardItem(data, roomKey, indexInRoom, startingTimeStamp);
                         final Intent intent = setIntentForTheGame(textCardItem);
                         countDownFromSelectedTheme = 4000;
                         String beforeLogoText = "You choose the text: " + textCardItem.getTitle();
@@ -190,6 +191,7 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         };
+
         timer.start();
     }
 
@@ -222,7 +224,7 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
         String roomKey = fromWhichActivityYouCameFrom.getExtras().getString("roomKey");
         int indexInRoom = fromWhichActivityYouCameFrom.getExtras().getInt("indexInRoom");
         return new TextDataRow(id, title, theme, text, date, composer,
-                rating, numberOfTimesPlayed, bestScore, fastestSpeed, roomKey, indexInRoom);
+                rating, numberOfTimesPlayed, bestScore, fastestSpeed, false, false, roomKey, null, indexInRoom);
     }
 
     private class FetchRandomText extends AsyncTask<Void, Void, Void> {
@@ -239,7 +241,7 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
                 changeSplashUI(choosenTheme);
                 int playCount = Integer.parseInt(textCardItem.getNumberOfTimesPlayed());
                 String composer = textCardItem.getComposer();
-                changedTextData(playCount, composer, choosenTheme, textCardItem.getID());
+                changedTextData(playCount, composer, choosenTheme, textCardItem.getTextId());
 
                 updateBestScoresOnUI(textCardItem);
 
@@ -270,7 +272,8 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
                     config.getLogo().setImageResource(getThemePictureId(choosenThemeName));
 //            config.getLogo().setScaleType(CENTER);
                     config.getBeforeLogoTextView().setText("Chosen Theme is: " + choosenThemeName);
-                    config.getAfterLogoTextView().setText("Loading the text");                }
+                    config.getAfterLogoTextView().setText("Loading the text");
+                }
             });
         }
 
@@ -335,7 +338,7 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
                         } else {
                             for (QueryDocumentSnapshot document : task.getResult()) {
                                 Log.d(TAG, "getRandomText: " + "DocumentSnapshot data: " + document.getData());
-                                TextDataRow textCardItem = TextDataRow.createTextCardItem(document, null, -1);
+                                TextDataRow textCardItem = TextDataRow.createTextCardItem(document, null, -1, null);
                                 int playCount = Integer.parseInt(textCardItem.getNumberOfTimesPlayed());
                                 String composer = textCardItem.getComposer();
                                 changedTextData(playCount, composer, choosenTheme, document.getId());
@@ -450,7 +453,7 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
     private Intent setIntentForTheGame(TextDataRow textCardItem) {
         Intent i = new Intent();
         i.setClass(getApplicationContext(), GameActivity.class);
-        i.putExtra("id", textCardItem.getID());
+        i.putExtra("id", textCardItem.getTextId());
         i.putExtra("title", textCardItem.getTitle());
         i.putExtra("text", textCardItem.getText());
         i.putExtra("composer", textCardItem.getComposer());
@@ -462,6 +465,7 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
         i.putExtra("fastestSpeed", textCardItem.getFastestSpeed());
         i.putExtra("roomKey", textCardItem.getRoomKey());
         i.putExtra("indexInRoom", textCardItem.getIndexInRoom());
+        i.putExtra("startingTimeStamp", textCardItem.getStartingTimeStamp());
 
         return i;
     }

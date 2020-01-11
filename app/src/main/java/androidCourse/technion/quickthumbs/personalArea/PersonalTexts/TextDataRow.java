@@ -16,34 +16,32 @@ public class TextDataRow {
     public boolean isClicked;
     public boolean isExpanded;
     private String roomKey;
-
-
+    private Long startingTimeStamp;
     private int indexInRoom;
 
-    public TextDataRow(String id, String title, String themeName, String text, String date, String composer,
-                       double rating, String numberOfTimesPlayed, String bestScore, String fastestSpeed,
-                       String roomKey, int indexInRoom) {
-        this.setID(id);
-        this.setTitle(title);
-        this.setThemeName(themeName);
-        this.setText(text);
-        this.setDate(date);
-        this.setComposer(composer);
-        this.setRating(rating);
-        this.setNumberOfTimesPlayed(numberOfTimesPlayed);
-        this.setBestScore(bestScore);
-        this.setFastestSpeed(fastestSpeed);
-        this.setRoomKey(roomKey);
-        this.setIndexInRoom(indexInRoom);
-        this.isClicked = false;
-        this.isExpanded = false;
+    public TextDataRow(String textId, String title, String themeName, String text, String date, String composer, double rating, String numberOfTimesPlayed, String bestScore, String fastestSpeed, boolean isClicked, boolean isExpanded, String roomKey, Long startingTimeStamp, int indexInRoom) {
+        this.textId = textId;
+        this.title = title;
+        this.themeName = themeName;
+        this.text = text;
+        this.date = date;
+        this.composer = composer;
+        this.rating = rating;
+        this.numberOfTimesPlayed = numberOfTimesPlayed;
+        this.bestScore = bestScore;
+        this.fastestSpeed = fastestSpeed;
+        this.isClicked = isClicked;
+        this.isExpanded = isExpanded;
+        this.roomKey = roomKey;
+        this.startingTimeStamp = startingTimeStamp;
+        this.indexInRoom = indexInRoom;
     }
 
-    public String getID() {
+    public String getTextId() {
         return textId;
     }
 
-    public void setID(String textId) {
+    public void setTextId(String textId) {
         this.textId = textId;
     }
 
@@ -95,12 +93,12 @@ public class TextDataRow {
         this.rating = rating;
     }
 
-    public void setNumberOfTimesPlayed(String numberOfTimesPlayed) {
-        this.numberOfTimesPlayed = numberOfTimesPlayed;
-    }
-
     public String getNumberOfTimesPlayed() {
         return numberOfTimesPlayed;
+    }
+
+    public void setNumberOfTimesPlayed(String numberOfTimesPlayed) {
+        this.numberOfTimesPlayed = numberOfTimesPlayed;
     }
 
     public String getBestScore() {
@@ -119,12 +117,36 @@ public class TextDataRow {
         this.fastestSpeed = fastestSpeed;
     }
 
+    public boolean isClicked() {
+        return isClicked;
+    }
+
+    public void setClicked(boolean clicked) {
+        isClicked = clicked;
+    }
+
+    public boolean isExpanded() {
+        return isExpanded;
+    }
+
+    public void setExpanded(boolean expanded) {
+        isExpanded = expanded;
+    }
+
     public String getRoomKey() {
         return roomKey;
     }
 
     public void setRoomKey(String roomKey) {
         this.roomKey = roomKey;
+    }
+
+    public Long getStartingTimeStamp() {
+        return startingTimeStamp;
+    }
+
+    public void setStartingTimeStamp(Long startingTimeStamp) {
+        this.startingTimeStamp = startingTimeStamp;
     }
 
     public int getIndexInRoom() {
@@ -135,8 +157,7 @@ public class TextDataRow {
         this.indexInRoom = indexInRoom;
     }
 
-
-    public static TextDataRow createTextCardItem(DocumentSnapshot document, String roomKey, int positionInRoom) {
+    public static TextDataRow createTextCardItem(DocumentSnapshot document, String roomKey, int positionInRoom, Long startingTimeStamp) {
         String id = document.getId();
         String title = document.get("title").toString();
         String theme = document.get("theme").toString();
@@ -157,7 +178,7 @@ public class TextDataRow {
             bestScore = document.getLong("bestScore").toString();
         }
         TextDataRow item = new TextDataRow(id, title, theme, text, date, composer, rating,
-                numberOfPlays, bestScore, fastestSpeed, roomKey, positionInRoom);
+                numberOfPlays, bestScore, fastestSpeed, false, false, roomKey, startingTimeStamp, positionInRoom);
 
         return item;
     }

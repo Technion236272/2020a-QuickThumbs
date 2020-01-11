@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 
@@ -107,6 +108,7 @@ public class GameActivity extends AppCompatActivity {
     private TextView correctOutOfTotalPercentageTextView;
     private TextView comboDisplayer;
     private TextView pointsChangeIndicator;
+    private TextView multiPlayerCounter;
 
     private boolean forwardCommand;
 
@@ -155,6 +157,8 @@ public class GameActivity extends AppCompatActivity {
     private String gameRoomKey;
     private int currentPlayerIndexInRoom;
     private int previousOtherPlayerIndex;
+    private long startingTimeStamp;
+    private Timer synchronizedMultiplayerCounter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -165,7 +169,7 @@ public class GameActivity extends AppCompatActivity {
 
         setGameTextAndLogicAndEnding(gameTextView);
 
-        currentWordEditor.setActivated(false);
+//        currentWordEditor.setActivated(false);
         gameLoadingLayout.setVisibility(View.VISIBLE);
         gamePlayingLayout.setVisibility(View.INVISIBLE);
 
@@ -185,9 +189,14 @@ public class GameActivity extends AppCompatActivity {
         gamePlayingLayout.setVisibility(View.VISIBLE);
         gameLoadingLayout.setVisibility(View.INVISIBLE);
 
-        keyboardConfiguration(currentWordEditor);
 
-        setEditorLogic();
+        if (gameRoomKey == null) {
+            keyboardConfiguration(currentWordEditor);
+            setEditorLogic();
+        } else {
+            setCountDownAndGameCounter();
+            currentWordEditor.setFocusable(false);
+        }
 
         comboDisplayChange();
 
@@ -208,6 +217,40 @@ public class GameActivity extends AppCompatActivity {
         gameTextWordOffset = 0;
 
         setUpSounds();  //any future sound features should be added here;
+    }
+
+    private void setCountDownAndGameCounter() {
+        final boolean[] needToSetEditor = {true};
+        final Handler mHandler = new Handler();
+        synchronizedMultiplayerCounter = new Timer();
+        synchronizedMultiplayerCounter.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        int fixedAmountOfSecondsUntilMultiplayerGameStart = 10;
+                        int spentTimeInSeconds = (int) ((System.currentTimeMillis() - startingTimeStamp) / 1000);
+
+                        int timeLeftUntilGameStart = fixedAmountOfSecondsUntilMultiplayerGameStart - spentTimeInSeconds;
+                        timeLeftUntilGameStart = timeLeftUntilGameStart < 0 ? (-1) * timeLeftUntilGameStart : timeLeftUntilGameStart;
+                        multiPlayerCounter.setText(String.valueOf(timeLeftUntilGameStart));
+
+                        if (timeLeftUntilGameStart == 0 && needToSetEditor[0]) {
+                            currentWordEditor.setFocusableInTouchMode(true);
+                            keyboardConfiguration(currentWordEditor);
+                            setEditorLogic();
+
+                            gameStartTimeStamp = System.currentTimeMillis();
+                            setTimerUpdateGameStatsPresentation();
+
+                            needToSetEditor[0] = !needToSetEditor[0];
+                        }
+
+                    }
+                });
+            }
+        }, 0, 500);
     }
 
     private void setRealTimeListenerForRoomInformationChanges() {
@@ -376,8 +419,10 @@ public class GameActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        long inactiveDeltaTime = System.currentTimeMillis() - gameStopTimeStamp;
-        gameStartTimeStamp += inactiveDeltaTime;
+        if (gameRoomKey == null) {
+            long inactiveDeltaTime = System.currentTimeMillis() - gameStopTimeStamp;
+            gameStartTimeStamp += inactiveDeltaTime;
+        }
 
         setUpSounds();
     }
@@ -481,11 +526,14 @@ public class GameActivity extends AppCompatActivity {
             String fastestSpeed = i.getExtras().getString("fastestSpeed");
             String roomKey = i.getExtras().getString("roomKey");
             int indexInRoom = i.getExtras().getInt("indexInRoom");
+            long startingTimeStampLocal = i.getExtras().getLong("startingTimeStamp", 0);
+
             selectedTextItem = new TextDataRow(id, title, theme, text, date, composer,
-                    rating, numberOfTimesPlayed, bestScore, fastestSpeed, roomKey, indexInRoom);
+                    rating, numberOfTimesPlayed, bestScore, fastestSpeed, false, false, roomKey, null, indexInRoom);
 
             gameRoomKey = roomKey;
             currentPlayerIndexInRoom = indexInRoom;
+            startingTimeStamp = startingTimeStampLocal;
 
             if (gameRoomKey != null) {
                 roomReference = FirebaseDatabase.getInstance().getReference().child("searchAndGame").child("GameRooms").child(gameRoomKey);
@@ -507,7 +555,6 @@ public class GameActivity extends AppCompatActivity {
         shouldStartTimer = true;
         correctKeysAmount = 0;
         gameTextWordStart = 0;
-        gameStartTimeStamp = 0;
         gameStopTimeStamp = 0;
         previousOtherPlayerIndex = 0;
         needClearance = false;
@@ -527,6 +574,7 @@ public class GameActivity extends AppCompatActivity {
         correctOutOfTotalPercentageTextView = findViewById(R.id.correctOutOfTotalPercentageTextView);
         comboDisplayer = findViewById(R.id.comboDisplayer);
         pointsChangeIndicator = findViewById(R.id.changeIndicator);
+        multiPlayerCounter = findViewById(R.id.multiPlayerCounter);
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
@@ -539,7 +587,8 @@ public class GameActivity extends AppCompatActivity {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
                 Log.d(TAG, "beforeTextChanged start ...");
 
-                if (shouldStartTimer) {
+                if (shouldStartTimer && gameRoomKey == null) {
+                    gameStartTimeStamp = System.currentTimeMillis();
                     setTimerUpdateGameStatsPresentation();
                     shouldStartTimer = false;
                 }
@@ -727,6 +776,9 @@ public class GameActivity extends AppCompatActivity {
 
     private void finishGame() {
         gameTimer.cancel();
+        if (gameRoomKey != null) {
+            synchronizedMultiplayerCounter.cancel();
+        }
 
         closeKeyboard();
 
@@ -794,7 +846,7 @@ public class GameActivity extends AppCompatActivity {
 
     private void writeGameResult(Double WPM, Double CPM, Double accuracy, Double points) {
         String theme = selectedTextItem.getThemeName();
-        String index = selectedTextItem.getID();
+        String index = selectedTextItem.getTextId();
         String timestamp = selectedTextItem.getDate();
 
         Map<String, Object> updatedStatistics = new HashMap<>();
@@ -1119,7 +1171,7 @@ public class GameActivity extends AppCompatActivity {
             public void onRatingChanged(RatingBar ratingBar, final float rating,
                                         boolean fromUser) {
                 String theme = selectedTextItem.getThemeName();
-                String index = selectedTextItem.getID();
+                String index = selectedTextItem.getTextId();
                 String timestamp = selectedTextItem.getDate();
                 getUserStatsCollection().document(statisticsDocument).collection(gameResultsCollection)
                         .whereEqualTo(themeField, theme)
@@ -1155,7 +1207,7 @@ public class GameActivity extends AppCompatActivity {
         Map<String, Object> ratingMap = new HashMap<>();
         ratingMap.put(textRatingField, rating);
         String theme = selectedTextItem.getThemeName();
-        String index = selectedTextItem.getID();
+        String index = selectedTextItem.getTextId();
         getUserStatsCollection().document(statisticsDocument).collection(gameResultsCollection)
                 .document(theme + "-" + index.toString() + "-" + gameTimeStamp.toString())
                 .set(ratingMap, merge())
@@ -1176,7 +1228,7 @@ public class GameActivity extends AppCompatActivity {
 
     private void updateTextRatingInDatabase(final float rating) {
         String theme = selectedTextItem.getThemeName();
-        String index = selectedTextItem.getID();
+        String index = selectedTextItem.getTextId();
         String timestamp = selectedTextItem.getDate();
         final String composerUid = selectedTextItem.getComposer();
         db.collection("themes").document(theme).collection("texts")
@@ -1210,7 +1262,7 @@ public class GameActivity extends AppCompatActivity {
 
     private void updateComposerTextBestScoreAndWPM(final Double wpm, final Double score) {
         db.collection("themes").document(selectedTextItem.getThemeName()).collection("texts")
-                .document(selectedTextItem.getID())
+                .document(selectedTextItem.getTextId())
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override

@@ -282,6 +282,7 @@ public class MainUserActivity extends Fragment {
                                     i.putExtra("id", textId);
                                     i.putExtra("roomKey", roomKey);
                                     i.putExtra("indexInRoom", indexForCurrentUser);
+                                    i.putExtra("startingTimeStamp", System.currentTimeMillis());
                                     context.startActivity(i);
                                 } else {
                                     if (dataSnapshot.getValue() != null)
@@ -322,13 +323,14 @@ public class MainUserActivity extends Fragment {
                                                                         searchTimer.cancel();
 
                                                                         //game starts here;
-                                                                        Context context = getActivity().getApplicationContext();
+                                                                        Context context = fragmentViewForButton.getContext();
                                                                         Intent i = new Intent(context, GameLoadingSplashScreenActivity.class);
                                                                         i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
                                                                         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                                                                         i.putExtra("id", textId);
                                                                         i.putExtra("roomKey", roomKey);
                                                                         i.putExtra("indexInRoom", indexInRoom);
+                                                                        i.putExtra("startingTimeStamp", System.currentTimeMillis());
                                                                         context.startActivity(i);
 
                                                                         gameRoomsReference.child(roomKey).removeEventListener(this);
@@ -447,7 +449,7 @@ public class MainUserActivity extends Fragment {
             if (textCardItem == null){
                 fetchRandomTextSpecifiedForUsers();
             }else{
-                String textId = textCardItem.getID();
+                String textId = textCardItem.getTextId();
                 try {
                     Class<?> c = MainUserActivity.class;
                     Method method = c.getDeclaredMethod("createSeparateRoom", String.class);
@@ -526,7 +528,7 @@ public class MainUserActivity extends Fragment {
                             fetchRandomTextSpecifiedForUsers();
                         } else {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                textCardItem = TextDataRow.createTextCardItem(document, null, -1);
+                                textCardItem = TextDataRow.createTextCardItem(document, null, -1, null);
                                 String textId = document.getId();
                                 try {
                                     Class<?> c = MainUserActivity.class;
