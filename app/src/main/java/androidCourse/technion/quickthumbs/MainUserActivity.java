@@ -2,7 +2,6 @@ package androidCourse.technion.quickthumbs;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Context;
 import android.content.Intent;
@@ -17,12 +16,15 @@ import androidCourse.technion.quickthumbs.multiplayerSearch.SearchingGrouper;
 import androidCourse.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
 import androidCourse.technion.quickthumbs.theme.ThemeSelectPopUp;
 
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
@@ -30,8 +32,6 @@ import com.facebook.AccessToken;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -49,7 +49,6 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.SetOptions;
 
 
 import java.lang.reflect.Method;
@@ -58,6 +57,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
@@ -75,9 +76,16 @@ public class MainUserActivity extends Fragment {
     DatabaseReference searchingRooms;
     DatabaseReference searchingRoomsLevel1;
     DatabaseReference gameRoomsReference;
-    private int triesCounter;
+
     CircleMenuView menu;
     private View fragmentViewForButton;
+
+    private TextView amountOfPlayerView;
+    private TextView searchTimerView;
+    private RelativeLayout searchScreen;
+    Timer searchTimer;
+    private Handler mHandler;
+    long startTime;
 
 //    private CacheHandler cacheHandler;
 
@@ -115,6 +123,9 @@ public class MainUserActivity extends Fragment {
 
         setOpeningSplashScreen();
 
+        amountOfPlayerView = view.findViewById(R.id.amountOfPlayers);
+        searchTimerView = view.findViewById(R.id.searchTimer);
+        searchScreen = view.findViewById(R.id.searchScreen);
     }
 
 
@@ -156,15 +167,14 @@ public class MainUserActivity extends Fragment {
                         popUpWindow.showPopupWindow(fragmentViewForButton, fragmentViewForButton.findViewById(R.id.RelativeLayout1));
 
                         break;
+
                     case 1:
-                        menu.setClickable(false);
-                        startSearchForGame();
-
-                        break;
-
                     case 2:
-                    default:
                         menu.setClickable(false);
+                        searchScreen.setVisibility(VISIBLE);
+
+                        setSearchTimer();
+
                         startSearchForGame();
 
                         break;
@@ -173,8 +183,35 @@ public class MainUserActivity extends Fragment {
         });
     }
 
+    private void setSearchTimer() {
+        startTime = System.currentTimeMillis();
+        mHandler = new Handler();
+        searchTimer = new Timer();
+        searchTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        int spentTimeInSeconds = (int) ((System.currentTimeMillis() - startTime) / 1000);
+
+                        int hours = spentTimeInSeconds / 3600;
+                        int minutes = (spentTimeInSeconds % 3600) / 60;
+                        int seconds = spentTimeInSeconds % 60;
+
+                        String timeString = String.format("%02d:%02d:%02d", hours, minutes, seconds);
+
+                        searchTimerView.setText(timeString);
+                    }
+                });
+            }
+        }, 0, 1000);
+    }
+
 
     private void startSearchForGame() {
+        amountOfPlayerView.setText("Searching Room ...");
+
         int magicNumber = 10;
         Query potentialRooms = searchingRoomsLevel1.orderByKey().limitToLast(magicNumber);
 
@@ -226,11 +263,15 @@ public class MainUserActivity extends Fragment {
                             public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
                                 if (b) {  //was committed
                                     menu.setClickable(true);
+                                    searchScreen.setVisibility(INVISIBLE);
+                                    searchTimer.cancel();
 
                                     GameRoom gameRoom = dataSnapshot.child(gameRooms).child(roomKey).getValue(GameRoom.class);
                                     String textId = gameRoom.textId;
 
                                     int indexForCurrentUser = 2;
+                                    int targetAmount = 2;
+                                    amountOfPlayerView.setText(String.format("%s out of %s in room ...", indexForCurrentUser, targetAmount));
 
                                     Context context = getActivity().getApplicationContext();
                                     Intent i = new Intent(context, GameLoadingSplashScreenActivity.class);
@@ -270,7 +311,14 @@ public class MainUserActivity extends Fragment {
                                                                             return;
                                                                         }
 
+                                                                        int currentAmount = 2;
+                                                                        int targetAmount = 2;
+                                                                        amountOfPlayerView.setText(String.format("%s out of %s in room ...", currentAmount, targetAmount));
+
                                                                         menu.setClickable(true);
+                                                                        searchScreen.setVisibility(INVISIBLE);
+                                                                        searchTimer.cancel();
+
                                                                         //game starts here;
                                                                         Context context = getActivity().getApplicationContext();
                                                                         Intent i = new Intent(context, GameLoadingSplashScreenActivity.class);
@@ -286,7 +334,9 @@ public class MainUserActivity extends Fragment {
 
                                                                     @Override
                                                                     public void onCancelled(@NonNull DatabaseError databaseError) {
-
+                                                                        menu.setClickable(true);
+                                                                        searchScreen.setVisibility(INVISIBLE);
+                                                                        searchTimer.cancel();
                                                                     }
                                                                 }
 
@@ -305,6 +355,10 @@ public class MainUserActivity extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
+                            int currentAmount = 1;
+                            int targetAmount = 2;
+                            amountOfPlayerView.setText(String.format("%s out of %s in room ...", currentAmount, targetAmount));
+
                             startMultiplayerGameWhenGameCreatedForThisRoom(key, textId, 1);
                         } else {
                             throw new RuntimeException("bug I guess");
