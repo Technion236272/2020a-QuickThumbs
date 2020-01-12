@@ -1269,8 +1269,8 @@ public class GameActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             DocumentSnapshot document = task.getResult();
                             Log.d(TAG, document.getId() + " => " + document.getData());
-                            Double bestScore = document.getDouble("best");
-                            Double bestWPM = document.getDouble("fastestSpeed");
+                            Double bestScore = document.getDouble("bestScore");
+                            Double bestWPM = document.getDouble("bestWpm");
                             if (bestScore != null && bestWPM != null) {
                                 if (bestScore < score)
                                     writeBestScoreInComposerTextsCollection(score, document.getId());
@@ -1290,7 +1290,7 @@ public class GameActivity extends AppCompatActivity {
 
     private void writeBestScoreInComposerTextsCollection(Double currentScore, String documentId) {
         Map<String, Object> temp = new HashMap<>();
-        temp.put("best", currentScore);
+        temp.put("bestScore", currentScore);
         db.collection("users").document(selectedTextItem.getComposer())
                 .collection("texts")
                 .document(documentId)
@@ -1311,7 +1311,7 @@ public class GameActivity extends AppCompatActivity {
 
     private void writeBestWPMInComposerTextsCollection(Double currentWPM, String documentId) {
         Map<String, Object> temp = new HashMap<>();
-        temp.put("fastestSpeed", currentWPM);
+        temp.put("bestWpm", currentWPM);
         db.collection("users").document(selectedTextItem.getComposer())
                 .collection("texts")
                 .document(documentId)
