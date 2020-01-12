@@ -7,6 +7,8 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.core.view.GestureDetectorCompat;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
 import android.content.Context;
@@ -26,6 +28,8 @@ import androidCourse.technion.quickthumbs.MainActivity;
 import androidCourse.technion.quickthumbs.R;
 import androidCourse.technion.quickthumbs.Utils.CacheHandler;
 import androidCourse.technion.quickthumbs.game.GameActivity;
+import androidCourse.technion.quickthumbs.personalArea.FriendsList.FriendAdaptor;
+import androidCourse.technion.quickthumbs.personalArea.FriendsList.FriendItem;
 
 import android.os.Environment;
 import android.os.StrictMode;
@@ -60,6 +64,8 @@ import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
@@ -76,7 +82,10 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
 
 import static android.app.Activity.RESULT_OK;
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
@@ -101,6 +110,14 @@ public class ProfileActivity extends Fragment {
     public static String FACEBOOK_FIELDS = "fields";
     private SharedPreferences sharedpreferences;
     private CacheHandler cacheHandler;
+    private RecyclerView friendsListRecyclerView;
+    final ArrayList<FriendItem> friendsList = new ArrayList<>();
+    private DocumentSnapshot lastSnapShot =null;
+    boolean noMoreLoading;
+    private int howMuchToLoadEachScroll;
+
+    HashMap<String,Boolean> loadedRTextsIDs=new HashMap<>();
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -115,12 +132,18 @@ public class ProfileActivity extends Fragment {
 
     public void onViewCreated(View view,
                               Bundle savedInstanceState) {
+        howMuchToLoadEachScroll = 3;
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         cameraPhotoURI = null;
         profilePicture = view.findViewById(R.id.profilePicture);
         cacheHandler = new CacheHandler(getContext());
+
+        friendsListRecyclerView = view.findViewById(R.id.friendsListRecyclerView);
+        friendsListRecyclerView.setHasFixedSize(true);
+        checkIfUserHasFriends();
+
 
         displayStatistics(view);
 
@@ -137,6 +160,101 @@ public class ProfileActivity extends Fragment {
                     }
                 }
         );
+    }
+
+    private void checkIfUserHasFriends() {
+        db.collection("users").document(getUid())
+                .collection("friends").get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful() && task.getResult().getDocuments().size() != 0) {
+                            Log.d(TAG, "collection is not empty!", task.getException());
+                            fetchPersonalFriendsList();
+                            setRecyclerViewScroller();
+                        } else {
+                            Log.d(TAG, "no such collection", task.getException());
+                        }
+                    }
+                });
+    }
+
+    private void setRecyclerViewScroller() {
+        friendsListRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+            @Override
+            public void onScrolled(final RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                if (dy > 0) {
+                    // Scrolling up
+                    Log.i("RecyclerView scrolled: ", "scroll down!");
+                    if(friendsList.size() != 0 && !noMoreLoading){
+                        refillFriendsList(recyclerView);
+                    }
+                } else if (dy < 0){
+                    // Scrolling down
+                    Log.i("RecyclerView scrolled: ", "scroll up!");
+                }
+                else if (dx<0){
+                    getActivity().finish();
+                    //overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                }
+            }
+        });
+    }
+
+    private void refillFriendsList(RecyclerView recyclerView) {
+        db.collection("users").document(getUid()).
+                collection("friends").orderBy("playCount", Query.Direction.DESCENDING).
+                startAfter(lastSnapShot).limit(howMuchToLoadEachScroll).get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            fillFriendsList(task);
+                            friendsListRecyclerView.getAdapter().notifyDataSetChanged();
+                        } else {
+                            Log.d(TAG, "getAllThemes:"+  "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+    }
+
+    private void fetchPersonalFriendsList() {
+        db.collection("users").document(getUid()).collection("friends").
+                orderBy("score", Query.Direction.DESCENDING).limit(4).get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            fillFriendsList(task);
+                            setTextAdaptor();
+                        } else {
+                            Log.d(TAG, "Error getting documents: ", task.getException());
+                        }
+                    }
+                });
+    }
+
+    private void fillFriendsList(Task<QuerySnapshot> task) {
+        for (DocumentSnapshot document:task.getResult()) {
+            if ( document.getString("text") == null ) continue;
+            FriendItem item = new FriendItem(document);
+            if (loadedRTextsIDs.get(document.getId()) == null ) {
+                loadedRTextsIDs.put(document.getId(),true);
+                friendsList.add(item);
+                lastSnapShot=document;
+            }else{
+                noMoreLoading =true;
+                friendsListRecyclerView.clearOnScrollListeners();
+            }
+        }
+    }
+
+    private void setTextAdaptor() {
+        FriendAdaptor adapter = new FriendAdaptor(friendsList,getActivity());
+        friendsListRecyclerView.setAdapter(adapter);
+        friendsListRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     }
 
     private void profilePictureSettings(View view) {
