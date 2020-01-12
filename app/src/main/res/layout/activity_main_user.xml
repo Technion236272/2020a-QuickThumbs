@@ -6,13 +6,13 @@
     android:layout_height="match_parent"
     android:fillViewport="true">
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout
         android:id="@+id/RelativeLayout1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/gradiant_color">
 
-        <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
@@ -23,15 +23,47 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">
 
-                <androidCourse.technion.quickthumbs.Utils.CircleMenuView
-                    android:id="@+id/circle_menu"
-                    android:layout_width="420dp"
-                    android:layout_height="300dp"
-                    android:layout_centerInParent="true"
-                    android:adjustViewBounds="true"
-                    android:src="@drawable/logo"
-                    app:button_colors="@array/colors"
-                    app:button_icons="@array/icons" />
+
+                <com.skyfishjy.library.RippleBackground
+                    xmlns:android="http://schemas.android.com/apk/res/android"
+                    xmlns:app="http://schemas.android.com/apk/res-auto"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/content"
+                    app:rb_color="#0099CC"
+                    app:rb_radius="50dp"
+                    app:rb_rippleAmount="4"
+                    app:rb_duration="3000"
+                    app:rb_scale="6">
+                    <androidCourse.technion.quickthumbs.Utils.CircleMenuView
+                        android:id="@+id/circle_menu"
+                        android:layout_width="420dp"
+                        android:layout_height="300dp"
+                        android:layout_centerInParent="true"
+                        android:adjustViewBounds="true"
+                        android:src="@drawable/logo"
+                        app:button_colors="@array/colors"
+                        app:button_icons="@array/icons" />
+                    <ImageView
+                        android:id="@+id/waitingLogo"
+                        android:visibility="invisible"
+                        android:layout_width="420dp"
+                        android:layout_height="300dp"
+                        android:layout_centerInParent="true"
+                        android:adjustViewBounds="true"
+                        android:src="@drawable/logo" />
+                </com.skyfishjy.library.RippleBackground>
+
+                <ImageButton
+                    android:id="@+id/closeButton"
+                    android:visibility="invisible"
+                    android:layout_alignBottom="@id/content"
+                    android:layout_marginBottom="50dp"
+                    android:background="@color/transparent"
+                    android:layout_centerHorizontal="true"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    app:srcCompat="@android:drawable/ic_notification_clear_all" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -39,7 +71,7 @@
                 xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="420dp"
                 android:layout_height="300dp"
-                android:background="@drawable/gradiant_color"
+                android:background="@color/transparent"
                 android:visibility="invisible">
 
                 <TextView
@@ -69,6 +101,8 @@
                     android:textSize="20sp" />
 
             </RelativeLayout>
+
+
         </FrameLayout>
     </RelativeLayout>
 </ScrollView>

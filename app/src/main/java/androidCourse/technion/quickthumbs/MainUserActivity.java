@@ -6,6 +6,7 @@ import androidx.annotation.Nullable;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidCourse.technion.quickthumbs.Utils.AppOpeningSplashScreen;
@@ -23,6 +24,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -49,6 +52,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.skyfishjy.library.RippleBackground;
 
 
 import java.lang.reflect.Method;
@@ -79,7 +83,9 @@ public class MainUserActivity extends Fragment {
     DatabaseReference searchingRoomsLevel1;
     DatabaseReference gameRoomsReference;
 
+    ImageButton closeButton;
     CircleMenuView menu;
+    ImageView waitingLogo;
     private View fragmentViewForButton;
 
     private TextView amountOfPlayerView;
@@ -88,6 +94,8 @@ public class MainUserActivity extends Fragment {
     Timer searchTimer;
     private Handler mHandler;
     long startTime;
+    RippleBackground rippleBackground;
+    private CircleMenuView.EventListener listener;
 
 //    private CacheHandler cacheHandler;
 
@@ -121,6 +129,8 @@ public class MainUserActivity extends Fragment {
 
         setCircleMenu();
 
+        setCloseMultiplayerSerchButtonListener();
+
         closeKeyboard();
 
         setOpeningSplashScreen();
@@ -133,7 +143,8 @@ public class MainUserActivity extends Fragment {
 
     private void setCircleMenu() {
         menu = getActivity().findViewById(R.id.circle_menu);
-        menu.setEventListener(new CircleMenuView.EventListener() {
+        waitingLogo = getActivity().findViewById(R.id.waitingLogo);
+        listener = new CircleMenuView.EventListener() {
             @Override
             public void onMenuOpenAnimationStart(@NonNull CircleMenuView view) {
                 Log.d("D", "onMenuOpenAnimationStart");
@@ -172,8 +183,14 @@ public class MainUserActivity extends Fragment {
 
                     case 1:
                     case 2:
-                        menu.setClickable(false);
+                        menu.setEventListener(null);
+                        waitingLogo.setVisibility(VISIBLE);
+                        menu.setVisibility(INVISIBLE);
                         searchScreen.setVisibility(VISIBLE);
+                        closeButton.setVisibility(VISIBLE);
+
+
+                        startRippleBackground();
 
                         setSearchTimer();
 
@@ -182,7 +199,25 @@ public class MainUserActivity extends Fragment {
                         break;
                 }
             }
+        };
+        menu.setEventListener(listener);
+
+    }
+
+    private void setCloseMultiplayerSerchButtonListener() {
+        closeButton = getActivity().findViewById(R.id.closeButton);
+        closeButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                rippleBackground.stopRippleAnimation();
+                setUIBackToNormal();
+            }
         });
+    }
+
+    private void startRippleBackground() {
+        rippleBackground=(RippleBackground)getActivity().findViewById(R.id.content);
+        rippleBackground.startRippleAnimation();
     }
 
     private void setSearchTimer() {
@@ -264,9 +299,9 @@ public class MainUserActivity extends Fragment {
                             @Override
                             public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
                                 if (b) {  //was committed
-                                    menu.setClickable(true);
-                                    searchScreen.setVisibility(INVISIBLE);
-                                    searchTimer.cancel();
+                                    setUIBackToNormal();
+
+                                    rippleBackground.stopRippleAnimation();
 
                                     GameRoom gameRoom = dataSnapshot.child(gameRooms).child(roomKey).getValue(GameRoom.class);
                                     String textId = gameRoom.textId;
@@ -318,9 +353,7 @@ public class MainUserActivity extends Fragment {
                                                                         int targetAmount = 2;
                                                                         amountOfPlayerView.setText(String.format("%s out of %s in room ...", currentAmount, targetAmount));
 
-                                                                        menu.setClickable(true);
-                                                                        searchScreen.setVisibility(INVISIBLE);
-                                                                        searchTimer.cancel();
+                                                                        setUIBackToNormal();
 
                                                                         //game starts here;
                                                                         Context context = fragmentViewForButton.getContext();
@@ -338,13 +371,20 @@ public class MainUserActivity extends Fragment {
 
                                                                     @Override
                                                                     public void onCancelled(@NonNull DatabaseError databaseError) {
-                                                                        menu.setClickable(true);
-                                                                        searchScreen.setVisibility(INVISIBLE);
-                                                                        searchTimer.cancel();
+                                                                        setUIBackToNormal();
                                                                     }
                                                                 }
 
         );
+    }
+
+    private void setUIBackToNormal() {
+        menu.setEventListener(listener);
+        menu.setVisibility(VISIBLE);
+        waitingLogo.setVisibility(INVISIBLE);
+        searchScreen.setVisibility(INVISIBLE);
+        closeButton.setVisibility(INVISIBLE);
+        searchTimer.cancel();
     }
 
     public void createSeparateRoom(final String textId) {
