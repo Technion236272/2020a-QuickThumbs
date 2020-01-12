@@ -1,28 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/RelativeLayout1"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true">
+    android:layout_height="wrap_content"
+    android:background="@drawable/background">
 
-    <RelativeLayout
-        android:id="@+id/RelativeLayout1"
+    <ScrollView xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/gradiant_color">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-        <FrameLayout
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true">
+            android:layout_height="wrap_content">
 
-            <RelativeLayout
-                android:id="@+id/relative_2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content">
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true">
 
+                <RelativeLayout
+                    android:id="@+id/relative_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
 
                 <com.skyfishjy.library.RippleBackground
                     xmlns:android="http://schemas.android.com/apk/res/android"
@@ -66,43 +68,38 @@
                     app:srcCompat="@android:drawable/ic_notification_clear_all" />
             </RelativeLayout>
 
-            <RelativeLayout
-                android:id="@+id/searchScreen"
-                xmlns:android="http://schemas.android.com/apk/res/android"
-                android:layout_width="420dp"
-                android:layout_height="300dp"
-                android:background="@color/transparent"
-                android:visibility="invisible">
+                <RelativeLayout
+                    android:id="@+id/searchScreen"
+                    android:layout_width="420dp"
+                    android:layout_height="300dp"
+                    android:background="@color/transparent"
+                    android:visibility="invisible">
 
-                <TextView
-                    xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:id="@+id/amountOfPlayers"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentTop="true"
-                    android:layout_centerHorizontal="true"
-                    android:layout_marginTop="20dp"
-                    android:padding="20dp"
-                    android:textColor="@color/secondaryColor"
-                    android:text="1 out of 2 in room ..."
-                    android:textSize="30sp"
-                    />
+                    <TextView
+                        android:id="@+id/amountOfPlayers"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentTop="true"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="20dp"
+                        android:padding="20dp"
+                        android:text="1 out of 2 in room ..."
+                        android:textColor="@color/secondaryColor"
+                        android:textSize="30sp" />
 
-                <TextView
-                    xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:id="@+id/searchTimer"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@id/amountOfPlayers"
-                    android:layout_centerHorizontal="true"
-                    android:padding="20dp"
-                    android:textColor="@color/secondaryLightColor"
-                    android:text="1 minute and 30 seconds"
-                    android:textSize="20sp" />
+                    <TextView
+                        android:id="@+id/searchTimer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/amountOfPlayers"
+                        android:layout_centerHorizontal="true"
+                        android:padding="20dp"
+                        android:text="1 minute and 30 seconds"
+                        android:textColor="@color/secondaryLightColor"
+                        android:textSize="20sp" />
 
-            </RelativeLayout>
-
-
-        </FrameLayout>
-    </RelativeLayout>
-</ScrollView>
+                </RelativeLayout>
+            </FrameLayout>
+        </RelativeLayout>
+    </ScrollView>
+</RelativeLayout>

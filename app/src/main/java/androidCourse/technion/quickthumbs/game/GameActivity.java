@@ -179,6 +179,7 @@ public class GameActivity extends AppCompatActivity {
 
         gameCreationSequence();
         setRatingBarListener();
+        setActionBar();
     }
 
     public void gameCreationSequence() {
@@ -1146,8 +1147,6 @@ public class GameActivity extends AppCompatActivity {
         if (inputMethodManager != null) {
             inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
         }
-
-        setActionBar();
     }
 
     private void setActionBar() {
