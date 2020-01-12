@@ -74,6 +74,8 @@ public class MainPager extends AppCompatActivity {
         CacheHandler cacheHandler = new CacheHandler(getApplicationContext());
         cacheHandler.getPersonalThemesDataFromDB();
         new CacheHandler.DownloadFromStorage().execute();
+
+        new CacheHandler.TextCacheRefill().execute();
     }
 
     private void turnDotIndicatorToInvisible(TabLayout tabLayout) {
@@ -274,6 +276,8 @@ public class MainPager extends AppCompatActivity {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         CacheHandler cacheHandler = new CacheHandler(getApplicationContext());
         cacheHandler.updateUserThemesSelectionOnDB();
+
+        new CacheHandler.TextCacheRefill().execute();
     }
 
     @Override

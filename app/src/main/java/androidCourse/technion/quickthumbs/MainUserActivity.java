@@ -62,6 +62,8 @@ import java.util.TimerTask;
 
 import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
+import static androidCourse.technion.quickthumbs.Utils.CacheHandler.checkIfTextListNeedToBeRefilled;
+import static androidCourse.technion.quickthumbs.Utils.CacheHandler.getNextTextFromSelectedTheme;
 
 
 public class MainUserActivity extends Fragment {
@@ -439,7 +441,23 @@ public class MainUserActivity extends Fragment {
         protected Void doInBackground(Void... voids) {
             CacheHandler cacheHandler = new CacheHandler(getContext());
             allUserThemes = cacheHandler.loadThemesFromSharedPreferences();
-            fetchRandomTextSpecifiedForUsers();
+            final String choosenTheme = getRandomThemeName();
+
+            TextDataRow textCardItem = getNextTextFromSelectedTheme(choosenTheme);
+            if (textCardItem == null){
+                fetchRandomTextSpecifiedForUsers();
+            }else{
+                String textId = textCardItem.getID();
+                try {
+                    Class<?> c = MainUserActivity.class;
+                    Method method = c.getDeclaredMethod("createSeparateRoom", String.class);
+                    method.invoke(MainUserActivity.this, textId);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                checkIfTextListNeedToBeRefilled(choosenTheme);
+            }
 
             return null;
         }

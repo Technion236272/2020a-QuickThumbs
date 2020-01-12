@@ -17,6 +17,7 @@ import androidCourse.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.widget.Toast;
 
 import com.facebook.AccessToken;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -43,6 +44,8 @@ import java.util.concurrent.TimeUnit;
 import gr.net.maroulis.library.EasySplashScreen;
 
 import static android.widget.ImageView.ScaleType.FIT_XY;
+import static androidCourse.technion.quickthumbs.Utils.CacheHandler.checkIfTextListNeedToBeRefilled;
+import static androidCourse.technion.quickthumbs.Utils.CacheHandler.getNextTextFromSelectedTheme;
 
 
 public class GameLoadingSplashScreenActivity extends AppCompatActivity {
@@ -225,9 +228,37 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
     private class FetchRandomText extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... voids) {
-            fetchRandomTextSpecifiedForUsers();
+
+            final String choosenTheme = getRandomThemeName();
+
+            TextDataRow textCardItem = getNextTextFromSelectedTheme(choosenTheme);
+            if (textCardItem == null){
+                fetchRandomTextSpecifiedForUsers();
+            }else{
+                sleep(1);
+                changeSplashUI(choosenTheme);
+                int playCount = Integer.parseInt(textCardItem.getNumberOfTimesPlayed());
+                String composer = textCardItem.getComposer();
+                changedTextData(playCount, composer, choosenTheme, textCardItem.getID());
+
+                updateBestScoresOnUI(textCardItem);
+
+                checkIfTextListNeedToBeRefilled(choosenTheme);
+            }
 
             return null;
+        }
+
+        public void updateBestScoresOnUI(final TextDataRow textCardItem) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    showBestStatsOnScreen(textCardItem);
+                    final Intent intent = setIntentForTheGame(textCardItem);
+                    setSplashScreenTimerToActivity(intent);
+
+                }
+            });
         }
 
         public void changeSplashUI(String choosenTheme) {
@@ -332,13 +363,13 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
                             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                                 if (task.isSuccessful()) {
                                     for (QueryDocumentSnapshot document : task.getResult()) {
-                                        Log.d(TAG, "getAllThemes:" + document.getId() + " => " + document.getData());
+//                                        Log.d(TAG, "getAllThemes:" + document.getId() + " => " + document.getData());
                                         getTextFromTextsCollection(document.getId()).set(document.getData(), SetOptions.merge());
                                         String composer = document.get("composer").toString();
                                         getUserCollection(composer, "texts").document(document.getId()).set(document.getData(), SetOptions.merge());
                                     }
                                 } else {
-                                    Log.d(TAG, "getAllThemes:" + "Error getting documents: ", task.getException());
+//                                    Log.d(TAG, "getAllThemes:" + "Error getting documents: ", task.getException());
                                 }
                             }
                         });
@@ -351,6 +382,7 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
             getSelectedThemeTextsCollection(choosenTheme).document(documentID).set(changedText, SetOptions.merge());
             getTextFromTextsCollection(documentID).set(changedText, SetOptions.merge());
             getUserCollection(composer, "texts").document(documentID).set(changedText, SetOptions.merge());
+            copyDocumentFromThemesToTextCollection();
         }
 
         private DocumentReference getTextFromTextsCollection(String documentID) {

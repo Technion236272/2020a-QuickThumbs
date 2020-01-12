@@ -152,14 +152,14 @@ public class ProfileActivity extends Fragment {
         if (isImageLoaded){
             return;
         }
-//        AccessToken accessToken = AccessToken.getCurrentAccessToken();
-//        boolean isLoggedInOnFacebook = accessToken != null && !accessToken.isExpired();
-//        GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(getActivity());
-//        if (isLoggedInOnFacebook){
-//            setFacebookProfilePicture();
-//        }else if (googleAccount != null){
-//            setGoogleProfilePicture();
-//        }
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        boolean isLoggedInOnFacebook = accessToken != null && !accessToken.isExpired();
+        GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(getActivity());
+        if (isLoggedInOnFacebook){
+            setFacebookProfilePicture();
+        }else if (googleAccount != null){
+            setGoogleProfilePicture();
+        }
     }
 
     private void setCameraPictureLoadListener(View view) {
