@@ -76,8 +76,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void setOpeningSplashScreen() {
         AppOpeningSplashScreen.Builder splash = new AppOpeningSplashScreen.Builder(this);
-        //        Set custom color of background:
-        splash.setBackgroundColor(getResources().getColor(R.color.primaryColor));
+        //Set custom color of background:
+        splash.setBackgroundImage(getResources().getDrawable(R.drawable.background));
         //Set custom image for background:
 //        splash.setBackgroundImage(getResources().getDrawable(R.mipmap.ic_launcher_foreground));
         //Set custom image for splash:
@@ -181,7 +181,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignInResult(task);
         }else{
-            // Pass the activity result back to the Facebook SDK
+            // Pass the activity result background to the Facebook SDK
             callbackManager.onActivityResult(requestCode, resultCode, data);
         }
     }

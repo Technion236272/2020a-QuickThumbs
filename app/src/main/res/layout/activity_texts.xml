@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
-    android:background="@drawable/gradiant_color"
+    android:background="@drawable/background"
     tools:context="androidCourse.technion.quickthumbs.personalArea.TextsActivity">
 
     <androidx.recyclerview.widget.RecyclerView
@@ -20,6 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
+        android:background="@drawable/background"
         android:visibility="visible">
 
         <TextView
@@ -27,7 +28,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:text="Loading the texts..."
-            android:background="@drawable/gradiant_color"
             android:gravity="center"
             android:textColor="@color/primaryTextColor"
             android:layout_centerHorizontal="true"
