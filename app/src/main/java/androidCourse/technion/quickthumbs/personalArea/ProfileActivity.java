@@ -5,22 +5,18 @@ import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
-import androidx.core.view.GestureDetectorCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -34,11 +30,11 @@ import androidCourse.technion.quickthumbs.personalArea.FriendsList.FriendItem;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.MediaStore;
-import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -65,15 +61,13 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageMetadata;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -85,7 +79,9 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import static android.app.Activity.RESULT_OK;
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
@@ -112,11 +108,12 @@ public class ProfileActivity extends Fragment {
     private CacheHandler cacheHandler;
     private RecyclerView friendsListRecyclerView;
     final ArrayList<FriendItem> friendsList = new ArrayList<>();
-    private DocumentSnapshot lastSnapShot =null;
+    private DocumentSnapshot lastSnapShot = null;
     boolean noMoreLoading;
     private int howMuchToLoadEachScroll;
-
-    HashMap<String,Boolean> loadedRTextsIDs=new HashMap<>();
+    private HashMap<String, Boolean> friendsMap;
+    private List<String> friendsIdList;
+    HashMap<String, Boolean> loadedFriendsIDs = new HashMap<>();
 
 
     @Override
@@ -142,13 +139,16 @@ public class ProfileActivity extends Fragment {
 
         friendsListRecyclerView = view.findViewById(R.id.friendsListRecyclerView);
         friendsListRecyclerView.setHasFixedSize(true);
+
+        friendsMap = new HashMap<>();
+        friendsIdList = new LinkedList<>();
         checkIfUserHasFriends();
 
 
         displayStatistics(view);
 
         setLogOutButton(view);
-
+        setSendFriendRequestButton(view);
 
         profilePictureSettings(view);
 
@@ -162,40 +162,136 @@ public class ProfileActivity extends Fragment {
         );
     }
 
-    private void checkIfUserHasFriends() {
-        db.collection("users").document(getUid())
-                .collection("friends").get()
+    private void setSendFriendRequestButton(final View view) {
+        view.findViewById(R.id.sendFriendRequestButton).setOnClickListener(
+                new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        EditText email = view.findViewById(R.id.emailEditText);
+                        String friendEmail = email.getText().toString();
+                        if (friendEmail != null) {
+                            addFriendRequestToDatabaseIfEmailExists(friendEmail);
+                        }
+                    }
+                }
+        );
+    }
+
+    private void addFriendRequestToDatabaseIfEmailExists(String friendEmail) {
+        db.collection("users").whereEqualTo("email", friendEmail).get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful() && task.getResult().getDocuments().size() != 0) {
-                            Log.d(TAG, "collection is not empty!", task.getException());
-                            fetchPersonalFriendsList();
-                            setRecyclerViewScroller();
-                        } else {
-                            Log.d(TAG, "no such collection", task.getException());
+                        if (task.isSuccessful() && task.getResult() != null) {
+                            String userDocumentId = getUserDocument().getId();
+                            for (QueryDocumentSnapshot friendDocument : task.getResult()) {
+                                addFriendRequestToSenderFriendsCollection(userDocumentId, friendDocument.getId());
+                                addFriendRequestToReceiverFriendsCollection(userDocumentId, friendDocument.getId());
+                            }
                         }
                     }
                 });
     }
 
+    private void addFriendRequestToSenderFriendsCollection(final String userDocumentId, final String friendDocumentId) {
+        //adds only if the new friend does not exist in the collection or is deleted
+        final Map<String, Object> friendMap = new HashMap<>();
+        friendMap.put("status", "requestSent");
+        getUserDocument().collection("friends").document(friendDocumentId)
+                .get().addOnCompleteListener(
+                new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot friendDocumentSnapshot = task.getResult();
+                            if (friendDocumentSnapshot.exists()) {
+                                String current_status = friendDocumentSnapshot.getString("status");
+                                if (current_status.equals("deleted")) {
+                                    addFriend(userDocumentId, friendDocumentId, friendMap);
+                                }
+                            } else {
+                                addFriend(userDocumentId, friendDocumentId, friendMap);
+                            }
+                        } else {
+                            addFriend(userDocumentId, friendDocumentId, friendMap);
+                        }
+                    }
+                }
+        );
+    }
+
+    private void addFriend(String userDocumentId, String friendDocumentId, Map<String, Object> friendMap) {
+        db.collection("users").document(userDocumentId).collection("friends")
+                .document(friendDocumentId)
+                .set(friendMap, SetOptions.merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        new CacheHandler.FriendsUpdateFrindsList().execute();
+                        Log.d(TAG, "friend document set successfully");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error setting friend document", e);
+                    }
+                });
+    }
+
+    private void addFriendRequestToReceiverFriendsCollection(final String userDocumentId, final String friendDocumentId) {
+        //adds only if the new friend does not exist in the collection or is deleted
+        final Map<String, Object> friendMap = new HashMap<>();
+        friendMap.put("status", "requestReceived");
+        db.collection("users").document(friendDocumentId).collection("friends")
+                .document(userDocumentId)
+                .get().addOnCompleteListener(
+                new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot userDocumentSnapshot = task.getResult();
+                            if (userDocumentSnapshot.exists()) {
+                                String current_status = userDocumentSnapshot.getString("status");
+                                if (current_status.equals("deleted")) {
+                                    addFriend(friendDocumentId, userDocumentId, friendMap);
+                                }
+                            } else {
+                                addFriend(friendDocumentId, userDocumentId, friendMap);
+                            }
+                        } else {
+                            addFriend(friendDocumentId, userDocumentId, friendMap);
+                        }
+                    }
+                }
+        );
+    }
+
+    private void checkIfUserHasFriends() {
+        friendsMap = cacheHandler.getUserfriendsMap();
+        friendsIdList = cacheHandler.getUserfriendsList();
+        if (friendsList.size() != 0 ){
+            fetchPersonalFriendsList();
+            setRecyclerViewScroller();
+        }
+    }
+
+
     private void setRecyclerViewScroller() {
         friendsListRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-
             @Override
             public void onScrolled(final RecyclerView recyclerView, int dx, int dy) {
                 super.onScrolled(recyclerView, dx, dy);
                 if (dy > 0) {
                     // Scrolling up
                     Log.i("RecyclerView scrolled: ", "scroll down!");
-                    if(friendsList.size() != 0 && !noMoreLoading){
+                    if (friendsList.size() != 0 && !noMoreLoading) {
                         refillFriendsList(recyclerView);
                     }
-                } else if (dy < 0){
+                } else if (dy < 0) {
                     // Scrolling down
                     Log.i("RecyclerView scrolled: ", "scroll up!");
-                }
-                else if (dx<0){
+                } else if (dx < 0) {
                     getActivity().finish();
                     //overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
                 }
@@ -204,9 +300,9 @@ public class ProfileActivity extends Fragment {
     }
 
     private void refillFriendsList(RecyclerView recyclerView) {
-        db.collection("users").document(getUid()).
-                collection("friends").orderBy("playCount", Query.Direction.DESCENDING).
-                startAfter(lastSnapShot).limit(howMuchToLoadEachScroll).get()
+        db.collection("users").whereIn("uid", friendsIdList)
+                .orderBy("email", Query.Direction.DESCENDING)
+                .startAfter(lastSnapShot).limit(howMuchToLoadEachScroll).get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -214,21 +310,21 @@ public class ProfileActivity extends Fragment {
                             fillFriendsList(task);
                             friendsListRecyclerView.getAdapter().notifyDataSetChanged();
                         } else {
-                            Log.d(TAG, "getAllThemes:"+  "Error getting documents: ", task.getException());
+                            Log.d(TAG, "getAllThemes:" + "Error getting documents: ", task.getException());
                         }
                     }
                 });
     }
 
     private void fetchPersonalFriendsList() {
-        db.collection("users").document(getUid()).collection("friends").
-                orderBy("score", Query.Direction.DESCENDING).limit(4).get()
+        db.collection("users").whereIn("uid", friendsIdList)
+                .orderBy("email", Query.Direction.DESCENDING).limit(5).get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             fillFriendsList(task);
-                            setTextAdaptor();
+                            setFriendAdaptor();
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());
                         }
@@ -237,22 +333,26 @@ public class ProfileActivity extends Fragment {
     }
 
     private void fillFriendsList(Task<QuerySnapshot> task) {
-        for (DocumentSnapshot document:task.getResult()) {
-            if ( document.getString("text") == null ) continue;
-            FriendItem item = new FriendItem(document);
-            if (loadedRTextsIDs.get(document.getId()) == null ) {
-                loadedRTextsIDs.put(document.getId(),true);
+        if (task.getResult() == null) {
+            return;
+        }
+        for (DocumentSnapshot document : task.getResult()) {
+            String status = document.getString("status");
+            if (status == null || !status.equals("accepted")) continue;
+            FriendItem item = new FriendItem(document, status);
+            if (loadedFriendsIDs.get(document.getId()) == null) {
+                loadedFriendsIDs.put(document.getId(), true);
                 friendsList.add(item);
-                lastSnapShot=document;
-            }else{
-                noMoreLoading =true;
+                lastSnapShot = document;
+            } else {
+                noMoreLoading = true;
                 friendsListRecyclerView.clearOnScrollListeners();
             }
         }
     }
 
-    private void setTextAdaptor() {
-        FriendAdaptor adapter = new FriendAdaptor(friendsList,getActivity());
+    private void setFriendAdaptor() {
+        FriendAdaptor adapter = new FriendAdaptor(friendsList, getActivity());
         friendsListRecyclerView.setAdapter(adapter);
         friendsListRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     }
@@ -267,15 +367,15 @@ public class ProfileActivity extends Fragment {
         StrictMode.setThreadPolicy(policy);
 
         boolean isImageLoaded = cacheHandler.loadPictureFromSharedPrefrences(profilePicture);
-        if (isImageLoaded){
+        if (isImageLoaded) {
             return;
         }
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         boolean isLoggedInOnFacebook = accessToken != null && !accessToken.isExpired();
         GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(getActivity());
-        if (isLoggedInOnFacebook){
+        if (isLoggedInOnFacebook) {
             setFacebookProfilePicture();
-        }else if (googleAccount != null){
+        } else if (googleAccount != null) {
             setGoogleProfilePicture();
         }
     }
@@ -317,7 +417,6 @@ public class ProfileActivity extends Fragment {
             }
         });
     }
-
 
 
     private void setGoogleProfilePicture() {
@@ -501,10 +600,10 @@ public class ProfileActivity extends Fragment {
             // we need to save its reference to a Uri variable
             pickedImgUri = data.getData();
             try {
-                Bitmap bitmapOriginal = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), pickedImgUri  );
+                Bitmap bitmapOriginal = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), pickedImgUri);
                 Matrix matrix = new Matrix();
                 matrix.postScale(0.5f, 0.5f);
-                Bitmap bitmap = Bitmap.createBitmap(bitmapOriginal, 100, 100,100, 100, matrix, true);
+                Bitmap bitmap = Bitmap.createBitmap(bitmapOriginal, 100, 100, 100, 100, matrix, true);
                 cacheHandler.savePictureOnSharedPrefrences("galleryProfilePicture", bitmapOriginal);
                 profilePicture.setImageBitmap(Bitmap.createScaledBitmap(bitmapOriginal, 200, 200, false));
 
@@ -527,7 +626,7 @@ public class ProfileActivity extends Fragment {
                     Bitmap bitmapOriginal = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), cameraPhotoURI);
                     Matrix matrix = new Matrix();
                     matrix.postScale(0.5f, 0.5f);
-                    Bitmap bitmap = Bitmap.createBitmap(bitmapOriginal, 100, 100,100, 100, matrix, true);
+                    Bitmap bitmap = Bitmap.createBitmap(bitmapOriginal, 100, 100, 100, 100, matrix, true);
                     cacheHandler.savePictureOnSharedPrefrences("galleryProfilePicture", bitmapOriginal);
                     profilePicture.setImageBitmap(Bitmap.createScaledBitmap(bitmapOriginal, 200, 200, false));
 

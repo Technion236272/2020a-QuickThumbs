@@ -278,6 +278,8 @@ public class MainPager extends AppCompatActivity {
         cacheHandler.updateUserThemesSelectionOnDB();
 
         new CacheHandler.TextCacheRefill().execute();
+
+        new CacheHandler.FriendsUpdateFrindsList().execute();
     }
 
     @Override
