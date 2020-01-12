@@ -2,6 +2,7 @@ package androidCourse.technion.quickthumbs.Utils;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -34,6 +35,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -58,8 +61,10 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import static android.content.Context.MODE_PRIVATE;
 import static androidCourse.technion.quickthumbs.personalArea.ProfileActivity.profilePicture;
@@ -67,9 +72,9 @@ import static androidCourse.technion.quickthumbs.personalArea.ProfileActivity.pr
 public class CacheHandler {
     //Get Cache Folder in Android
     private static final String TAG = CacheHandler.class.getSimpleName();
-    private final String[] themesNames = {"Comedy", "Music", "Movies", "Science", "Games", "Literature"};
+    private static final String[] themesNames = {"Comedy", "Music", "Movies", "Science", "Games", "Literature"};
     private static Context context;
-    private FirebaseFirestore db;
+    private static FirebaseFirestore db;
     private static FirebaseAuth mAuth;
     private static String MyPREFERENCES;
     private static FirebaseStorage storage;
@@ -128,7 +133,7 @@ public class CacheHandler {
         Gson gson = new Gson();
         String json = gson.toJson(selected);
         editor.putString("chosen themes", json);
-        editor.apply();
+        editor.commit();
     }
 
     public Map<String, Boolean> loadThemesFromSharedPreferences() {
@@ -160,10 +165,9 @@ public class CacheHandler {
             return mAuth.getUid();
         } else if (account != null) {
             return account.getId();
-        } else if (accessToken != null){
+        } else if (accessToken != null) {
             return accessToken.getUserId();
-        }
-        else {
+        } else {
             return mAuth.toString();
         }
     }
@@ -194,26 +198,6 @@ public class CacheHandler {
         StorageReference userStorage = storageRef.child(getUid());
         StorageReference profilePictureRef = userStorage.child("/profilePicture.JPEG");
 
-//        profilePictureRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-//            @Override
-//            public void onSuccess(Uri uri) {
-//                // Got the download URL for 'users/Uid/profilePicture.JPEG'
-//                Bitmap bitmap = null;
-//                try {
-//                    bitmap = MediaStore.Images.Media.getBitmap(context.getContentResolver(), uri);
-//                    savePictureOnSharedPrefrences("galleryProfilePicture", bitmap);
-//                    showMessage("picture was loaded from storage");
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-//            }
-//        }).addOnFailureListener(new OnFailureListener() {
-//            @Override
-//            public void onFailure(@NonNull Exception exception) {
-//                // Handle any errors
-//                showMessage("picture not found on storage");
-//            }
-//        });
         final long ONE_MEGABYTE = 1024 * 1024;
         profilePictureRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
             @Override
@@ -222,13 +206,13 @@ public class CacheHandler {
                 Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
                 savePictureOnSharedPrefrences("galleryProfilePicture", bitmap);
                 profilePicture.setImageBitmap(bitmap);
-                showMessage("picture was loaded from storage");
+//                showMessage("picture was loaded from storage");
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception exception) {
                 // Handle any errors
-                showMessage("picture not found on storage");
+//                showMessage("picture not found on storage");
             }
         });
     }
@@ -255,7 +239,7 @@ public class CacheHandler {
         editor.putBoolean("googleProfilePicture", false);
         editor.putBoolean(checkIfAccountTypeUsed, true);//set the profile picture type
         editor.putString("ProfilePictureBitmapEncoded", encodeTobase64(yourbitmap));
-        editor.apply();
+        editor.commit();
     }
 
     // method for base64 to bitmap
@@ -311,7 +295,7 @@ public class CacheHandler {
                 SharedPreferences sharedpreferences = context.getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
                 SharedPreferences.Editor editor = sharedpreferences.edit();
                 editor.putBoolean("isLoadedToStorage", true);
-                showMessage("Profile picture uploaded successfully!");
+//                showMessage("Profile picture uploaded successfully!");
             }
         });
 
@@ -339,15 +323,6 @@ public class CacheHandler {
             storeProfilePhoto(params[0].photoSource, params[0].imageBitmap, params[0].profilePicture);
             return null;
         }
-
-        protected void onProgressUpdate() {
-            //            setProgressPercent(progress[0]);
-        }
-
-        protected void onPostExecute() {
-            //            showDialog("Downloaded " + result + " bytes");
-        }
-
     }
 
     // simple method to show toast message
@@ -355,86 +330,139 @@ public class CacheHandler {
         Toast.makeText(context, message, Toast.LENGTH_LONG).show();
     }
 
+    public static void checkIfTextListNeedToBeRefilled(String selectedTheme) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString(getUid() + "_" + selectedTheme + "_textsList", null);
+        Type type = new TypeToken<List<TextDataRow>>() {
+        }.getType();
+        List<TextDataRow> loadedList = gson.fromJson(json, type);
+        int themeIndex = sharedPreferences.getInt(getUid() + "_" + selectedTheme + "_index", 0);
+        if (loadedList == null || themeIndex > 6) {
+            new TextCacheRefill().execute();
+        }
+    }
 
-    public static File getCacheFolder(Context context) {
-        File cacheDir = null;
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            cacheDir = new File(Environment.getExternalStorageDirectory(), "cachefolder");
-            if (!cacheDir.isDirectory()) {
-                cacheDir.mkdirs();
+    public static TextDataRow getNextTextFromSelectedTheme(String selectedTheme) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString(getUid() + "_" + selectedTheme + "_textsList", null);
+        Type type = new TypeToken<List<TextDataRow>>() {
+        }.getType();
+        List<TextDataRow> loadedList = gson.fromJson(json, type);
+        if (loadedList == null) {
+            new TextCacheRefill().execute();
+            return null;
+        } else {
+            int themeIndex = sharedPreferences.getInt(getUid() + "_" + selectedTheme + "_index", 0);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt(getUid() + "_" + selectedTheme + "_index", themeIndex +1 );
+            editor.commit();
+            return loadedList.get(themeIndex % 10 );
+        }
+    }
+
+    public static class TextCacheRefill extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            //cancel ongoing upload
+            refillTextsForAllThemes();
+            return null;
+        }
+    }
+
+    public static void refillTextsForAllThemes() {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
+        for (String themeName : themesNames) {
+            Gson gson = new Gson();
+            String json = sharedPreferences.getString(getUid() + "_" + themeName + "_textsList", null);
+            Type type = new TypeToken<List<TextDataRow>>() {
+            }.getType();
+            List<TextDataRow> loadedList = gson.fromJson(json, type);
+            if (loadedList == null) {
+                loadedList = new LinkedList<>();
+            }
+            int themeIndex = sharedPreferences.getInt(getUid() + "_" + themeName + "_index", 0);
+            if (loadedList.size() == 0 || themeIndex != 0) {
+                refillThemeTextList(themeName, loadedList, themeIndex);
             }
         }
-
-        if (!cacheDir.isDirectory()) {
-            cacheDir = context.getCacheDir(); //get system cache folder
-        }
-
-        return cacheDir;
     }
 
-    //Get App Data Folder in Android
-    public static File getDataFolder(Context context) {
-        File dataDir = null;
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            dataDir = new File(Environment.getExternalStorageDirectory(), "myappdata");
-            if (!dataDir.isDirectory()) {
-                dataDir.mkdirs();
+    private static void refillThemeTextList(final String themeName, final List<TextDataRow> loadedList, final int themeIndex) {
+        //now reach for the theme texts and check the number of texts in the theme
+        getThemesCollection().document(themeName).
+                get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        int textsAmount = document.getLong("textsCount").intValue();
+                        getRandomText(themeName, textsAmount, loadedList, themeIndex);
+                    } else {
+                        //TODO: is it possible that we will reach here?
+                    }
+                } else {
+                    //TODO: is it possible that we will reach here?
+                }
+            }
+        });
+    }
+
+    private static void getRandomText(final String choosenTheme, final int textsAmount, final List<TextDataRow> loadedList, final int themeIndex) {
+        final int chosenIndex = (new Random().nextInt(textsAmount)) + 1;
+        LinkedList<Integer> textIndexes = new LinkedList<>();
+        int numberOfTextsToAdd = (themeIndex == 0) ? 10 : themeIndex;
+        for (int i = 0; i < numberOfTextsToAdd; i++) {
+            int nextTextIdToInsertToList = ((chosenIndex + i) % textsAmount) +1;
+            textIndexes.add(nextTextIdToInsertToList);
+        }
+        //now reach for the theme texts and check the number of texts in there
+        getSelectedThemeTextsCollection(choosenTheme).whereIn("mainThemeID", textIndexes).
+                get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    if (task.getResult().isEmpty()) {
+                    } else {
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            TextDataRow textCardItem = TextDataRow.createTextCardItem(document, null, -1);
+                            loadedList.add(textCardItem);
+                        }
+                        updateThemeListAndSaveToSharedPreferences(themeIndex, loadedList, choosenTheme);
+                    }
+                } else {
+                }
+            }
+        });
+    }
+
+    private static void updateThemeListAndSaveToSharedPreferences(int themeIndex, List<TextDataRow> loadedList, String choosenTheme) {
+        for (int i = 0; i < themeIndex; i++) {
+            loadedList.remove(0);
+        }
+        if (loadedList.size() != 0) {
+            while (loadedList.size() < 10) {
+                loadedList.add(loadedList.get(0));
             }
         }
-
-        if (!dataDir.isDirectory()) {
-            dataDir = context.getFilesDir();
-        }
-
-        return dataDir;
+        SharedPreferences sharedPreferences = context.getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(getUid() + "_" + choosenTheme + "_index", 0);
+        Gson gson = new Gson();
+        String json = gson.toJson(loadedList);
+        editor.putString(getUid() + "_" + choosenTheme + "_textsList", json);
+//        showMessage(choosenTheme + "list was loaded with " + (loadedList.size()) + " items");
+        editor.commit();
     }
 
-    public static void writeFileIntoCacheFolder(Context context, TextDataRow textDataRow) throws IOException {
-        byte[] insert = serializeObject(textDataRow);
-        // open input stream test.txt for reading purpose.
-        File cacheDir = getCacheFolder(context);
-        InputStream inStream = new FileInputStream(cacheDir.getPath());
-        InputStream inputStream = new BufferedInputStream(inStream, 10240);
-        File cacheFile = new File(cacheDir, "textCache");
-        FileOutputStream outputStream = new FileOutputStream(cacheFile);
-
-        byte buffer[] = new byte[1024];
-        int dataSize;
-        int loadedSize = 0;
-        while ((dataSize = inputStream.read(buffer)) != -1) {
-            loadedSize += dataSize;
-            outputStream.write(buffer, 0, dataSize);
-        }
-
-        outputStream.close();
+    private static CollectionReference getSelectedThemeTextsCollection(String theme) {
+        return getThemesCollection().document(theme).collection("texts");
     }
 
-    public static TextDataRow loadFileFromCacheFolder(Context context) throws IOException, ClassNotFoundException {
-        File cacheDir = getCacheFolder(context);
-        File cacheFile = new File(cacheDir, "textCache");
-        InputStream fileInputStream = new FileInputStream(cacheFile);
-        byte buffer[] = new byte[1024];
-        int read = fileInputStream.read(buffer, 0, 1024);
-        TextDataRow item = (TextDataRow) deserializeBytes(buffer);
-        return item;
+    private static CollectionReference getThemesCollection() {
+        return db.collection("themes");
     }
 
-    public static byte[] serializeObject(Object obj) throws IOException {
-        ByteArrayOutputStream bytesOut = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(bytesOut);
-        oos.writeObject(obj);
-        oos.flush();
-        byte[] bytes = bytesOut.toByteArray();
-        bytesOut.close();
-        oos.close();
-        return bytes;
-    }
-
-    public static Object deserializeBytes(byte[] bytes) throws IOException, ClassNotFoundException {
-        ByteArrayInputStream bytesIn = new ByteArrayInputStream(bytes);
-        ObjectInputStream ois = new ObjectInputStream(bytesIn);
-        Object obj = ois.readObject();
-        ois.close();
-        return obj;
-    }
 }
