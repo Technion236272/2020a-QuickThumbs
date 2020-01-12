@@ -141,21 +141,63 @@
                 android:text="@string/emptyText"
                 android:textColor="@color/primaryTextColor" />
 
-            <Button
-                android:id="@+id/logOutButton"
-                style="@style/SecondaryColorRoundedButton"
-                android:layout_below="@id/Score"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="10dp"
-                android:text="@string/LogOut" />
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/friendsListRecyclerView"
+        android:background="@color/primaryTextColor"
+        android:layout_below="@id/ScoreValue"
+        android:layout_width="match_parent"
+        android:layout_height="350dp"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginRight="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginStart="20dp"
 
-            <com.facebook.login.widget.LoginButton
-                android:id="@+id/facebook_log_out_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/Score"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="10dp" />
+        android:scrollbars="vertical"
+        android:fastScrollEnabled="true"/>
+
+    <RelativeLayout
+        android:id="@+id/addFriendLayout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="10dp"
+        android:paddingRight="30dp"
+        android:paddingEnd="30dp"
+        android:layout_alignBottom="@+id/friendsListRecyclerView"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:visibility="visible">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/addFriendButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="5dp"
+            android:layout_marginRight="5dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/logo"
+            android:src="@drawable/ic_add_circle_24dp"
+            app:tint="@color/secondaryTextColor"
+            android:layout_marginEnd="5dp" />
+    </RelativeLayout>
+
+    <Button
+        android:id="@+id/logOutButton"
+        style="@style/SecondaryColorRoundedButton"
+        android:layout_below="@id/friendsListRecyclerView"
+        android:layout_marginTop="10dp"
+        android:layout_centerHorizontal="true"
+        android:text="@string/LogOut" />
+
+    <com.facebook.login.widget.LoginButton
+        android:id="@+id/facebook_log_out_button"
+        android:layout_width="wrap_content"
+        android:layout_below="@id/friendsListRecyclerView"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_centerHorizontal="true"/>
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/shareButton"
