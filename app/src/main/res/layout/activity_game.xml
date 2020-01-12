@@ -244,7 +244,6 @@
             </RelativeLayout>
         </RelativeLayout>
 
-
         <RelativeLayout
             android:id="@+id/gameTextLayout"
             android:layout_width="match_parent"
@@ -273,8 +272,8 @@
                     android:id="@+id/pointsValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:text="0"
                     android:textColor="@color/primaryTextColor"
-                    android:text = "0"
                     android:textSize="17sp" />
 
                 <TextView
@@ -298,8 +297,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
+                    android:text="0"
                     android:textColor="@color/primaryTextColor"
-                    android:text = "0"
                     android:textSize="17sp" />
 
                 <TextView
@@ -314,8 +313,8 @@
                     android:id="@+id/CPMValue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:text="0"
                     android:textColor="@color/primaryTextColor"
-                    android:text = "0"
                     android:textSize="17sp" />
             </LinearLayout>
 
@@ -357,8 +356,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@id/comboDisplayer"
-                        android:layout_marginRight="10dp"
                         android:layout_marginLeft="10dp"
+                        android:layout_marginRight="10dp"
                         android:gravity="left"
                         android:textColor="@color/primaryTextColor"
                         android:textSize="17sp" />
@@ -394,6 +393,174 @@
                 android:text="Loading the text..."
                 android:textColor="@color/primaryTextColor"
                 android:textSize="17sp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/podiumScreen"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@drawable/gradiant_color"
+            android:orientation="vertical"
+            android:visibility="invisible">
+
+            <TextView
+                android:id="@+id/placementAnnouncement"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:padding="10dp"
+                android:text="PLACEMENTS"
+                android:textColor="@color/secondaryDarkColor"
+                android:textSize="40sp"
+                android:textStyle="bold|italic" />
+
+            <ImageView
+                android:id="@+id/podiumImageView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:adjustViewBounds="true"
+                android:cropToPadding="true"
+                android:scaleType="fitXY"
+                android:src="@drawable/podium" />
+
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight=".48"
+                    android:orientation="horizontal">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".42"
+                        android:orientation="vertical">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:padding="5sp">
+
+                            <TextView
+                                android:id="@+id/placement2Points"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentBottom="true"
+                                android:layout_centerHorizontal="true"
+                                android:layout_marginBottom="50dp"
+                                android:textColor="@color/secondaryDarkColor"
+                                android:textSize="20sp" />
+
+                            <TextView
+                                android:id="@+id/placement2"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_above="@id/placement2Points"
+                                android:layout_centerHorizontal="true"
+                                android:textColor="@color/secondaryColor"
+                                android:textSize="24sp" />
+
+                        </RelativeLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".56"
+                        android:orientation="vertical">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:padding="5sp">
+
+                            <TextView
+                                android:id="@+id/placement1Points"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentBottom="true"
+                                android:layout_centerHorizontal="true"
+                                android:layout_marginBottom="100dp"
+                                android:textColor="@color/secondaryDarkColor"
+                                android:textSize="20sp" />
+
+                            <TextView
+                                android:id="@+id/placement1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_above="@id/placement1Points"
+                                android:layout_centerHorizontal="true"
+                                android:textColor="@color/secondaryColor"
+                                android:textSize="24sp" />
+
+
+                        </RelativeLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight=".42"
+                        android:orientation="vertical">
+
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:padding="5sp">
+
+                            <TextView
+                                android:id="@+id/placement3Points"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentBottom="true"
+                                android:layout_centerHorizontal="true"
+                                android:layout_marginBottom="20dp"
+                                android:textColor="@color/secondaryDarkColor"
+                                android:textSize="20sp" />
+
+                            <TextView
+                                android:id="@+id/placement3"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_above="@id/placement3Points"
+                                android:layout_centerHorizontal="true"
+                                android:textColor="@color/secondaryColor"
+                                android:textSize="24sp" />
+
+                        </RelativeLayout>
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight=".52"
+                    android:orientation="horizontal">
+
+                    <RelativeLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <Button
+                            android:id="@+id/closingPodiumButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentBottom="true"
+                            android:layout_centerHorizontal="true"
+                            android:layout_marginBottom="10dp"
+                            android:background="@android:drawable/ic_menu_close_clear_cancel" />
+                    </RelativeLayout>
+
+                </LinearLayout>
+            </LinearLayout>
         </RelativeLayout>
     </FrameLayout>
 </RelativeLayout>
