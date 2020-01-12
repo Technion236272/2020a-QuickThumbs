@@ -427,7 +427,7 @@ public class CacheHandler {
                     if (task.getResult().isEmpty()) {
                     } else {
                         for (QueryDocumentSnapshot document : task.getResult()) {
-                            TextDataRow textCardItem = TextDataRow.createTextCardItem(document, null, -1);
+                            TextDataRow textCardItem = TextDataRow.createTextCardItem(document, null, -1, null);
                             loadedList.add(textCardItem);
                         }
                         updateThemeListAndSaveToSharedPreferences(themeIndex, loadedList, choosenTheme);
