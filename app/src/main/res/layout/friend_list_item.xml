@@ -16,15 +16,16 @@
         android:layout_height="wrap_content"
         android:padding="20dp">
 
-
-        <ImageView
+        <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/friendProfilePicture"
             android:layout_width="82dp"
             android:layout_height="82dp"
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:layout_marginRight="12dp"
-            android:scaleType="fitXY" />
+            android:src="@drawable/placeholder"
+            app:civ_border_color="#FF000000"
+            app:civ_border_width="2dp" />
 
         <TextView
             android:id="@+id/friendName"

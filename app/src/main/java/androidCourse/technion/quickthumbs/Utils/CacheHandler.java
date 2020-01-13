@@ -13,6 +13,7 @@ import android.os.Environment;
 
 import androidCourse.technion.quickthumbs.AddTextActivity;
 import androidCourse.technion.quickthumbs.game.GameActivity;
+import androidCourse.technion.quickthumbs.personalArea.FriendsList.FriendItem;
 import androidCourse.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
 import androidCourse.technion.quickthumbs.theme.ThemeDataRow;
 
@@ -356,9 +357,9 @@ public class CacheHandler {
         } else {
             int themeIndex = sharedPreferences.getInt(getUid() + "_" + selectedTheme + "_index", 0);
             SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putInt(getUid() + "_" + selectedTheme + "_index", themeIndex +1 );
+            editor.putInt(getUid() + "_" + selectedTheme + "_index", themeIndex + 1);
             editor.commit();
-            return loadedList.get(themeIndex % 10 );
+            return loadedList.get(themeIndex % 10);
         }
     }
 
@@ -415,7 +416,7 @@ public class CacheHandler {
         LinkedList<Integer> textIndexes = new LinkedList<>();
         int numberOfTextsToAdd = (themeIndex == 0) ? 10 : themeIndex;
         for (int i = 0; i < numberOfTextsToAdd; i++) {
-            int nextTextIdToInsertToList = ((chosenIndex + i) % textsAmount) +1;
+            int nextTextIdToInsertToList = ((chosenIndex + i) % textsAmount) + 1;
             textIndexes.add(nextTextIdToInsertToList);
         }
         //now reach for the theme texts and check the number of texts in there
@@ -463,6 +464,96 @@ public class CacheHandler {
 
     private static CollectionReference getThemesCollection() {
         return db.collection("themes");
+    }
+
+    public static class FriendsUpdateFrindsList extends AsyncTask<Void, Void, Void> {
+        @Override
+        protected Void doInBackground(Void... voids) {
+            //cancel ongoing upload
+            checkAndUpdateFriendsList();
+            return null;
+        }
+    }
+
+    public static void checkAndUpdateFriendsList() {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString(getUid() + "_friendsList", null);
+        Type type = new TypeToken<HashMap<String, FriendItem>>() {
+        }.getType();
+        HashMap<String, FriendItem> loadedFriendsMap = gson.fromJson(json, type);
+        if (loadedFriendsMap == null) {
+            loadedFriendsMap = new HashMap<>();
+        }
+        final HashMap<String, FriendItem> finalLoadedFrindsMap = loadedFriendsMap;
+        getUsersFriendCollection().
+                get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    if (task.getResult().isEmpty()) {
+                    } else {
+                        HashMap<String, FriendItem> friendMapFromServer = new HashMap<>();
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            String status = document.getString("status");
+                            FriendItem friendItem = new FriendItem(document, status);
+                            friendMapFromServer.put(friendItem.getId(), friendItem);
+                        }
+                        if ( finalLoadedFrindsMap.size() != friendMapFromServer.size()) {
+                            updateFriendMapFromServer(friendMapFromServer);
+                        }
+                    }
+                } else {
+                }
+            }
+        });
+
+    }
+
+    private static void updateFriendMapFromServer(HashMap<String, FriendItem> friendsMap) {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(friendsMap);
+        editor.putString(getUid() + "_friendsList", json);
+        editor.commit();
+    }
+
+    public List<String> getUserfriendsList(){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString(getUid() + "_friendsList", null);
+        Type type = new TypeToken<List<String>>() {
+        }.getType();
+        HashMap<String, Boolean> loadedFriendsMap = gson.fromJson(json, type);
+        List<String> friendsList = new LinkedList<>();
+        if (loadedFriendsMap == null) {
+            return friendsList;
+        }
+        for (String friend : loadedFriendsMap.keySet()){
+            friendsList.add(friend);
+        }
+        return friendsList;
+    }
+
+    public HashMap<String, Boolean> getUserfriendsMap(){
+        SharedPreferences sharedPreferences = context.getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sharedPreferences.getString(getUid() + "_friendsList", null);
+        Type type = new TypeToken<List<String>>() {
+        }.getType();
+        HashMap<String, Boolean> loadedFriendsMap = gson.fromJson(json, type);
+
+        if (loadedFriendsMap == null) {
+            loadedFriendsMap = new HashMap<>();
+            return loadedFriendsMap;
+        }
+
+        return loadedFriendsMap;
+    }
+
+    private static CollectionReference getUsersFriendCollection() {
+        return db.collection("users").document(getUid()).collection("friends");
     }
 
 }

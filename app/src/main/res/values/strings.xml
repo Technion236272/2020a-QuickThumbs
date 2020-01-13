@@ -32,5 +32,7 @@
     <string name="fb_login_protocol_scheme">fb2769332536457773</string>
     <string name="quick_thumbs">Quick Thumbs</string>
     <string name="emptyText">--</string>
+    <string name="statistics">Statistics:</string>
+    <string name="friends">Friends:</string>
 
 </resources>
