@@ -122,16 +122,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
+                        if (task.isSuccessful() && fireBaseAuth.getCurrentUser()!=null) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = fireBaseAuth.getCurrentUser();
-                            String email = fireBaseAuth.getCurrentUser().getEmail();
+                            String email = user.getEmail();
                             String uid = fireBaseAuth.getUid();
 //                            getFacebookUserData();
                             Map<String, Object> changedUser = new HashMap<>();
                             changedUser.put("uid", uid);
                             changedUser.put("email", email);
+                            changedUser.put("name",user.getDisplayName());
                             addUserDataToCollection(changedUser);
                         } else {
                             // If sign in fails, display a message to the user.
@@ -202,19 +203,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     // START auth_with_google
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
-
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         fireBaseAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
+                        if (task.isSuccessful() && fireBaseAuth.getCurrentUser()!=null) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
-                            FirebaseUser user = fireBaseAuth.getCurrentUser();
                             Map<String, Object> changedUser = new HashMap<>();
                             changedUser.put("uid", fireBaseAuth.getUid());
                             changedUser.put("email", fireBaseAuth.getCurrentUser().getEmail());
+                            GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(getApplicationContext());
+                            if(account != null){
+                                String personName = account.getDisplayName();
+                                changedUser.put("name",personName);
+                            }
                             addUserDataToCollection(changedUser);
                         } else {
                             // If sign in fails, display a message to the user.
@@ -234,19 +238,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         FirebaseUser currentUser = fireBaseAuth.getCurrentUser();
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
 
-        if (currentUser != null && currentUser.isEmailVerified() && account==null) {
-            String uid = currentUser.getUid();
-            Intent intent = new Intent(MainActivity.this, MainPager.class);
-
-            startActivity(intent);
-            finish();
-            Log.d(TAG, "already signed in user: " + uid);
-            return;
-        }
-
         // Check for existing Google Sign In account, if the user is already signed in
         // the GoogleSignInAccount will be non-null.
-       if (account != null && !account.isExpired()) {
+        if (account != null && !account.isExpired()) {
             String uid = account.getId();
             Intent intent = new Intent(MainActivity.this, MainPager.class);
 
@@ -254,6 +248,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             finish();
             Log.d(TAG, "already signed in user: " + uid);
             return;
+        }
+        if (currentUser != null) {
+            currentUser.reload();
+            if (currentUser.isEmailVerified()){
+                String uid = currentUser.getUid();
+                Intent intent = new Intent(MainActivity.this, MainPager.class);
+
+                startActivity(intent);
+                finish();
+                Log.d(TAG, "already signed in user: " + uid);
+                return;
+            }
         }
 
         // Check for existing Facebook Sign In account, if the user is already signed in
@@ -308,17 +314,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             FirebaseUser user = fireBaseAuth.getCurrentUser();
-                            String uid = user.getUid();
-                            if(user.isEmailVerified()){
-                                Map<String, Object> changedUser = new HashMap<>();
-                                changedUser.put("uid", fireBaseAuth.getUid());
-                                changedUser.put("email", fireBaseAuth.getCurrentUser().getEmail());
-                                addUserDataToCollection(changedUser);
-                                Log.d(TAG, "successfully signed in user: " + uid);
-                            } else{
-                                Toast.makeText(MainActivity.this, "Authentication failed. Please verify your email.", Toast.LENGTH_LONG)
-                                        .show();
-                                sendUserEmailVerification(user);
+                            if(user!=null) {
+                                String uid = user.getUid();
+                                if (user.isEmailVerified()) {
+                                    Map<String, Object> changedUser = new HashMap<>();
+                                    changedUser.put("uid", fireBaseAuth.getUid());
+                                    String userMail = fireBaseAuth.getCurrentUser().getEmail();
+                                    changedUser.put("email", userMail);
+                                    if(userMail!=null){
+                                        changedUser.put("name", userMail.substring(0,userMail.indexOf("@")));
+                                    }
+                                    addUserDataToCollection(changedUser);
+                                    Log.d(TAG, "successfully signed in user: " + uid);
+                                } else {
+                                    Toast.makeText(MainActivity.this, "Authentication failed. Please verify your email.", Toast.LENGTH_LONG)
+                                            .show();
+                                    sendUserEmailVerification(user);
+                                }
                             }
                         } else {
                             Toast.makeText(MainActivity.this, "Authentication failed.", Toast.LENGTH_LONG)
