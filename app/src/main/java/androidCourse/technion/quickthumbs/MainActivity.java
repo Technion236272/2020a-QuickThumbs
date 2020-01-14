@@ -3,10 +3,15 @@ package androidCourse.technion.quickthumbs;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidCourse.technion.quickthumbs.Utils.AppOpeningSplashScreen;
+import androidCourse.technion.quickthumbs.Utils.FriendRequestMessageService;
 
 import android.util.Log;
 import android.view.View;
@@ -38,6 +43,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -73,6 +79,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setButtonsListeners();
 
     }
+
+
 
     private void setOpeningSplashScreen() {
         AppOpeningSplashScreen.Builder splash = new AppOpeningSplashScreen.Builder(this);
@@ -133,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             changedUser.put("uid", uid);
                             changedUser.put("email", email);
                             changedUser.put("name",user.getDisplayName());
+                            //changedUser.put("token",token.getToken());
                             addUserDataToCollection(changedUser);
                         } else {
                             // If sign in fails, display a message to the user.
@@ -201,7 +210,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     // START auth_with_google
-    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
+    private void firebaseAuthWithGoogle(final GoogleSignInAccount acct) {
         Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         fireBaseAuth.signInWithCredential(credential)
@@ -214,6 +223,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             Map<String, Object> changedUser = new HashMap<>();
                             changedUser.put("uid", fireBaseAuth.getUid());
                             changedUser.put("email", fireBaseAuth.getCurrentUser().getEmail());
+                            //changedUser.put("token",acct.getIdToken());
                             GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(getApplicationContext());
                             if(account != null){
                                 String personName = account.getDisplayName();
@@ -321,6 +331,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                     changedUser.put("uid", fireBaseAuth.getUid());
                                     String userMail = fireBaseAuth.getCurrentUser().getEmail();
                                     changedUser.put("email", userMail);
+                                    //changedUser.put("token", fireBaseAuth.getCurrentUser().getIdToken(true));
                                     if(userMail!=null){
                                         changedUser.put("name", userMail.substring(0,userMail.indexOf("@")));
                                     }

@@ -23,6 +23,7 @@ import androidCourse.technion.quickthumbs.R;
 
 import static androidCourse.technion.quickthumbs.FirestoreConstants.statisticsDocument;
 import static androidCourse.technion.quickthumbs.FirestoreConstants.statsCollection;
+import static androidCourse.technion.quickthumbs.FirestoreConstants.themeField;
 import static androidCourse.technion.quickthumbs.FirestoreConstants.usersCollection;
 
 public class FriendItem {
@@ -32,6 +33,7 @@ public class FriendItem {
         this.email = email;
         this.profilePicture = profilePicture;
         this.totalScore = totalScore;
+        this.isApproved = false;
 //        this.textAdded = textAdded;
 //        this.avgAccuracy = avgAccuracy;
 //        this.avgCPM = avgCPM;
@@ -74,7 +76,7 @@ public class FriendItem {
         StorageReference userStorage = storageRef.child(uid);
         StorageReference profilePictureRef = userStorage.child("/profilePicture.JPEG");
         final long ONE_MEGABYTE = 1024 * 1024;
-        try{
+        try {
             profilePictureRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                 @Override
                 public void onSuccess(byte[] bytes) {
@@ -89,7 +91,7 @@ public class FriendItem {
                     profilePicture = null;
                 }
             });
-        }catch (Exception e){
+        } catch (Exception e) {
             //no such picture exist
         }
 
@@ -117,16 +119,9 @@ public class FriendItem {
                 });
     }
 
-    public String getStatus() {
-        return status;
-    }
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public FriendItem FriendItemFromUserCollection(DocumentSnapshot document, String status) {
-        FriendItem friendItem = new FriendItem(document, status);
+    public FriendItem FriendItemFromUserCollection(DocumentSnapshot document, String status, boolean isApproved) {
+        FriendItem friendItem = new FriendItem(document, isApproved);
         setProfilePicture(this.id);
 //        friendItem.profilePicture = null;
 //        friendItem.totalScore = document.getLong("totalScore").longValue();
@@ -191,7 +186,24 @@ public class FriendItem {
     private String email;
     private Bitmap profilePicture;
     private Long totalScore;
-    private String status;
+
+    public void setProfilePicture(Bitmap profilePicture) {
+        this.profilePicture = profilePicture;
+    }
+
+    public void setTotalScore(Long totalScore) {
+        this.totalScore = totalScore;
+    }
+
+    public boolean isApproved() {
+        return isApproved;
+    }
+
+    public void setApproved(boolean approved) {
+        isApproved = approved;
+    }
+
+    private boolean isApproved;
 //    private Long textAdded;
 //    private double avgAccuracy;
 //    private double avgCPM;
@@ -212,10 +224,10 @@ public class FriendItem {
                             email = document.get("email").toString();
                             if (document.get("name") == null) {
                                 name = email;
-                            }else {
+                            } else {
                                 name = document.get("name").toString();
                             }
-                            Log.d("WELL THIS STAFF IS  ",email);
+                            Log.d("WELL THIS STAFF IS  ", email);
                             setTotalScore(uid);
                         } else {
                             setTotalScore(uid);
@@ -224,18 +236,17 @@ public class FriendItem {
                 });
     }
 
-    public FriendItem(DocumentSnapshot document, String status) {
+    public FriendItem(DocumentSnapshot document, boolean isApproved) {
         this.id = document.getId();
-        this.status = status;
 //        setEmailAndName(document.getId());
-        if (document.get("email") == null){
+        if (document.get("email") == null) {
             email = "";
-        }else{
+        } else {
             email = document.get("email").toString();
         }
         if (document.get("name") == null) {
             name = email;
-        }else {
+        } else {
             name = document.get("name").toString();
         }
         setProfilePicture(document.getId());
@@ -243,6 +254,7 @@ public class FriendItem {
 //        this.profilePicture = null;
 //        this.totalScore = document.getLong("totalScore").longValue();
         this.totalScore = Long.valueOf(0);
+        this.isApproved = isApproved;
     }
 
 

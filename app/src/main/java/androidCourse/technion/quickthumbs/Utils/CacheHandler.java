@@ -26,6 +26,7 @@ import android.widget.PopupWindow;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
 
 import com.facebook.AccessToken;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -200,22 +201,55 @@ public class CacheHandler {
         StorageReference profilePictureRef = userStorage.child("/profilePicture.JPEG");
 
         final long ONE_MEGABYTE = 1024 * 1024;
-        profilePictureRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-            @Override
-            public void onSuccess(byte[] bytes) {
-                // Data for "images/island.jpg" is returns, use this as needed
-                Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                savePictureOnSharedPrefrences("galleryProfilePicture", bitmap);
-                profilePicture.setImageBitmap(bitmap);
+        try{
+            profilePictureRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] bytes) {
+                    // Data for "images/island.jpg" is returns, use this as needed
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    savePictureOnSharedPrefrences("galleryProfilePicture", bitmap);
+                    profilePicture.setImageBitmap(bitmap);
 //                showMessage("picture was loaded from storage");
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle any errors
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle any errors
 //                showMessage("picture not found on storage");
-            }
-        });
+                }
+            });
+        }catch (Exception e){
+
+        }
+
+    }
+
+    void getProfilePicture(String uid, final NotificationCompat.Builder builder) {
+        StorageReference storageRef = storage.getReference().child("users");
+        StorageReference userStorage = storageRef.child(uid);
+        StorageReference profilePictureRef = userStorage.child("/profilePicture.JPEG");
+
+        final long ONE_MEGABYTE = 1024 * 1024;
+        try{
+            profilePictureRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] bytes) {
+                    // Data for "images/island.jpg" is returns, use this as needed
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    Bitmap icon=ShrinkBitmap(bitmap,64,64);
+                    builder.setLargeIcon(icon);
+//                showMessage("picture was loaded from storage");
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle any errors
+//                showMessage("picture not found on storage");
+                }
+            });
+        }catch (Exception e){
+        }
+
     }
 
     public boolean loadPictureFromSharedPrefrences(ImageView profilePicture) {
@@ -229,6 +263,46 @@ public class CacheHandler {
             return true;
         }
         return false;
+    }
+
+    public Bitmap ShrinkBitmap(Bitmap bitmap, int width, int height){
+
+        BitmapFactory.Options bmpFactoryOptions = new BitmapFactory.Options();
+        bmpFactoryOptions.inJustDecodeBounds = true;
+
+        int heightRatio = (int)Math.ceil(bmpFactoryOptions.outHeight/(float)height);
+        int widthRatio = (int)Math.ceil(bmpFactoryOptions.outWidth/(float)width);
+
+        if (heightRatio > 1 || widthRatio > 1)
+        {
+            if (heightRatio > widthRatio)
+            {
+                bmpFactoryOptions.inSampleSize = heightRatio;
+            } else {
+                bmpFactoryOptions.inSampleSize = widthRatio;
+            }
+        }
+
+        bmpFactoryOptions.inJustDecodeBounds = false;
+        return bitmap;
+    }
+
+    public boolean isUsingProfilePicture() {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
+        Boolean isUsingGalleryPhoto = sharedPreferences.getBoolean("galleryProfilePicture", false);
+        Boolean isUsingFacebookPhoto = sharedPreferences.getBoolean("facebookProfilePicture", false);
+        Boolean isUsingGooglePhoto = sharedPreferences.getBoolean("googleProfilePicture", false);
+        if (isUsingGalleryPhoto || isUsingFacebookPhoto || isUsingGooglePhoto) {
+            return true;
+        }
+        return false;
+    }
+
+    public Bitmap getProfilePicture() {
+        SharedPreferences sharedPreferences = context.getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
+        String getImageBitmap = sharedPreferences.getString("ProfilePictureBitmapEncoded", "");
+        Bitmap bitmap = decodeBase64(getImageBitmap);
+        return bitmap;
     }
 
     public static void savePictureOnSharedPrefrences(String checkIfAccountTypeUsed, Bitmap yourbitmap) {
@@ -497,8 +571,7 @@ public class CacheHandler {
                         HashMap<String, FriendItem> friendMapFromServer = new HashMap<>();
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             Log.d(TAG, "user friend server list "+document.getId() + " => " + document.getData());
-                            String status = document.getString("status");
-                            FriendItem friendItem = new FriendItem(document, status);
+                            FriendItem friendItem = new FriendItem(document,false);
                             friendMapFromServer.put(friendItem.getId(), friendItem);
                         }
                         if ( finalLoadedFrindsMap.size() != friendMapFromServer.size()) {
