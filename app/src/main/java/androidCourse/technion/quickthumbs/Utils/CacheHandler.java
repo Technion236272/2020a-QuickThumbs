@@ -492,9 +492,11 @@ public class CacheHandler {
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
                     if (task.getResult().isEmpty()) {
+                        Log.d(TAG, "empty so much empty" );
                     } else {
                         HashMap<String, FriendItem> friendMapFromServer = new HashMap<>();
                         for (QueryDocumentSnapshot document : task.getResult()) {
+                            Log.d(TAG, "user friend server list "+document.getId() + " => " + document.getData());
                             String status = document.getString("status");
                             FriendItem friendItem = new FriendItem(document, status);
                             friendMapFromServer.put(friendItem.getId(), friendItem);
@@ -519,14 +521,14 @@ public class CacheHandler {
         editor.commit();
     }
 
-    public List<String> getUserfriendsList(){
+    public LinkedList<String> getUserfriendsList(){
         SharedPreferences sharedPreferences = context.getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
         Gson gson = new Gson();
         String json = sharedPreferences.getString(getUid() + "_friendsList", null);
-        Type type = new TypeToken<List<String>>() {
+        Type type = new TypeToken<HashMap<String, FriendItem>>() {
         }.getType();
-        HashMap<String, Boolean> loadedFriendsMap = gson.fromJson(json, type);
-        List<String> friendsList = new LinkedList<>();
+        HashMap<String, FriendItem> loadedFriendsMap = gson.fromJson(json, type);
+        LinkedList<String> friendsList = new LinkedList<>();
         if (loadedFriendsMap == null) {
             return friendsList;
         }
@@ -536,13 +538,13 @@ public class CacheHandler {
         return friendsList;
     }
 
-    public HashMap<String, Boolean> getUserfriendsMap(){
+    public HashMap<String, FriendItem> getUserfriendsMap(){
         SharedPreferences sharedPreferences = context.getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
         Gson gson = new Gson();
         String json = sharedPreferences.getString(getUid() + "_friendsList", null);
-        Type type = new TypeToken<List<String>>() {
+        Type type = new TypeToken<HashMap<String, FriendItem>>() {
         }.getType();
-        HashMap<String, Boolean> loadedFriendsMap = gson.fromJson(json, type);
+        HashMap<String, FriendItem> loadedFriendsMap = gson.fromJson(json, type);
 
         if (loadedFriendsMap == null) {
             loadedFriendsMap = new HashMap<>();

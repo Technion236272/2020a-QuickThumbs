@@ -34,7 +34,7 @@ public class FriendAdaptor extends RecyclerView.Adapter<FriendViewHolder>{
     @NonNull
     @Override
     public FriendViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.text_list_item, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.friend_list_item, parent, false);
         FriendViewHolder holder = new FriendViewHolder(v);
 
         return holder;
@@ -42,22 +42,11 @@ public class FriendAdaptor extends RecyclerView.Adapter<FriendViewHolder>{
 
     @Override
     public void onBindViewHolder(@NonNull final FriendViewHolder holder, final int position) {
-        holder.friendName.setText(friendsList.get(position).getId());
-        holder.friendProfilePicture.setImageBitmap(friendsList.get(position).getProfilePicture());
+        holder.friendName.setText(friendsList.get(position).getName());
+        if (friendsList.get(position).getProfilePicture() != null){
+            holder.friendProfilePicture.setImageBitmap(friendsList.get(position).getProfilePicture());
+        }
         holder.friendTotalScore.setText(friendsList.get(position).getTotalScore().toString());
-//        holder.playTextButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent i = new Intent(context, GameLoadingSplashScreenActivity.class);
-//                i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-//                i.putExtra("gameType","withFriend");
-//                i.putExtra("FriendID", friendsList.get(position).getId());
-//                i.putExtra("FriendName", friendsList.get(position).getName());
-//                context.startActivity(i);
-//            }
-//
-//
-//        });
 
 
     }

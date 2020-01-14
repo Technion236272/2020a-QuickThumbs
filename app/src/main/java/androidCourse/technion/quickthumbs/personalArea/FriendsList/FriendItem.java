@@ -2,16 +2,28 @@ package androidCourse.technion.quickthumbs.personalArea.FriendsList;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
 import java.sql.Timestamp;
+
+import androidCourse.technion.quickthumbs.R;
+
+import static androidCourse.technion.quickthumbs.FirestoreConstants.statisticsDocument;
+import static androidCourse.technion.quickthumbs.FirestoreConstants.statsCollection;
+import static androidCourse.technion.quickthumbs.FirestoreConstants.usersCollection;
 
 public class FriendItem {
     public FriendItem(String id, String name, String email, Bitmap profilePicture, Long textAdded, Long totalScore, double avgAccuracy, double avgCPM, double avgWPM, Timestamp lastUpdated, Long numOfGames) {
@@ -56,35 +68,53 @@ public class FriendItem {
         return profilePicture;
     }
 
-    public void setProfilePicture(String uid) {
+    public void setProfilePicture(final String uid) {
         FirebaseStorage storage = FirebaseStorage.getInstance();
         StorageReference storageRef = storage.getReference().child("users");
         StorageReference userStorage = storageRef.child(uid);
         StorageReference profilePictureRef = userStorage.child("/profilePicture.JPEG");
-
         final long ONE_MEGABYTE = 1024 * 1024;
-        profilePictureRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-            @Override
-            public void onSuccess(byte[] bytes) {
-                // Data for "images/island.jpg" is returns, use this as needed
-                profilePicture = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+        try{
+            profilePictureRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] bytes) {
+                    // Data for "images/island.jpg" is returns, use this as needed
+                    profilePicture = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
 //                showMessage("picture was loaded from storage");
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle any errors
-                profilePicture = null;
-            }
-        });
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle any errors
+                    profilePicture = null;
+                }
+            });
+        }catch (Exception e){
+            //no such picture exist
+        }
+
     }
 
     public Long getTotalScore() {
         return totalScore;
     }
 
-    public void setTotalScore(Long totalScore) {
-        this.totalScore = totalScore;
+    public void setTotalScore(String uid) {
+        FirebaseFirestore db;
+        db = FirebaseFirestore.getInstance();
+        db.collection(usersCollection)
+                .document(uid).collection(statsCollection).document(statisticsDocument).get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            Long score = task.getResult().getLong("TotalScore");
+                            totalScore = score;
+
+                        } else {
+                        }
+                    }
+                });
     }
 
     public String getStatus() {
@@ -97,11 +127,9 @@ public class FriendItem {
 
     public FriendItem FriendItemFromUserCollection(DocumentSnapshot document, String status) {
         FriendItem friendItem = new FriendItem(document, status);
-        friendItem.name = document.get("name").toString();
-        friendItem.email = document.get("email").toString();
         setProfilePicture(this.id);
 //        friendItem.profilePicture = null;
-        friendItem.totalScore = document.getLong("totalScore").longValue();
+//        friendItem.totalScore = document.getLong("totalScore").longValue();
 //        friendItem.textAdded = document.getLong("textAdded").longValue();
 //        friendItem.avgAccuracy = document.getDouble("avgAccuracy").doubleValue();
 //        friendItem.avgCPM = document.getDouble("avgCPM").doubleValue();
@@ -171,12 +199,47 @@ public class FriendItem {
 //    private Timestamp lastUpdated;
 //    private Long numOfGames;
 
+    public void setEmailAndName(final String uid) {
+        FirebaseFirestore db;
+        db = FirebaseFirestore.getInstance();
+        db.collection(usersCollection)
+                .document(uid).get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            email = document.get("email").toString();
+                            if (document.get("name") == null) {
+                                name = email;
+                            }else {
+                                name = document.get("name").toString();
+                            }
+                            Log.d("WELL THIS STAFF IS  ",email);
+                            setTotalScore(uid);
+                        } else {
+                            setTotalScore(uid);
+                        }
+                    }
+                });
+    }
+
     public FriendItem(DocumentSnapshot document, String status) {
         this.id = document.getId();
         this.status = status;
-        this.name = document.get("name").toString();
-        this.email = document.get("email").toString();
-        setProfilePicture(this.id);
+//        setEmailAndName(document.getId());
+        if (document.get("email") == null){
+            email = "";
+        }else{
+            email = document.get("email").toString();
+        }
+        if (document.get("name") == null) {
+            name = email;
+        }else {
+            name = document.get("name").toString();
+        }
+        setProfilePicture(document.getId());
+        setTotalScore(document.getId());
 //        this.profilePicture = null;
 //        this.totalScore = document.getLong("totalScore").longValue();
         this.totalScore = Long.valueOf(0);
