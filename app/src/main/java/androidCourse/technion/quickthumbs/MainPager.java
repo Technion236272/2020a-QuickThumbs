@@ -76,6 +76,9 @@ public class MainPager extends AppCompatActivity {
         new CacheHandler.DownloadFromStorage().execute();
 
         new CacheHandler.TextCacheRefill().execute();
+
+        new CacheHandler.FriendsUpdateFrindsList().execute();
+
     }
 
     private void turnDotIndicatorToInvisible(TabLayout tabLayout) {
@@ -279,7 +282,6 @@ public class MainPager extends AppCompatActivity {
 
         new CacheHandler.TextCacheRefill().execute();
 
-        new CacheHandler.FriendsUpdateFrindsList().execute();
     }
 
     @Override

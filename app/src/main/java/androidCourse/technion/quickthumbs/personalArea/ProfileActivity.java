@@ -111,8 +111,8 @@ public class ProfileActivity extends Fragment {
     private DocumentSnapshot lastSnapShot = null;
     boolean noMoreLoading;
     private int howMuchToLoadEachScroll;
-    private HashMap<String, Boolean> friendsMap;
-    private List<String> friendsIdList;
+    private HashMap<String, FriendItem> friendsMap;
+    private LinkedList<String> friendsIdList;
     HashMap<String, Boolean> loadedFriendsIDs = new HashMap<>();
 
 
@@ -183,21 +183,22 @@ public class ProfileActivity extends Fragment {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful() && task.getResult() != null) {
-                            String userDocumentId = getUserDocument().getId();
+                            DocumentSnapshot userDocument = task.getResult().getDocuments().get(0);
                             for (QueryDocumentSnapshot friendDocument : task.getResult()) {
-                                addFriendRequestToSenderFriendsCollection(userDocumentId, friendDocument.getId());
-                                addFriendRequestToReceiverFriendsCollection(userDocumentId, friendDocument.getId());
+                                addFriendRequestToSenderFriendsCollection(userDocument, friendDocument);
+                                addFriendRequestToReceiverFriendsCollection(userDocument, friendDocument);
                             }
                         }
                     }
                 });
     }
 
-    private void addFriendRequestToSenderFriendsCollection(final String userDocumentId, final String friendDocumentId) {
+    private void addFriendRequestToSenderFriendsCollection(final DocumentSnapshot userDocumentId, final DocumentSnapshot friendDocument) {
         //adds only if the new friend does not exist in the collection or is deleted
         final Map<String, Object> friendMap = new HashMap<>();
         friendMap.put("status", "requestSent");
-        getUserDocument().collection("friends").document(friendDocumentId)
+        friendMap.put("email", friendDocument.get("email"));
+        getUserDocument().collection("friends").document(friendDocument.getId())
                 .get().addOnCompleteListener(
                 new OnCompleteListener<DocumentSnapshot>() {
                     @Override
@@ -207,22 +208,22 @@ public class ProfileActivity extends Fragment {
                             if (friendDocumentSnapshot.exists()) {
                                 String current_status = friendDocumentSnapshot.getString("status");
                                 if (current_status.equals("deleted")) {
-                                    addFriend(userDocumentId, friendDocumentId, friendMap);
+                                    addFriend(userDocumentId, friendDocument, friendMap);
                                 }
                             } else {
-                                addFriend(userDocumentId, friendDocumentId, friendMap);
+                                addFriend(userDocumentId, friendDocument, friendMap);
                             }
                         } else {
-                            addFriend(userDocumentId, friendDocumentId, friendMap);
+                            addFriend(userDocumentId, friendDocument, friendMap);
                         }
                     }
                 }
         );
     }
 
-    private void addFriend(String userDocumentId, String friendDocumentId, Map<String, Object> friendMap) {
-        db.collection("users").document(userDocumentId).collection("friends")
-                .document(friendDocumentId)
+    private void addFriend(DocumentSnapshot userDocument, DocumentSnapshot friendDocument, Map<String, Object> friendMap) {
+        db.collection("users").document(userDocument.getId()).collection("friends")
+                .document(friendDocument.getId())
                 .set(friendMap, SetOptions.merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
@@ -239,12 +240,13 @@ public class ProfileActivity extends Fragment {
                 });
     }
 
-    private void addFriendRequestToReceiverFriendsCollection(final String userDocumentId, final String friendDocumentId) {
+    private void addFriendRequestToReceiverFriendsCollection(final DocumentSnapshot userDocument, final DocumentSnapshot friendDocument) {
         //adds only if the new friend does not exist in the collection or is deleted
         final Map<String, Object> friendMap = new HashMap<>();
         friendMap.put("status", "requestReceived");
-        db.collection("users").document(friendDocumentId).collection("friends")
-                .document(userDocumentId)
+        friendMap.put("email", userDocument.get("email"));
+        db.collection("users").document(friendDocument.getId()).collection("friends")
+                .document(userDocument.getId())
                 .get().addOnCompleteListener(
                 new OnCompleteListener<DocumentSnapshot>() {
                     @Override
@@ -254,13 +256,13 @@ public class ProfileActivity extends Fragment {
                             if (userDocumentSnapshot.exists()) {
                                 String current_status = userDocumentSnapshot.getString("status");
                                 if (current_status.equals("deleted")) {
-                                    addFriend(friendDocumentId, userDocumentId, friendMap);
+                                    addFriend(friendDocument, userDocument, friendMap);
                                 }
                             } else {
-                                addFriend(friendDocumentId, userDocumentId, friendMap);
+                                addFriend(friendDocument, userDocument, friendMap);
                             }
                         } else {
-                            addFriend(friendDocumentId, userDocumentId, friendMap);
+                            addFriend(friendDocument, userDocument, friendMap);
                         }
                     }
                 }
@@ -270,7 +272,8 @@ public class ProfileActivity extends Fragment {
     private void checkIfUserHasFriends() {
         friendsMap = cacheHandler.getUserfriendsMap();
         friendsIdList = cacheHandler.getUserfriendsList();
-        if (friendsList.size() != 0 ){
+        if (friendsIdList.size() != 0 ){
+            Log.i(TAG,"not empty friends ");
             fetchPersonalFriendsList();
             setRecyclerViewScroller();
         }
@@ -301,7 +304,6 @@ public class ProfileActivity extends Fragment {
 
     private void refillFriendsList(RecyclerView recyclerView) {
         db.collection("users").whereIn("uid", friendsIdList)
-                .orderBy("email", Query.Direction.DESCENDING)
                 .startAfter(lastSnapShot).limit(howMuchToLoadEachScroll).get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -318,7 +320,7 @@ public class ProfileActivity extends Fragment {
 
     private void fetchPersonalFriendsList() {
         db.collection("users").whereIn("uid", friendsIdList)
-                .orderBy("email", Query.Direction.DESCENDING).limit(5).get()
+                .limit(5).get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -337,8 +339,9 @@ public class ProfileActivity extends Fragment {
             return;
         }
         for (DocumentSnapshot document : task.getResult()) {
-            String status = document.getString("status");
-            if (status == null || !status.equals("accepted")) continue;
+            Log.d(TAG, "friend is : "+document.get("email").toString());
+            String status = friendsMap.get(document.getId()).toString();
+//            if (status == null || !status.equals("accepted")) continue;
             FriendItem item = new FriendItem(document, status);
             if (loadedFriendsIDs.get(document.getId()) == null) {
                 loadedFriendsIDs.put(document.getId(), true);
