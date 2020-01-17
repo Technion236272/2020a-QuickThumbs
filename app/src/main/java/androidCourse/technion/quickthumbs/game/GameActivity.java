@@ -59,6 +59,7 @@ import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -96,6 +97,7 @@ import static androidCourse.technion.quickthumbs.FirestoreConstants.usersCollect
 import static com.google.firebase.firestore.SetOptions.merge;
 
 public class GameActivity extends AppCompatActivity {
+    Context applicationContext;
     private EditText currentWordEditor;
     private Boolean needClearance;
     private TextView gameTextView;
@@ -112,6 +114,8 @@ public class GameActivity extends AppCompatActivity {
     private TextView comboDisplayer;
     private TextView pointsChangeIndicator;
     private TextView multiPlayerCounter;
+    private TextView wpmCompareNumberView;
+    private TextView wpmCompareLineView;
     private Button closingPodiumButton;
 
     private RelativeLayout podiumScreen;
@@ -174,6 +178,8 @@ public class GameActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
+
+        applicationContext = getApplicationContext();
 
         initializeFields();
 
@@ -678,6 +684,8 @@ public class GameActivity extends AppCompatActivity {
         pointsChangeIndicator = findViewById(R.id.changeIndicator);
         multiPlayerCounter = findViewById(R.id.multiPlayerCounter);
         closingPodiumButton = findViewById(R.id.closingPodiumButton);
+        wpmCompareNumberView = findViewById(R.id.wpmCompareNumber);
+        wpmCompareLineView = findViewById(R.id.wpmCompareLine);
 
         podiumScreen = findViewById(R.id.podiumScreen);
 
@@ -905,9 +913,13 @@ public class GameActivity extends AppCompatActivity {
 
     private void finishGame() {
         gameTimer.cancel();
+
         if (gameRoomKey != null) {
             synchronizedMultiplayerCounter.cancel();
+            updateUserRealTimeData(collectedPoints);
         }
+        String wpm = wpmTextView.getText().toString();
+        setWpmIndicationInReportScreen(wpm);
 
         closeKeyboard();
 
@@ -924,11 +936,76 @@ public class GameActivity extends AppCompatActivity {
 
         correctOutOfTotalPercentageTextView.setText(correctPercentage + "%");
 
-        if (gameRoomKey != null) {
-            updateUserRealTimeData(collectedPoints);
-        }
 
         updateUserStatistics(correctPercentage);
+    }
+
+    public DocumentReference getUserDocument() {
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(applicationContext);
+        String users = "users";
+
+        if (mAuth.getCurrentUser() != null) {
+            return db.collection(users)
+                    .document(mAuth.getUid());
+        } else if (googleAccount != null) {
+            return db.collection(users)
+                    .document(googleAccount.getId());
+        } else {
+            return db.collection(users)
+                    .document(accessToken.getUserId());
+        }
+    }
+
+    private void setWpmIndicationInReportScreen(final String currentGameWpn) {
+        getUserDocument().collection("stats").document("statistics").get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+                                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                                Double avgWpm = document.getDouble("avgWPM");
+                                setSpeedComparedNumber(currentGameWpn, String.valueOf(avgWpm));
+
+                            } else {
+                                Log.d(TAG, "No such document - reading statistics");
+                            }
+                        } else {
+                            Log.d(TAG, "reading statistics failed with ", task.getException());
+                        }
+                    }
+                });
+    }
+
+    private void setSpeedComparedNumber(String currentGameWpm, String userAverageWpm) {
+        Integer currentWpm = Integer.valueOf(currentGameWpm);
+        double wpmDouble = Double.parseDouble(userAverageWpm);
+        int previousWpnAverage = (int) wpmDouble;
+        int wpmCompareNumber = currentWpm - previousWpnAverage;
+        String displayedNumber = String.valueOf(Math.abs(wpmCompareNumber));
+        SpannableString spannableString = SpannableString.valueOf(displayedNumber);
+        ForegroundColorSpan color;
+        String textIndication;
+        Techniques techniques;
+
+        if (wpmCompareNumber >= 0) {
+            color = new ForegroundColorSpan(Color.GREEN);
+            textIndication = "better than your average by ";
+            techniques = Techniques.Bounce;
+        } else {
+            color = new ForegroundColorSpan(Color.RED);
+            textIndication = "worse than your average by ";
+            techniques = Techniques.Shake;
+        }
+
+        spannableString.setSpan(color, 0, displayedNumber.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+
+        wpmCompareNumberView.setText(spannableString);
+        wpmCompareLineView.setText(textIndication);
+
+        YoYo.with(techniques).repeat(1000).playOn(wpmCompareNumberView);
     }
 
     private void updateUserRealTimeData(final int collectedPoints) {
