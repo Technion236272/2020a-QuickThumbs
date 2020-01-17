@@ -86,8 +86,8 @@
             android:layout_width="?attr/actionBarSize"
             android:layout_height="?attr/actionBarSize"
             android:layout_below="@id/friendTotalScore"
-            android:layout_toEndOf="@id/addFriendButton"
-            android:layout_toRightOf="@id/addFriendButton"
+            android:layout_toEndOf="@id/removeRequestButton"
+            android:layout_toRightOf="@id/removeRequestButton"
             android:layout_marginLeft="20dp"
             android:gravity="center" />
 

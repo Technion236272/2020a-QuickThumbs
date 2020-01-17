@@ -43,6 +43,17 @@ public class NotificationActivity extends AppCompatActivity {
             messageValues.put(key, value);
             Log.d(TAG, "Extras received at onNewIntent:  Key: " + key + " Value: " + value);
         }
+        if (messageValues.get("gameInvite") != null) {
+            boolean answer = (boolean) extras.get("answer");
+            if (answer) {
+                Intent goToMainScreen = new Intent(context,MainUserActivity.class);
+                goToMainScreen.putExtra("roomKey",messageValues.get("roomKey").toString());
+                startActivity(goToMainScreen);
+            } else {
+                //reject game
+                finish();
+            }
+        }
 
         FriendsDatabaseHandler friendsDatabaseHandler = new FriendsDatabaseHandler();
         if (messageValues.get("answer") != null) {

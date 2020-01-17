@@ -45,24 +45,66 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
         }
 
         //stuff we get from the cloud
-        String title = message.getNotification().getTitle();
-        String body = message.getNotification().getBody();
-        String from = message.getFrom().substring(25);// from the 25 index is the uid of the sender
-
+        String title = message.getData().get("title");
+        String body = message.getData().get("body");
+        String from = message.getData().get("sender");// from the 25 index is the uid of the sender
+        String roomKey = message.getData().get("room");
         NotificationCompat.Builder builder;
 
+        //choose the appropriate notification
+        switch (title){
+                case "Request accepted":
+                    builder = setFriendAcceptNotification(title, body, from);
+
+                    break;
+                case "New pending request":
+                    builder = setFriendRequestNotification(title, body, from);
+
+                    break;
+                case "Game invite":
+                default:
+                    builder = setFriendGameInviteNotification(title, body, from, roomKey);
+                    break;
+        }
         if (title.equals("Request accepted") ){
-            builder = setFriendAcceptNotification(title, body, from);
         }else{
             builder = setFriendRequestNotification(title, body, from);
         }
-
+        builder.setOngoing(true);
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
 
         // notificationId is a unique int for each notification that you must define
 
         notificationManager.notify(notificationId, builder.build());
 
+    }
+
+    private NotificationCompat.Builder setFriendGameInviteNotification(String title, String body, String from,String roomKey) {
+        notificationId = 1;
+        //the press on notification answer
+        PendingIntent regularPendingIntent = setPressOnNotificationIntent();
+        //the yes answer
+        PendingIntent acceptPendingIntent = setGameAnswerPendingIntent(title, body, from,roomKey, true);
+        //the no answer
+        PendingIntent rejectPendingIntent = setGameAnswerPendingIntent(title, body, from,roomKey, false);
+
+        //This is the proper solution for dismiss the dialog aka the dismiss a
+        PendingIntent pIntentDismiss = setDismissNotificationIntent();
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID)
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContentTitle(title)
+                .setContentText(body)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                // Set the intent that will fire when the user taps the notification
+                .addAction(R.drawable.play_with_friends, "Accept", acceptPendingIntent) // #0
+                .addAction(R.drawable.account_remove, "Reject", rejectPendingIntent)  // #1
+                .addAction(R.drawable.eye_off, "Dismiss", pIntentDismiss)//                .setContentIntent(regularPendingIntent)
+                .setWhen(0) //important so the whole message will be shown
+                .setAutoCancel(true);
+
+        setNotificationSenderImage(from, builder);
+        return builder;
     }
 
     private NotificationCompat.Builder setFriendAcceptNotification(String title, String body, String from) {
@@ -87,7 +129,6 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
 //                .setContentIntent(regularPendingIntent)
                 .setWhen(0) //important so the whole message will be shown
                 .setAutoCancel(true);
-
 
         setNotificationSenderImage(from, builder);
         return builder;
@@ -122,6 +163,25 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
 
         setNotificationSenderImage(from, builder);
         return builder;
+    }
+
+    private PendingIntent setGameAnswerPendingIntent(String title, String body, String from,String roomKey, boolean b) {
+        //the yes answer
+        Intent acceptIntent = new Intent(getApplicationContext(), NotificationActivity.class);
+        acceptIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+//        acceptIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        acceptIntent.putExtra("gameInvite", true);
+        acceptIntent.putExtra("roomKey", roomKey);
+        acceptIntent.putExtra("answer", b);
+        acceptIntent.putExtra("title", title);
+        acceptIntent.putExtra("body", body);
+        acceptIntent.putExtra("from", from);
+        int rand = new Random().nextInt('Z'-'A');
+        String xId = String.valueOf(rand);
+        acceptIntent.putExtra("x_id", xId);
+        acceptIntent.setAction(xId);
+        return PendingIntent.getActivity(getApplicationContext(), 1, acceptIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     private void setNotificationSenderImage(String from, NotificationCompat.Builder builder) {
