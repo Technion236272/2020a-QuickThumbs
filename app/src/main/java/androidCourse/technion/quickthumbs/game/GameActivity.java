@@ -143,6 +143,7 @@ public class GameActivity extends AppCompatActivity {
     private List<Integer> comboOptions;
     private int currentComboIndex;
     private int comboCounter;
+    private boolean passOnAfterTextChanged;
     private boolean isPreviousActionIsCorrectOrGameJustStarted;
     private boolean isVibrateOnMistakeOn = true;
 
@@ -659,6 +660,7 @@ public class GameActivity extends AppCompatActivity {
         previousOtherPlayerIndex = 0;
         needClearance = false;
         forwardCommand = true;
+        passOnAfterTextChanged = false;
         isPreviousActionIsCorrectOrGameJustStarted = true;
 
         currentWordEditor = findViewById(R.id.currentWord);
@@ -709,6 +711,14 @@ public class GameActivity extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 Log.d(TAG, "onTextChanged start ...");
 
+                if (!currentWordEditor.hasFocus()) {
+                    Log.d(TAG, "onTextChanged finished because of s.clear() ...");
+                    passOnAfterTextChanged = true;
+                    currentWordEditor.requestFocus();
+
+                    return;
+                }
+
                 if (isAddedKey(before, count)) {
                     logicOnAddedKey(s, start);
                 } else {    //removed key
@@ -723,12 +733,20 @@ public class GameActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {
                 Log.d(TAG, "afterTextChanged start ...");
 
+                if (passOnAfterTextChanged) {
+                    Log.d(TAG, "afterTextChanged finished because of s.clear() ...");
+                    passOnAfterTextChanged = false;
+
+                    return;
+                }
+
                 if (forwardCommand) {
                     gameTextWordOffset++;
 
                     if (!needClearance) {
                         paintGameTextBasedOnWordFlags();
                     } else {
+                        currentWordEditor.clearFocus();
                         s.clear();
                         needClearance = false;
 
@@ -777,6 +795,8 @@ public class GameActivity extends AppCompatActivity {
         for (GameWordStatus status : wordFlags) {
             if (!status.equals(GameWordStatus.CORRECT) && !status.equals(GameWordStatus.CORRECT_BUT_BEEN_HERE_BEFORE)) {
                 giveExtraCorrectCharacterForSpacePress = false;
+
+                break;
             }
         }
 
@@ -1198,7 +1218,7 @@ public class GameActivity extends AppCompatActivity {
     private void increaseCombo() {
         isPreviousActionIsCorrectOrGameJustStarted = true;
 
-        if (comboCounter++ == comboThreshold) {
+        if (++comboCounter == comboThreshold) {
             comboCounter = 0;
 
             if (currentComboIndex < comboOptions.size() - 1) {
