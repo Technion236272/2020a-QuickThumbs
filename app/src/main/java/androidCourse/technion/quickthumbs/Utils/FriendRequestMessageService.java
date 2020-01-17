@@ -17,6 +17,8 @@ import androidx.core.app.NotificationManagerCompat;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 import java.util.Random;
 
 import androidCourse.technion.quickthumbs.MainPager;
@@ -28,6 +30,7 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
     private NotificationManager notificationManager;
     private String CHANNEL_ID = "F_REQ";
     int notificationId = 1;
+    String TAG = FriendRequestMessageService.class.getSimpleName();
 
     public FriendRequestMessageService() {
         super();
@@ -40,7 +43,7 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(RemoteMessage message) {
-        if (message == null || message.getNotification() == null) {
+        if (message == null || message.getFrom()==null) {
             return;
         }
 
@@ -53,11 +56,11 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
 
         //choose the appropriate notification
         switch (title){
-                case "Request accepted":
+                case "You are Friends!":
                     builder = setFriendAcceptNotification(title, body, from);
 
                     break;
-                case "New pending request":
+                case "New Friend Request":
                     builder = setFriendRequestNotification(title, body, from);
 
                     break;
@@ -66,17 +69,12 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
                     builder = setFriendGameInviteNotification(title, body, from, roomKey);
                     break;
         }
-        if (title.equals("Request accepted") ){
-        }else{
-            builder = setFriendRequestNotification(title, body, from);
-        }
+
         builder.setOngoing(true);
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
 
         // notificationId is a unique int for each notification that you must define
-
         notificationManager.notify(notificationId, builder.build());
-
     }
 
     private NotificationCompat.Builder setFriendGameInviteNotification(String title, String body, String from,String roomKey) {
@@ -199,7 +197,7 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
         intentDismiss.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         intentDismiss.putExtra("dismiss", true);
         //Create the PendingIntent
-        int rand = new Random().nextInt('Z'-'A');
+        int rand = new Random().nextInt('Z' - 'A');
         String xId = String.valueOf(rand);
         intentDismiss.putExtra("x_id", xId);
         intentDismiss.setAction(xId);
@@ -216,7 +214,7 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
         acceptIntent.putExtra("title", title);
         acceptIntent.putExtra("body", body);
         acceptIntent.putExtra("from", from);
-        int rand = new Random().nextInt('Z'-'A');
+        int rand = new Random().nextInt('Z' - 'A');
         String xId = String.valueOf(rand);
         acceptIntent.putExtra("x_id", xId);
         acceptIntent.setAction(xId);
@@ -227,7 +225,7 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
         //the click on the notification
         Intent regularIntent = new Intent(getApplicationContext(), NotificationActivity.class);
         regularIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-        int rand = new Random().nextInt('Z'-'A');
+        int rand = new Random().nextInt('Z' - 'A');
         String xId = String.valueOf(rand);
         regularIntent.putExtra("x_id", xId);
         regularIntent.setAction(xId);
