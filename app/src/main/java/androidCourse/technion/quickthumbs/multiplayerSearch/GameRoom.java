@@ -14,10 +14,13 @@ public class GameRoom {
     public boolean usr1Online;
     public boolean usr2Online;
 
+    public int usr1Points;
+    public int usr2Points;
+
     public GameRoom() {
     }
 
-    public GameRoom(String user1, Integer location1, String user2, Integer location2, String textId, boolean started, boolean usr1Online, boolean usr2Online) {
+    public GameRoom(String user1, Integer location1, String user2, Integer location2, String textId, boolean started, boolean usr1Online, boolean usr2Online, int usr1Points, int usr2Points) {
         this.user1 = user1;
         this.location1 = location1;
         this.user2 = user2;
@@ -26,6 +29,8 @@ public class GameRoom {
         this.started = started;
         this.usr1Online = usr1Online;
         this.usr2Online = usr2Online;
+        this.usr1Points = usr1Points;
+        this.usr2Points = usr2Points;
     }
 
     public String getUser1() {
@@ -90,5 +95,21 @@ public class GameRoom {
 
     public void setUsr2Online(boolean usr2Online) {
         this.usr2Online = usr2Online;
+    }
+
+    public int getUsr1Points() {
+        return usr1Points;
+    }
+
+    public void setUsr1Points(int usr1Points) {
+        this.usr1Points = usr1Points;
+    }
+
+    public int getUsr2Points() {
+        return usr2Points;
+    }
+
+    public void setUsr2Points(int usr2Points) {
+        this.usr2Points = usr2Points;
     }
 }

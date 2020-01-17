@@ -32,6 +32,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.RatingBar;
 import android.widget.RelativeLayout;
@@ -66,6 +67,8 @@ import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -109,6 +112,11 @@ public class GameActivity extends AppCompatActivity {
     private TextView comboDisplayer;
     private TextView pointsChangeIndicator;
     private TextView multiPlayerCounter;
+    private Button closingPodiumButton;
+
+    private RelativeLayout podiumScreen;
+
+    private List<Pair<TextView, TextView>> podiumPlaces;
 
     private boolean forwardCommand;
 
@@ -159,6 +167,7 @@ public class GameActivity extends AppCompatActivity {
     private int previousOtherPlayerIndex;
     private long startingTimeStamp;
     private Timer synchronizedMultiplayerCounter;
+    private List<Integer> roomPoints;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -169,7 +178,6 @@ public class GameActivity extends AppCompatActivity {
 
         setGameTextAndLogicAndEnding(gameTextView);
 
-//        currentWordEditor.setActivated(false);
         gameLoadingLayout.setVisibility(View.VISIBLE);
         gamePlayingLayout.setVisibility(View.INVISIBLE);
 
@@ -190,7 +198,6 @@ public class GameActivity extends AppCompatActivity {
         gamePlayingLayout.setVisibility(View.VISIBLE);
         gameLoadingLayout.setVisibility(View.INVISIBLE);
 
-
         if (gameRoomKey == null) {
             keyboardConfiguration(currentWordEditor);
             setEditorLogic();
@@ -210,8 +217,14 @@ public class GameActivity extends AppCompatActivity {
         currentWordIndex = 0;
 
         if (gameRoomKey != null) {
-            moveUserMarkerToNextWord(wordMarkerForOtherGameRoomUser, 0);
+            moveUserMarkerToNextWord(wordMarkerForOtherGameRoomUser, 0, gameTextView);
             setRealTimeListenerForRoomInformationChanges();
+            closingPodiumButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    podiumScreen.setVisibility(View.INVISIBLE);
+                }
+            });
         }
 
         initializeWordFlagsAndPointsDefaultValue(words[0]);
@@ -298,14 +311,17 @@ public class GameActivity extends AppCompatActivity {
 
                 GameRoom room = dataSnapshot.getValue(GameRoom.class);
                 int toPosition;
+                int opponentPoints;
 
                 switch (currentPlayerIndexInRoom) {
                     case 1:
                         toPosition = room.location2;
+                        opponentPoints = room.usr2Points;
 
                         break;
                     case 2:
                         toPosition = room.location1;
+                        opponentPoints = room.usr1Points;
 
                         break;
                     default:
@@ -313,10 +329,39 @@ public class GameActivity extends AppCompatActivity {
                 }
 
                 if (previousOtherPlayerIndex == toPosition) {   //other player didn't change his position
+                    ImmutableList<Integer> currentRoomPoints = ImmutableList.of(room.usr1Points, room.usr2Points);
+
+                    if (!roomPoints.equals(currentRoomPoints) && gameTextWordStart == -1) { //some player (current player too) updated end points, and current player finished game.
+                        roomPoints = currentRoomPoints;
+
+                        List<Pair<Integer, String>> allUsersResults = new ArrayList<>();
+                        allUsersResults.add(new Pair<>(room.usr1Points, room.user1));
+                        allUsersResults.add(new Pair<>(room.usr2Points, room.user2));
+
+                        List<Pair<Integer, String>> podiumResults = new ArrayList<>();
+                        for (Pair<Integer, String> p : allUsersResults) {
+                            if (p.first != -1) {
+                                podiumResults.add(p);
+                            }
+                        }
+
+                        Collections.sort(podiumResults, new Comparator<Pair<Integer, String>>() {
+                            @Override
+                            public int compare(Pair<Integer, String> o1, Pair<Integer, String> o2) {
+                                return o2.first - o1.first;
+                            }
+                        });
+
+                        updatePodium(podiumResults);
+
+                    }
+
                     return;
                 }
 
-                moveUserMarkerToNextWord(wordMarkerForOtherGameRoomUser, toPosition);
+                TextView textToChange = gameTextWordStart == -1 ? gameReportText : gameTextView;
+
+                moveUserMarkerToNextWord(wordMarkerForOtherGameRoomUser, toPosition, textToChange);
 
                 previousOtherPlayerIndex++;
             }
@@ -326,6 +371,59 @@ public class GameActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void updatePodium(List<Pair<Integer, String>> podiumResults) {
+        int amountOfPlayersOnPodium = Math.min(3, podiumResults.size());
+
+        for (int i = 0; i < amountOfPlayersOnPodium; i++) {
+            Pair<Integer, String> p = podiumResults.get(i);
+            Integer points = p.first;
+            String name = p.second;
+
+            Pair<TextView, TextView> viewPair = podiumPlaces.get(i);
+            TextView nameView = viewPair.first;
+            TextView pointsView = viewPair.second;
+
+            nameView.setText(name);
+            pointsView.setText(String.valueOf(points));
+        }
+
+        podiumScreen.setVisibility(View.VISIBLE);
+        YoYo.with(Techniques.Landing)
+                .duration(800)
+                .playOn(podiumScreen);
+
+        for (int i = 0; i < amountOfPlayersOnPodium; i++) {
+            Pair<TextView, TextView> viewPair = podiumPlaces.get(i);
+            TextView nameView = viewPair.first;
+            TextView pointsView = viewPair.second;
+
+            if (i == 0) {
+                YoYo.with(Techniques.Bounce)
+                        .delay(700)
+                        .duration(600)
+                        .repeat(20)
+                        .playOn(nameView);
+
+                YoYo.with(Techniques.Wobble)
+                        .delay(700)
+                        .duration(600)
+                        .playOn(pointsView);
+            } else {
+                YoYo.with(Techniques.RubberBand)
+                        .delay(700)
+                        .duration(600)
+                        .repeat(20)
+                        .playOn(nameView);
+
+                YoYo.with(Techniques.Shake)
+                        .delay(700)
+                        .duration(600)
+                        .playOn(pointsView);
+
+            }
+        }
     }
 
     private void updateRemoteUserPosition() {
@@ -431,8 +529,8 @@ public class GameActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         gameStopTimeStamp = System.currentTimeMillis();
-
         if (gameRoomKey != null) {
+            synchronizedMultiplayerCounter.cancel();
             removeRoomIfNeeded();
         }
 
@@ -552,6 +650,7 @@ public class GameActivity extends AppCompatActivity {
         comboCounter = 0;
         collectedPoints = 0;
         comboOptions = ImmutableList.of(1, 2, 4, 8, 10);
+        roomPoints = ImmutableList.of(-1, -1);
         currentComboIndex = 0;
         shouldStartTimer = true;
         correctKeysAmount = 0;
@@ -576,6 +675,15 @@ public class GameActivity extends AppCompatActivity {
         comboDisplayer = findViewById(R.id.comboDisplayer);
         pointsChangeIndicator = findViewById(R.id.changeIndicator);
         multiPlayerCounter = findViewById(R.id.multiPlayerCounter);
+        closingPodiumButton = findViewById(R.id.closingPodiumButton);
+
+        podiumScreen = findViewById(R.id.podiumScreen);
+
+        podiumPlaces = new ArrayList<>();
+
+        podiumPlaces.add(new Pair<TextView, TextView>((TextView) findViewById(R.id.placement1), (TextView) findViewById(R.id.placement1Points)));
+        podiumPlaces.add(new Pair<TextView, TextView>((TextView) findViewById(R.id.placement2), (TextView) findViewById(R.id.placement2Points)));
+        podiumPlaces.add(new Pair<TextView, TextView>((TextView) findViewById(R.id.placement3), (TextView) findViewById(R.id.placement3Points)));
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
@@ -786,7 +894,7 @@ public class GameActivity extends AppCompatActivity {
         gameReportLayout.setVisibility(View.VISIBLE);
         gamePlayingLayout.setVisibility(View.INVISIBLE);
 
-        gameReportText.setText(gameTextView.getText());
+        gameReportText.setText(gameTextView.getText(), TextView.BufferType.SPANNABLE);
 
         int totalCharacters = gameTextView.getText().toString().length();
 
@@ -796,6 +904,50 @@ public class GameActivity extends AppCompatActivity {
 
         correctOutOfTotalPercentageTextView.setText(correctPercentage + "%");
 
+        if (gameRoomKey != null) {
+            updateUserRealTimeData(collectedPoints);
+        }
+
+        updateUserStatistics(correctPercentage);
+    }
+
+    private void updateUserRealTimeData(final int collectedPoints) {
+        roomReference.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                if (mutableData.getValue() == null) {
+                    return Transaction.success(mutableData);
+                }
+
+                GameRoom gameRoom = mutableData.getValue(GameRoom.class);
+
+                switch (currentPlayerIndexInRoom) {
+                    case 1:
+                        gameRoom.usr1Points = collectedPoints;
+
+                        break;
+                    case 2:
+                        gameRoom.usr2Points = collectedPoints;
+
+                        break;
+                    default:
+                        throw new IllegalStateException("Unexpected value: " + currentPlayerIndexInRoom);
+                }
+
+                mutableData.setValue(gameRoom);
+
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
+
+            }
+        });
+    }
+
+    private void updateUserStatistics(int correctPercentage) {
         ((TextView) (findViewById(R.id.reportWPMValue))).setText(wpmTextView.getText());
         ((TextView) (findViewById(R.id.reportCPMValue))).setText(cpmTextView.getText());
         ((TextView) (findViewById(R.id.reportPointsValue))).setText(pointTextView.getText());
@@ -1110,17 +1262,17 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void moveMarkerToNextWord(BackgroundColorSpan color) {
-        moveUserMarkerToNextWord(color, currentWordIndex + 1);
+        moveUserMarkerToNextWord(color, currentWordIndex + 1, gameTextView);
     }
 
-    private void moveUserMarkerToNextWord(BackgroundColorSpan color, int toIndex) {
+    private void moveUserMarkerToNextWord(BackgroundColorSpan color, int toIndex, TextView textViewSpannableToUpdate) {
         Pair<String, Integer> pair = wordsMapper.get(toIndex);
         Integer nextWordStartIndex = pair.second;
         String nextWord = pair.first;
 
         int lastIndex = nextWordStartIndex + nextWord.length();
 
-        Spannable gameTextSpannable = (Spannable) gameTextView.getText();
+        Spannable gameTextSpannable = (Spannable) textViewSpannableToUpdate.getText();
         gameTextSpannable.setSpan(color, nextWordStartIndex, lastIndex, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
     }
 
