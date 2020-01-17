@@ -10,16 +10,24 @@
       "client_info": {
         "mobilesdk_app_id": "1:318163594770:android:49079985bb0e5aafeaf2cb",
         "android_client_info": {
-          "package_name": "androidCourse.technion.quickthumbs"
+          "package_name": "android.technion.quickthumbs"
         }
       },
       "oauth_client": [
         {
-          "client_id": "318163594770-tnlfj5ngbgjd7jaonqlcv7lltv5ltf89.apps.googleusercontent.com",
+          "client_id": "318163594770-lvbvper5rncsq1fv6lveeb03f6fgvp4j.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "androidCourse.technion.quickthumbs",
-            "certificate_hash": "85a60362cf7be512b2416a73502941edf6e2e1de"
+            "package_name": "android.technion.quickthumbs",
+            "certificate_hash": "cb4836b6666b4810747479cc7f86846e2d4ad4bb"
+          }
+        },
+        {
+          "client_id": "318163594770-jr1odm0b7ubi513l4hqfacfj2hhe1i5a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "android.technion.quickthumbs",
+            "certificate_hash": "10a178c3c45415524dc160870ad4cb9f1ced0786"
           }
         },
         {
@@ -51,6 +59,22 @@
         }
       },
       "oauth_client": [
+        {
+          "client_id": "318163594770-q42u45ld2hbni4i62auj3b542nnuk5v9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "androidCourse.technion.quickthumbs",
+            "certificate_hash": "cb4836b6666b4810747479cc7f86846e2d4ad4bb"
+          }
+        },
+        {
+          "client_id": "318163594770-pmnb9uc02g1luf049dni4fqvvdpe8v53.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "androidCourse.technion.quickthumbs",
+            "certificate_hash": "10a178c3c45415524dc160870ad4cb9f1ced0786"
+          }
+        },
         {
           "client_id": "318163594770-em34vo4inh3vhsd10gcucutv6h9ts1c6.apps.googleusercontent.com",
           "client_type": 1,

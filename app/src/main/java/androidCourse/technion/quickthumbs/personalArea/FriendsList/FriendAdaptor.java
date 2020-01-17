@@ -17,6 +17,9 @@ import java.util.List;
 
 import androidCourse.technion.quickthumbs.GameLoadingSplashScreenActivity;
 import androidCourse.technion.quickthumbs.R;
+import androidCourse.technion.quickthumbs.database.FriendsDatabaseHandler;
+
+import static androidCourse.technion.quickthumbs.personalArea.ProfileActivity.requestsIdList;
 
 public class FriendAdaptor extends RecyclerView.Adapter<FriendViewHolder>{
     List<FriendItem> friendsList;
@@ -47,8 +50,51 @@ public class FriendAdaptor extends RecyclerView.Adapter<FriendViewHolder>{
             holder.friendProfilePicture.setImageBitmap(friendsList.get(position).getProfilePicture());
         }
         holder.friendTotalScore.setText(friendsList.get(position).getTotalScore().toString());
+        if ( friendsList.get(position).isApproved()){
+            holder.addFriendButton.setVisibility(View.GONE);
+            holder.removeRequestButton.setVisibility(View.GONE);
+        }else{
+            holder.playWithFriend.setVisibility(View.GONE);
+        }
+        setPlayButtonListener(holder, friendsList.get(position));
+        setAddFriendButton(holder, friendsList.get(position),position);
+        setRemoveRequestButton(holder, friendsList.get(position),position);
 
+    }
 
+    private void setPlayButtonListener(@NonNull FriendViewHolder holder, FriendItem friendItem) {
+        holder.playWithFriend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+
+        });
+    }
+
+    private void setAddFriendButton(@NonNull FriendViewHolder holder, final FriendItem friendItem, final int position) {
+        holder.addFriendButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FriendsDatabaseHandler friendsDatabaseHandler = new FriendsDatabaseHandler();
+                friendsDatabaseHandler.addFriend(friendItem.getId(), context);
+                friendItem.setApproved(true);
+                requestsIdList.remove(position);
+            }
+
+        });
+    }
+
+    private void setRemoveRequestButton(@NonNull FriendViewHolder holder, final FriendItem friendItem, final int position) {
+        holder.removeRequestButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                FriendsDatabaseHandler friendsDatabaseHandler = new FriendsDatabaseHandler();
+                friendsDatabaseHandler.removeRequest(friendItem.getId(), context);
+                requestsIdList.remove(position);
+            }
+
+        });
     }
 
     private int getCardColorBasedOnClicks(Boolean flag) {

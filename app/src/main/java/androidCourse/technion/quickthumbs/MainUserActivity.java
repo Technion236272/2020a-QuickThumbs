@@ -11,6 +11,7 @@ import android.os.Bundle;
 import androidCourse.technion.quickthumbs.Utils.AppOpeningSplashScreen;
 import androidCourse.technion.quickthumbs.Utils.CacheHandler;
 import androidCourse.technion.quickthumbs.Utils.CircleMenuView;
+import androidCourse.technion.quickthumbs.database.FriendsDatabaseHandler;
 import androidCourse.technion.quickthumbs.multiplayerSearch.GameRoom;
 import androidCourse.technion.quickthumbs.multiplayerSearch.SearchingGrouper;
 import androidCourse.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
@@ -98,7 +99,6 @@ public class MainUserActivity extends Fragment {
     RippleBackground rippleBackground;
     private CircleMenuView.EventListener listener;
 
-//    private CacheHandler cacheHandler;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -139,7 +139,13 @@ public class MainUserActivity extends Fragment {
         amountOfPlayerView = view.findViewById(R.id.amountOfPlayers);
         searchTimerView = view.findViewById(R.id.searchTimer);
         searchScreen = view.findViewById(R.id.searchScreen);
+
+
     }
+
+
+
+
 
 
     private void setCircleMenu() {

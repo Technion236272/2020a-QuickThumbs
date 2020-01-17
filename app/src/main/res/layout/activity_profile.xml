@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/profileLayout"
     android:layout_width="match_parent"
@@ -8,7 +9,7 @@
     android:orientation="vertical"
     tools:context="androidCourse.technion.quickthumbs.personalArea.ProfileActivity">
 
-    <ScrollView xmlns:app="http://schemas.android.com/apk/res-auto"
+    <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:fillViewport="true">
@@ -160,6 +161,7 @@
                 android:text="@string/emptyText"
                 android:textColor="@color/primaryTextColor" />
 
+
             <View
                 android:id="@+id/line2"
                 android:layout_width="match_parent"
@@ -202,10 +204,54 @@
                 android:layout_above="@id/friendsListRecyclerView"
                 android:layout_gravity="top"/>
 
+<!--            <RadioGroup-->
+<!--                android:id="@+id/rdogrp"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:layout_margin="8dp"-->
+<!--                android:gravity="center"-->
+<!--                android:layout_above="@id/friendsListRecyclerView"-->
+<!--                android:layout_below="@id/sendFriendRequestButton"-->
+<!--                android:orientation="horizontal" >-->
+
+<!--                <RadioButton-->
+<!--                    android:id="@+id/friendsList"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_margin="0dp"-->
+<!--                    style="@style/LightPrimaryRoundedButton"-->
+<!--                    android:button="@null"-->
+<!--                    android:checked="true"-->
+<!--                    android:gravity="center" />-->
+
+<!--                <RadioButton-->
+<!--                    android:id="@+id/requestsList"-->
+<!--                    android:layout_width="wrap_content"-->
+<!--                    android:layout_height="wrap_content"-->
+<!--                    android:layout_margin="0dp"-->
+<!--                    style="@style/LightPrimaryRoundedButton"-->
+<!--                    android:button="@null"-->
+<!--                    android:gravity="center" />-->
+
+<!--            </RadioGroup>-->
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/friendsListRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_below = "@id/emailEditText"
+                android:layout_height="350dp"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="10dp"
+                android:layout_marginRight="15dp"
+                android:layout_marginBottom="20dp"
+                android:background="@color/primaryTextColor"
+                android:fastScrollEnabled="true"
+                android:scrollbars="vertical" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/requestsListRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_below = "@id/friendsListRecyclerView"
                 android:layout_height="350dp"
                 android:layout_marginLeft="15dp"
                 android:layout_marginTop="10dp"
@@ -243,7 +289,7 @@
             <Button
                 android:id="@+id/logOutButton"
                 style="@style/SecondaryColorRoundedButton"
-                android:layout_below="@id/friendsListRecyclerView"
+                android:layout_below="@id/requestsListRecyclerView"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="10dp"
                 android:text="@string/LogOut" />
@@ -252,7 +298,7 @@
                 android:id="@+id/facebook_log_out_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/friendsListRecyclerView"
+                android:layout_below="@id/requestsListRecyclerView"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="10dp" />
 
@@ -269,6 +315,7 @@
                 android:src="@drawable/ic_share_black_24dp"
                 app:backgroundTint="@color/secondaryColor"
                 app:tint="@color/secondaryTextColor" />
+
         </RelativeLayout>
     </ScrollView>
 </RelativeLayout>

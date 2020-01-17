@@ -1,13 +1,21 @@
 package androidCourse.technion.quickthumbs;
 
+import android.app.AlertDialog;
+import android.app.Application;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import androidCourse.technion.quickthumbs.R;
 
 import androidCourse.technion.quickthumbs.Utils.CacheHandler;
+import androidCourse.technion.quickthumbs.Utils.FriendRequestMessageService;
+import androidCourse.technion.quickthumbs.database.FriendsDatabaseHandler;
 import androidCourse.technion.quickthumbs.personalArea.ProfileActivity;
 import androidCourse.technion.quickthumbs.personalArea.TextsActivity;
+
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
@@ -21,14 +29,20 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
+import com.facebook.AccessToken;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import static androidCourse.technion.quickthumbs.personalArea.ProfileActivity.profilePicture;
 
 
 public class MainPager extends AppCompatActivity {
+    private static final String TAG = MainPager.class.getSimpleName();
     private FragmentPagerAdapter adapterViewPager;
     private TextView pageTitle;
     private ImageButton statsButton;
@@ -39,6 +53,7 @@ public class MainPager extends AppCompatActivity {
     private TextView backToMainTitleFromStatistics;
     private ImageButton backToMainButtonFromTexts;
     private ImageButton backToMainButtonFromStatistics;
+    private FirebaseAuth mAuth;
 
     ViewPager vpPager;
 
@@ -46,6 +61,14 @@ public class MainPager extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.view_pager);
+
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseMessaging.getInstance().subscribeToTopic("user_sent_request" + getUid());
+        FirebaseMessaging.getInstance().subscribeToTopic("friend_accepted_user_request" + getUid());
+
+        FriendRequestMessageService friendRequestMessageService = new FriendRequestMessageService();
+        friendRequestMessageService.createNotificationChannel(getApplicationContext());
+
         vpPager = findViewById(R.id.vpPager);
         adapterViewPager = new MyPagerAdapter(getSupportFragmentManager());
         vpPager.setAdapter(adapterViewPager);
@@ -66,6 +89,20 @@ public class MainPager extends AppCompatActivity {
         vpPager.setCurrentItem(1);
 
         getDataFromDB();
+
+    }
+
+    private String getUid() {
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        if (currentUser != null) {
+            return mAuth.getUid();
+        } else if (account != null) {
+            return account.getId();
+        } else {
+            return accessToken.getUserId();
+        }
     }
 
     private void getDataFromDB() {
@@ -77,7 +114,7 @@ public class MainPager extends AppCompatActivity {
 
         new CacheHandler.TextCacheRefill().execute();
 
-        new CacheHandler.FriendsUpdateFrindsList().execute();
+//        new CacheHandler.FriendsUpdateFrindsList().execute();
 
     }
 
