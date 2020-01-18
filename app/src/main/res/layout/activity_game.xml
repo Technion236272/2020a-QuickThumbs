@@ -289,8 +289,9 @@
 
             <LinearLayout
                 android:id="@+id/second"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_alignParentLeft="true"
                 android:layout_alignParentTop="true"
                 android:orientation="horizontal">
 
@@ -351,6 +352,8 @@
                     android:text="0"
                     android:textColor="@color/primaryTextColor"
                     android:textSize="17sp" />
+
+
             </LinearLayout>
 
             <ScrollView
@@ -385,6 +388,38 @@
                         android:text=""
                         android:textColor="@color/secondaryColor"
                         android:textSize="50sp" />
+
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+
+                        android:layout_alignBaseline="@id/multiPlayerCounter"
+                        android:layout_alignParentRight="true"
+                        android:layout_toRightOf="@id/multiPlayerCounter">
+
+                        <ImageView
+                            android:id="@+id/onlineIndicator"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignParentRight="true"
+                            android:layout_centerVertical="true"
+                            android:layout_marginRight="5dp"
+                            android:background="@drawable/circle_online_indication"
+                            android:padding="5dp"
+                            android:visibility="invisible" />
+
+                        <TextView
+                            android:id="@+id/opponentName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_alignBaseline="@+id/onlineIndicator"
+                            android:layout_toLeftOf="@id/onlineIndicator"
+                            android:padding="15sp"
+                            android:textColor="@color/secondaryColor"
+                            android:textSize="20sp" />
+
+                    </RelativeLayout>
+
 
                     <TextView
                         android:id="@+id/displayText"
