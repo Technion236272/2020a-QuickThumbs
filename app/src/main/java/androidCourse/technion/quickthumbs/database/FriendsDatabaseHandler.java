@@ -34,13 +34,13 @@ public class FriendsDatabaseHandler {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Toast.makeText(context,"is now your friend!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context,"You're friends now!", Toast.LENGTH_LONG).show();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(context,"friend add failed. please go to requests and try again", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context,"Friend adding failed. Please go to requests and try again if you're not already friends.", Toast.LENGTH_LONG).show();
                     }
                 });
 
@@ -56,13 +56,13 @@ public class FriendsDatabaseHandler {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Toast.makeText(context,"request to be your friend was removed!", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context,"Friend request removed!", Toast.LENGTH_LONG).show();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(context,"request remove failed. please go to requests and try again", Toast.LENGTH_LONG).show();
+                        Toast.makeText(context,"Friend request removing failed. Please go to requests and try again.", Toast.LENGTH_LONG).show();
                     }
                 });
     }
