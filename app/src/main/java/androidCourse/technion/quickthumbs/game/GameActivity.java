@@ -34,6 +34,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -117,6 +118,8 @@ public class GameActivity extends AppCompatActivity {
     private TextView wpmCompareNumberView;
     private TextView wpmCompareLineView;
     private Button closingPodiumButton;
+    private ImageView onlineIndicator;
+    private TextView opponentNameView;
 
     private RelativeLayout podiumScreen;
 
@@ -224,6 +227,7 @@ public class GameActivity extends AppCompatActivity {
         currentWordIndex = 0;
 
         if (gameRoomKey != null) {
+            onlineIndicator.setVisibility(View.VISIBLE);
             moveUserMarkerToNextWord(wordMarkerForOtherGameRoomUser, 0, gameTextView);
             setRealTimeListenerForRoomInformationChanges();
             closingPodiumButton.setOnClickListener(new View.OnClickListener() {
@@ -275,6 +279,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void setRealTimeListenerForRoomInformationChanges() {
+        final Handler mHandler = new Handler();
         roomReference.runTransaction(new Transaction.Handler() {
             @NonNull
             @Override
@@ -284,19 +289,36 @@ public class GameActivity extends AppCompatActivity {
                 }
 
                 GameRoom gameRoom = mutableData.getValue(GameRoom.class);
+                boolean isOpponentOnline;
+                final String opponentName;
 
                 switch (currentPlayerIndexInRoom) {
                     case 1:
                         gameRoom.usr1Online = true;
+                        opponentName = gameRoom.user2;
+                        isOpponentOnline = gameRoom.usr2Online;
 
                         break;
                     case 2:
                         gameRoom.usr2Online = true;
+                        isOpponentOnline = gameRoom.usr1Online;
+                        opponentName = gameRoom.user1;
 
                         break;
                     default:
                         throw new IllegalStateException("Unexpected value: " + currentPlayerIndexInRoom);
                 }
+
+                final int min = Math.min(10, opponentName.length());
+                final int color = isOpponentOnline ? Color.GREEN : Color.GRAY;
+
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        opponentNameView.setText(opponentName.subSequence(0, min));
+                        onlineIndicator.setBackgroundColor(color);
+                    }
+                });
 
                 mutableData.setValue(gameRoom);
 
@@ -318,22 +340,25 @@ public class GameActivity extends AppCompatActivity {
 
                 GameRoom room = dataSnapshot.getValue(GameRoom.class);
                 int toPosition;
-                int opponentPoints;
+                boolean isOpponentOnline;
 
                 switch (currentPlayerIndexInRoom) {
                     case 1:
                         toPosition = room.location2;
-                        opponentPoints = room.usr2Points;
+                        isOpponentOnline = room.usr2Online;
 
                         break;
                     case 2:
                         toPosition = room.location1;
-                        opponentPoints = room.usr1Points;
+                        isOpponentOnline = room.usr1Online;
 
                         break;
                     default:
                         throw new IllegalStateException("Unexpected value: " + currentPlayerIndexInRoom);
                 }
+
+                int color = isOpponentOnline ? Color.GREEN : Color.GRAY;
+                onlineIndicator.setBackgroundColor(color);
 
                 if (previousOtherPlayerIndex == toPosition) {   //other player didn't change his position
                     ImmutableList<Integer> currentRoomPoints = ImmutableList.of(room.usr1Points, room.usr2Points);
@@ -396,9 +421,12 @@ public class GameActivity extends AppCompatActivity {
             pointsView.setText(String.valueOf(points));
         }
 
-        podiumScreen.setVisibility(View.VISIBLE);
+        if (podiumScreen.getVisibility() == View.INVISIBLE) {
+            podiumScreen.setVisibility(View.VISIBLE);
+        }
+
         YoYo.with(Techniques.Landing)
-                .duration(800)
+                .duration(2000)
                 .playOn(podiumScreen);
 
         for (int i = 0; i < amountOfPlayersOnPodium; i++) {
@@ -417,7 +445,7 @@ public class GameActivity extends AppCompatActivity {
                         .delay(700)
                         .duration(600)
                         .playOn(pointsView);
-            } else {
+            } else { //
                 YoYo.with(Techniques.RubberBand)
                         .delay(700)
                         .duration(600)
@@ -686,6 +714,8 @@ public class GameActivity extends AppCompatActivity {
         closingPodiumButton = findViewById(R.id.closingPodiumButton);
         wpmCompareNumberView = findViewById(R.id.wpmCompareNumber);
         wpmCompareLineView = findViewById(R.id.wpmCompareLine);
+        onlineIndicator = findViewById(R.id.onlineIndicator);
+        opponentNameView = findViewById(R.id.opponentName);
 
         podiumScreen = findViewById(R.id.podiumScreen);
 
