@@ -61,19 +61,25 @@ public class NotificationActivity extends AppCompatActivity {
             if (answer) {
                 friendsDatabaseHandler.addFriend((String) extras.getString("from"), getApplicationContext());
                 Log.d(TAG, "friend is " + extras.getString("from"));
-                finish();
+                Intent intent = new Intent(this, MainPager.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
             } else {
                 friendsDatabaseHandler.removeRequest(extras.getString("from"), getApplicationContext());
-                finish();
+                Intent intent = new Intent(this, MainPager.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
             }
         }
         //if dismiss button was pressed
         if (messageValues.get("dismiss") != null && ((Boolean) messageValues.get("dismiss") ) ) {
-            finish();
+            Intent intent = new Intent(this, MainPager.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
         }
-        if (messageValues.get("from") != null ) {
-            showNotificationInADialog((String) messageValues.get("from"));
-        }
+//        if (messageValues.get("from") != null ) {
+//            showNotificationInADialog((String) messageValues.get("from"));
+//        }
         // if the message body was pressed
 
 //        RemoteMessage msg = (RemoteMessage) extras.get("msg");
@@ -147,30 +153,30 @@ public class NotificationActivity extends AppCompatActivity {
     private void showNotificationInADialog(final String from) {
 
         // show a dialog with the provided title and message
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Friend Request");
-        builder.setMessage(from+ " has asked to be your friend ");
-        builder.setPositiveButton("Accept", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                dialog.cancel();
-                FriendsDatabaseHandler friendsDatabaseHandler = new FriendsDatabaseHandler();
-                friendsDatabaseHandler.addFriend(from, getApplicationContext());
-            }
-        });
-        builder.setNegativeButton("Reject", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                dialog.cancel();
-                FriendsDatabaseHandler friendsDatabaseHandler = new FriendsDatabaseHandler();
-                friendsDatabaseHandler.removeRequest(from, getApplicationContext());
-            }
-        });
-        builder.setNeutralButton("Dismiss", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int whichButton) {
-                dialog.cancel();
-            }
-        });
-        AlertDialog alert = builder.create();
-        alert.show();
+//        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//        builder.setTitle("Friend Request");
+//        builder.setMessage(from+ " has asked to be your friend ");
+//        builder.setPositiveButton("Accept", new DialogInterface.OnClickListener() {
+//            public void onClick(DialogInterface dialog, int whichButton) {
+//                dialog.cancel();
+//                FriendsDatabaseHandler friendsDatabaseHandler = new FriendsDatabaseHandler();
+//                friendsDatabaseHandler.addFriend(from, getApplicationContext());
+//            }
+//        });
+//        builder.setNegativeButton("Reject", new DialogInterface.OnClickListener() {
+//            public void onClick(DialogInterface dialog, int whichButton) {
+//                dialog.cancel();
+//                FriendsDatabaseHandler friendsDatabaseHandler = new FriendsDatabaseHandler();
+//                friendsDatabaseHandler.removeRequest(from, getApplicationContext());
+//            }
+//        });
+//        builder.setNeutralButton("Dismiss", new DialogInterface.OnClickListener() {
+//            public void onClick(DialogInterface dialog, int whichButton) {
+//                dialog.cancel();
+//            }
+//        });
+//        AlertDialog alert = builder.create();
+//        alert.show();
     }
 
 

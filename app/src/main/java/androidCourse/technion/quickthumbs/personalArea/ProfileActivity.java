@@ -266,9 +266,9 @@ public class ProfileActivity extends Fragment {
     }
 
     private void addFriendRequest(DocumentSnapshot userDocument, DocumentSnapshot friendDocument, Map<String, Object> friendMap) {
-        db.collection("users").document(userDocument.getId()).collection("requests")
-                .document(friendDocument.getId())
-                .set(friendDocument.getData(), SetOptions.merge())
+        db.collection("users").document(friendDocument.getId()).collection("requests")
+                .document(userDocument.getId())
+                .set(userDocument.getData(), SetOptions.merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
