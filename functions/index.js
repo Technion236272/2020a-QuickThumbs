@@ -7,23 +7,28 @@ const db = admin.firestore()
 		
 		
 		
-	exports.user_sent_request = functions.firestore.document('/users/{user_id}/requests/{friend_id}').onCreate((snap, context) => {
+
+exports.user_game_invite = functions.firestore.document('/users/{user_id}/game_requests/{friend_id}').onCreate((snap, context) => {
     const user_id = context.params.user_id;
     const friend_id = context.params.friend_id;
+    console.log('user_id ' + user_id);
+    console.log('friend_id ' + friend_id);
 
 
-    console.log('friend request notification event triggered');
+    console.log('game invite request notification event triggered');
 
-
-    db.collection('users').doc(user_id).get().then((doc) => {
-
-        const user_name = doc.data().name;
+    db.collection('users').doc(user_id).collection('game_requests').doc(friend_id).get().then((doc) => {
+		console.log(doc);
+		const room_key	= doc.data().roomKey;
+		console.log(room_key);
 
         // Create a notification
         const payload = {
-            notification: {
-                title: 'New pending request',
-                body: user_name + ' want you to play with him!',
+            data: {
+                title: 'Game invite',
+				room: room_key,
+				sender: user_id,
+                body: user_id + ' invite you for a game against him!',
                 sound: "default"
             },
         };
@@ -31,10 +36,12 @@ const db = admin.firestore()
         //Create an options object that contains the time to live for the notification and the priority
         const options = {
             priority: "high",
-            timeToLive: 60 * 60 * 24
+            timeToLive: 60 * 60 * 10
         };
+		
+		let deleteDoc = db.collection('users').doc(user_id).collection('game_requests').doc(friend_id).delete();
 
-        return admin.messaging().sendToTopic("user_sent_request" + friend_id, payload, options);
+        return admin.messaging().sendToTopic("user_game_invite" + friend_id, payload, options);
 
     }).catch(error => {
 
@@ -42,41 +49,6 @@ const db = admin.firestore()
     });
 
 
-});
-
-
-exports.friend_accepted_user_request = functions.firestore.document('/users/{friend_id}/friends/{user_id}').onCreate((snap, context) => {
-    const user_id = context.params.user_id;
-    const friend_id = context.params.friend_id;
-
-    console.log('friend approved your friendship request notification event triggered');
-
-    db.collection('users').doc(user_id).get().then((doc) => {
-
-        const friend_name = doc.data().name;
-
-        // Create a notification
-        const payload = {
-            notification: {
-                title: 'Request accepted',
-                body: friend_name + ' is happy to play with you!',
-                sound: "default"
-            },
-        };
-
-        //Create an options object that contains the time to live for the notification and the priority
-        const options = {
-            priority: "high",
-            timeToLive: 60 * 60 * 24
-        };
-        let deleteDoc = db.collection('users').doc(friend_id).collection('requests').doc(user_id).delete();
-
-        return admin.messaging().sendToTopic("friend_accepted_user_request" + friend_id, payload, options);
-
-    }).catch(error => {
-
-        console.log(error.message);
-    });
 });
 
 // // Create and Deploy Your First Cloud Functions

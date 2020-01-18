@@ -12,12 +12,14 @@ import androidCourse.technion.quickthumbs.Utils.AppOpeningSplashScreen;
 import androidCourse.technion.quickthumbs.Utils.CacheHandler;
 import androidCourse.technion.quickthumbs.Utils.CircleMenuView;
 import androidCourse.technion.quickthumbs.database.FriendsDatabaseHandler;
+import androidCourse.technion.quickthumbs.database.GameDatabaseInviteHandler;
 import androidCourse.technion.quickthumbs.multiplayerSearch.GameRoom;
 import androidCourse.technion.quickthumbs.multiplayerSearch.SearchingGrouper;
 import androidCourse.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
 import androidCourse.technion.quickthumbs.theme.ThemeSelectPopUp;
 
 import android.os.Handler;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -76,19 +78,20 @@ public class MainUserActivity extends Fragment {
     private static final String searchingRoomsStr = "searchingRooms";
     private static final String level1 = "level1";
     private FirebaseAuth fireBaseAuth;
-    private FirebaseFirestore db;
+    private static FirebaseFirestore db;
     public static FirebaseDatabase instance;
     public static Button gameBtn;
     public static Button startMultiGameButton;
     DatabaseReference mDatabase;
     DatabaseReference searchingRooms;
     DatabaseReference searchingRoomsLevel1;
-    DatabaseReference gameRoomsReference;
+    public static DatabaseReference gameRoomsReference;
+    public static ValueEventListener valueEventListener;
 
     ImageButton closeButton;
     CircleMenuView menu;
     ImageView waitingLogo;
-    private View fragmentViewForButton;
+    private static View fragmentViewForButton;
 
     private TextView amountOfPlayerView;
     private TextView searchTimerView;
@@ -98,7 +101,11 @@ public class MainUserActivity extends Fragment {
     long startTime;
     RippleBackground rippleBackground;
     private CircleMenuView.EventListener listener;
-
+    private String acceptedInvitationRoomKey = "-1";
+    public static String friendUid = null;
+    private String[] basicThemes = {"Comedy", "Music", "Movies", "Science", "Games", "Literature"};
+    private static Map<String, Boolean> allUserThemes = new HashMap<>();
+    private static TextDataRow textCardItem = null;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -140,13 +147,17 @@ public class MainUserActivity extends Fragment {
         searchTimerView = view.findViewById(R.id.searchTimer);
         searchScreen = view.findViewById(R.id.searchScreen);
 
+        Intent intent = getActivity().getIntent();
+        if (intent.hasExtra("roomKey")) {
+            acceptedInvitationRoomKey = intent.getStringExtra("roomKey");
+            StartSpecifiedGame(String.valueOf(acceptedInvitationRoomKey));
+        }
+        if (friendUid != null) {
+            Myparam myparam = new Myparam(friendUid);
+            new MainUserActivity.FetchRandomTextForFriendsRoom().execute(myparam);
+        }
 
     }
-
-
-
-
-
 
     private void setCircleMenu() {
         menu = getActivity().findViewById(R.id.circle_menu);
@@ -188,8 +199,8 @@ public class MainUserActivity extends Fragment {
 
                         break;
 
+
                     case 1:
-                    case 2:
                         menu.setEventListener(null);
                         waitingLogo.setVisibility(VISIBLE);
                         menu.setVisibility(INVISIBLE);
@@ -203,6 +214,34 @@ public class MainUserActivity extends Fragment {
 
                         startSearchForGame();
 
+                        break;
+
+                    case 2:
+                        menu.setEventListener(null);
+                        waitingLogo.setVisibility(VISIBLE);
+                        menu.setVisibility(INVISIBLE);
+                        searchScreen.setVisibility(VISIBLE);
+                        closeButton.setVisibility(VISIBLE);
+                        startRippleBackground();
+
+                        setSearchTimer();
+
+                        if (acceptedInvitationRoomKey != "-1") {
+                            StartSpecifiedGame(String.valueOf(acceptedInvitationRoomKey));
+                        } else {
+                            //TODO: implement pop up friends list
+                            if (friendUid != null) {
+                                CacheHandler cacheHandler = new CacheHandler(getContext());
+                                allUserThemes = cacheHandler.loadThemesFromSharedPreferences();
+                                final String choosenTheme = getRandomThemeName();
+
+                                TextDataRow textCardItem = getNextTextFromSelectedTheme(choosenTheme);
+                                Myparam myparam = new Myparam(friendUid);
+                                myparam.setTextId(textCardItem.getTextId());
+                                createSpecialRoom(myparam);
+//                                new MainUserActivity.FetchRandomTextForFriendsRoom().execute(myparam);
+                            }
+                        }
                         break;
                 }
             }
@@ -363,6 +402,130 @@ public class MainUserActivity extends Fragment {
 
     private void setStartMultiplayerGameWhenFlagActivated(final String roomKey, final String textId, final int indexInRoom) {
         Log.d(TAG, "adding listener for game flag");
+        valueEventListener = gameRoomsReference.child(roomKey).addValueEventListener(new ValueEventListener() {
+                                                                                         @Override
+                                                                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                                             if (!dataSnapshot.exists() ||
+                                                                                                     !dataSnapshot.getValue(GameRoom.class).started) {
+                                                                                                 return;
+                                                                                             }
+
+                                                                                             Log.d(TAG, "Flag was turned in game room so user should move to game");
+
+                                                                                             int currentAmount = 2;
+                                                                                             int targetAmount = 2;
+                                                                                             amountOfPlayerView.setText(String.format("%s out of %s in room ...", currentAmount, targetAmount));
+
+                                                                                             setUIBackToNormal();
+
+                                                                                             //game starts here;
+                                                                                             Context context = fragmentViewForButton.getContext();
+                                                                                             Intent i = new Intent(context, GameLoadingSplashScreenActivity.class);
+                                                                                             i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                                                                                             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                                                             i.putExtra("id", textId);
+                                                                                             i.putExtra("roomKey", roomKey);
+                                                                                             i.putExtra("indexInRoom", indexInRoom);
+                                                                                             i.putExtra("startingTimeStamp", System.currentTimeMillis());
+                                                                                             context.startActivity(i);
+
+                                                                                             gameRoomsReference.child(roomKey).removeEventListener(this);
+                                                                                         }
+
+                                                                                         @Override
+                                                                                         public void onCancelled(@NonNull DatabaseError databaseError) {
+                                                                                             setUIBackToNormal();
+                                                                                         }
+                                                                                     }
+
+        );
+    }
+    ///here the shit i added - aka mori
+
+    private void StartSpecifiedGame(final String roomKey) {
+        Log.d(TAG, "Going to the right room");
+        amountOfPlayerView.setText("Searching Room ...");
+
+        gameRoomsReference.child(roomKey).runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                if (mutableData.getValue() == null) {
+                    return Transaction.success(mutableData);
+                }
+
+                GameRoom gameRoom = mutableData.getValue(GameRoom.class);
+
+                GameRoom gameRoomWithUserAdded = new GameRoom(gameRoom.user1, gameRoom.location1, getUid(), 0, gameRoom.textId, true, false, false, -1, -1);
+
+                mutableData.setValue(gameRoomWithUserAdded);
+
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
+                if (b) {  //was committed
+                    Log.d(TAG, "Successfully added to game room");
+                    setUIBackToNormal();
+
+                    rippleBackground.stopRippleAnimation();
+
+                    GameRoom gameRoom = dataSnapshot.getValue(GameRoom.class);
+                    String textId = gameRoom.textId;
+
+                    int indexForCurrentUser = 2;
+                    int targetAmount = 2;
+                    amountOfPlayerView.setText(String.format("%s out of %s in room ...", indexForCurrentUser, targetAmount));
+
+                    Context context = getActivity().getApplicationContext();
+                    Intent i = new Intent(context, GameLoadingSplashScreenActivity.class);
+                    i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    i.putExtra("id", textId);
+                    i.putExtra("roomKey", roomKey);
+                    i.putExtra("indexInRoom", indexForCurrentUser);
+                    i.putExtra("startingTimeStamp", System.currentTimeMillis());
+                    context.startActivity(i);
+                } else {
+                    Log.d(TAG, "Friend enter game should not fail!!, might be connectivity issues or any other unexpected problem");
+                }
+            }
+        });
+
+    }
+
+    public void createSpecialRoom(Myparam myparam) {
+        final String friendUid = myparam.friendId;
+        final String textId = myparam.textId;
+        Log.d(TAG, "Starting to create separate room");
+        final String key = searchingRoomsLevel1.push().getKey();
+
+
+        GameRoom newRoom = new GameRoom(fireBaseAuth.getUid(), 0, null, 0, textId, false, false, false, -1, -1);
+
+        gameRoomsReference.child(key).setValue(newRoom)
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        if (task.isSuccessful()) {
+                            int currentAmount = 1;
+                            int targetAmount = 2;
+                            amountOfPlayerView.setText(String.format("%s out of %s in room ...", currentAmount, targetAmount));
+
+                            setGameForFriends(key, textId, 1);
+
+                            GameDatabaseInviteHandler gameDatabaseInviteHandler = new GameDatabaseInviteHandler();
+                            gameDatabaseInviteHandler.inviteFriendToAGame(friendUid, key, getActivity());
+                        } else {
+                            throw new RuntimeException("bug I guess");
+                        }
+                    }
+                });
+    }
+
+    public void setGameForFriends(final String roomKey, final String textId, final int indexInRoom) {
+        Log.d(TAG, "adding listener for game flag");
         gameRoomsReference.child(roomKey).addValueEventListener(new ValueEventListener() {
                                                                     @Override
                                                                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -401,6 +564,51 @@ public class MainUserActivity extends Fragment {
 
         );
     }
+
+    public static class Myparam {
+        private String friendId;
+        private String textId;
+
+        public Myparam(String friendId) {
+            this.friendId = friendId;
+        }
+
+        public void setTextId(String textId) {
+            this.textId = textId;
+        }
+    }
+
+    public class FetchRandomTextForFriendsRoom extends AsyncTask<Myparam, Void, Void> {
+
+
+        @Override
+        protected Void doInBackground(Myparam... myparams) {
+            CacheHandler cacheHandler = new CacheHandler(getContext());
+            allUserThemes = cacheHandler.loadThemesFromSharedPreferences();
+            final String choosenTheme = getRandomThemeName();
+
+            TextDataRow textCardItem = getNextTextFromSelectedTheme(choosenTheme);
+            if (textCardItem == null) {
+                fetchRandomTextSpecifiedForUsers();
+            } else {
+                String textId = textCardItem.getTextId();
+                myparams[0].setTextId(textId);
+                try {
+                    Class<?> c = MainUserActivity.class;
+                    Method method = c.getDeclaredMethod("createSpecialRoom", String.class);
+                    method.invoke(MainUserActivity.this, myparams[0]);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                checkIfTextListNeedToBeRefilled(choosenTheme);
+            }
+            return null;
+        }
+    }
+
+
+    ///end my stuff added - mori
 
     private void setUIBackToNormal() {
         menu.setEventListener(listener);
@@ -500,9 +708,7 @@ public class MainUserActivity extends Fragment {
     }
 
     private class FetchRandomTextId extends AsyncTask<Void, Void, Void> {
-        private String[] basicThemes = {"Comedy", "Music", "Movies", "Science", "Games", "Literature"};
-        private Map<String, Boolean> allUserThemes = new HashMap<>();
-        private TextDataRow textCardItem = null;
+
 
         @Override
         protected Void doInBackground(Void... voids) {
@@ -525,126 +731,116 @@ public class MainUserActivity extends Fragment {
 
                 checkIfTextListNeedToBeRefilled(choosenTheme);
             }
-
             return null;
         }
+    }
 
-        protected void onProgressUpdate() {
-            //            setProgressPercent(progress[0]);
-        }
-
-        protected void onPostExecute() {
-            //            showDialog("Downloaded " + result + " bytes");
-        }
-
-        private void fetchRandomTextSpecifiedForUsers() {
-            final String choosenTheme = getRandomThemeName();
-            //now reach for the theme texts and check the number of texts in the theme
-            getThemesCollection().document(choosenTheme).
-                    get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                    if (task.isSuccessful()) {
-                        DocumentSnapshot document = task.getResult();
-                        if (document.exists()) {
-                            Log.d(TAG, "getRandomTheme:" + "DocumentSnapshot data: " + document.getData());
-                            int textsAmount = document.getLong("textsCount").intValue();
-                            getRandomText(choosenTheme, textsAmount);
-                        } else {
-                            Log.d(TAG, "getRandomTheme:" + "No such document");
-                            //TODO: is it possible that we will reach here?
-                        }
+    private static void fetchRandomTextSpecifiedForUsers() {
+        final String choosenTheme = getRandomThemeName();
+        //now reach for the theme texts and check the number of texts in the theme
+        getThemesCollection().document(choosenTheme).
+                get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    DocumentSnapshot document = task.getResult();
+                    if (document.exists()) {
+                        Log.d(TAG, "getRandomTheme:" + "DocumentSnapshot data: " + document.getData());
+                        int textsAmount = document.getLong("textsCount").intValue();
+                        getRandomText(choosenTheme, textsAmount);
                     } else {
-                        Log.d(TAG, "getRandomTheme:" + "get failed with ", task.getException());
+                        Log.d(TAG, "getRandomTheme:" + "No such document");
                         //TODO: is it possible that we will reach here?
                     }
+                } else {
+                    Log.d(TAG, "getRandomTheme:" + "get failed with ", task.getException());
+                    //TODO: is it possible that we will reach here?
                 }
-            });
+            }
+        });
+    }
+
+
+    private static String getRandomThemeName() {
+        List<String> userChosenThemes = new LinkedList<>();
+        for (String theme : allUserThemes.keySet()) {
+            if (allUserThemes.get(theme)) {
+                userChosenThemes.add(theme);
+            }
         }
-
-
-        private String getRandomThemeName() {
-            List<String> userChosenThemes = new LinkedList<>();
+        // if the user has no themes selected we will choose all for him
+        if (userChosenThemes.isEmpty()) {
             for (String theme : allUserThemes.keySet()) {
-                if (allUserThemes.get(theme)) {
-                    userChosenThemes.add(theme);
-                }
+                userChosenThemes.add(theme);
             }
-            // if the user has no themes selected we will choose all for him
-            if (userChosenThemes.isEmpty()) {
-                for (String theme : allUserThemes.keySet()) {
-                    userChosenThemes.add(theme);
-                }
-            }
-            //choose random theme from the user themes
-            int themesListSize = userChosenThemes.size();
-            return userChosenThemes.get(new Random().nextInt(themesListSize));
         }
+        //choose random theme from the user themes
+        int themesListSize = userChosenThemes.size();
+        return userChosenThemes.get(new Random().nextInt(themesListSize));
+    }
 
-        private void getRandomText(final String choosenTheme, int textsAmount) {
-            final int chosenIndex = (new Random().nextInt(textsAmount)) + 1;
-            //now reach for the theme texts and check the number of texts in there
-            getSelectedThemeTextsCollection(choosenTheme).whereEqualTo("mainThemeID", chosenIndex).
-                    get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                    if (task.isSuccessful()) {
-                        if (task.getResult().isEmpty()) {
-                            fetchRandomTextSpecifiedForUsers();
-                        } else {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                textCardItem = TextDataRow.createTextCardItem(document, null, -1, null);
-                                String textId = document.getId();
-                                try {
-                                    Class<?> c = MainUserActivity.class;
-                                    Method method = c.getDeclaredMethod("createSeparateRoom", String.class);
-                                    method.invoke(MainUserActivity.this, textId);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
-                                }
-                                return;
-                            }
-                        }
+    private static void getRandomText(final String choosenTheme, int textsAmount) {
+        final int chosenIndex = (new Random().nextInt(textsAmount)) + 1;
+        //now reach for the theme texts and check the number of texts in there
+        getSelectedThemeTextsCollection(choosenTheme).whereEqualTo("mainThemeID", chosenIndex).
+                get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    if (task.getResult().isEmpty()) {
+                        fetchRandomTextSpecifiedForUsers();
                     } else {
-                        Log.d(TAG, "getRandomText: " + "get failed with ", task.getException());
+                        for (QueryDocumentSnapshot document : task.getResult()) {
+                            textCardItem = TextDataRow.createTextCardItem(document, null, -1, null);
+                            String textId = document.getId();
+                            try {
+                                Class<?> c = MainUserActivity.class;
+                                Method method = c.getDeclaredMethod("createSeparateRoom", String.class);
+                                method.invoke(c, textId);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                            return;
+                        }
                     }
+                } else {
+                    Log.d(TAG, "getRandomText: " + "get failed with ", task.getException());
                 }
-            });
-        }
-
-        private DocumentReference getTextFromTextsCollection(String documentID) {
-            return db.collection("texts").document(documentID);
-        }
-
-        private CollectionReference getUserCollection(String userID, String collecionName) {
-            return getUserDocument(userID).collection(collecionName);
-        }
-
-        private DocumentReference getUserDocument(String composer) {
-            return db.collection("users").document(composer);
-        }
-
-        private CollectionReference getSelectedThemeTextsCollection(String theme) {
-            return getThemesCollection().document(theme).collection("texts");
-        }
-
-        private CollectionReference getThemesCollection() {
-            return db.collection("themes");
-        }
-
-        private String getUid() {
-            FirebaseUser currentUser = fireBaseAuth.getCurrentUser();
-            GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(getContext());
-            AccessToken accessToken = AccessToken.getCurrentAccessToken();
-            if (account != null && currentUser == null) {
-                return account.getId();
-            } else if (currentUser != null) {
-                return fireBaseAuth.getUid();
-            } else {
-                return accessToken.getUserId();
             }
-        }
+        });
+    }
 
+    private DocumentReference getTextFromTextsCollection(String documentID) {
+        return db.collection("texts").document(documentID);
+    }
+
+    private CollectionReference getUserCollection(String userID, String collecionName) {
+        return getUserDocument(userID).collection(collecionName);
+    }
+
+    private DocumentReference getUserDocument(String composer) {
+        return db.collection("users").document(composer);
+    }
+
+    private static CollectionReference getSelectedThemeTextsCollection(String theme) {
+        return getThemesCollection().document(theme).collection("texts");
+    }
+
+    private static CollectionReference getThemesCollection() {
+        return db.collection("themes");
+    }
+
+    private String getUid() {
+        FirebaseUser currentUser = fireBaseAuth.getCurrentUser();
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(getContext());
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        if (account != null && currentUser == null) {
+            return account.getId();
+        } else if (currentUser != null) {
+            return fireBaseAuth.getUid();
+        } else {
+            return accessToken.getUserId();
+        }
     }
 
 

@@ -55,7 +55,7 @@ public class MainPager extends AppCompatActivity {
     private ImageButton backToMainButtonFromStatistics;
     private FirebaseAuth mAuth;
 
-    ViewPager vpPager;
+    public static ViewPager vpPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +65,7 @@ public class MainPager extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         FirebaseMessaging.getInstance().subscribeToTopic("user_sent_request" + getUid());
         FirebaseMessaging.getInstance().subscribeToTopic("friend_accepted_user_request" + getUid());
+        FirebaseMessaging.getInstance().subscribeToTopic("user_game_invite" + getUid());
 
         FriendRequestMessageService friendRequestMessageService = new FriendRequestMessageService();
         friendRequestMessageService.createNotificationChannel(getApplicationContext());

@@ -16,9 +16,15 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.List;
 
 import androidCourse.technion.quickthumbs.GameLoadingSplashScreenActivity;
+import androidCourse.technion.quickthumbs.MainPager;
+import androidCourse.technion.quickthumbs.MainUserActivity;
 import androidCourse.technion.quickthumbs.R;
+import androidCourse.technion.quickthumbs.Utils.CacheHandler;
 import androidCourse.technion.quickthumbs.database.FriendsDatabaseHandler;
+import androidCourse.technion.quickthumbs.database.GameDatabaseInviteHandler;
 
+import static androidCourse.technion.quickthumbs.MainUserActivity.gameRoomsReference;
+import static androidCourse.technion.quickthumbs.MainUserActivity.valueEventListener;
 import static androidCourse.technion.quickthumbs.personalArea.ProfileActivity.requestsIdList;
 
 public class FriendAdaptor extends RecyclerView.Adapter<FriendViewHolder>{
@@ -53,20 +59,27 @@ public class FriendAdaptor extends RecyclerView.Adapter<FriendViewHolder>{
         if ( friendsList.get(position).isApproved()){
             holder.addFriendButton.setVisibility(View.GONE);
             holder.removeRequestButton.setVisibility(View.GONE);
-        }else{
-            holder.playWithFriend.setVisibility(View.GONE);
         }
+//        else{//TODO: set it back to on
+//            holder.playWithFriend.setVisibility(View.GONE);
+//        }
         setPlayButtonListener(holder, friendsList.get(position));
         setAddFriendButton(holder, friendsList.get(position),position);
         setRemoveRequestButton(holder, friendsList.get(position),position);
 
     }
 
-    private void setPlayButtonListener(@NonNull FriendViewHolder holder, FriendItem friendItem) {
+    private void setPlayButtonListener(@NonNull FriendViewHolder holder, final FriendItem friendItem) {
         holder.playWithFriend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                //here last search for a game is canceled
+//                gameRoomsReference.removeEventListener(valueEventListener);//TODO: if alreadt=y searching then remove it
+                //here the room for the game is created
+//                MainUserActivity.Myparam myparam = new MainUserActivity.Myparam(friendItem.getId());
+//                new MainUserActivity.FetchRandomTextForFriendsRoom().execute(myparam);
+                MainUserActivity.friendUid = friendItem.getId();
+                MainPager.vpPager.setCurrentItem(1);
             }
 
         });
