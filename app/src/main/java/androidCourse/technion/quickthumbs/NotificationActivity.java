@@ -2,6 +2,8 @@ package androidCourse.technion.quickthumbs;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -42,6 +44,10 @@ public class NotificationActivity extends AppCompatActivity {
             Object value = extras.get(key);
             messageValues.put(key, value);
             Log.d(TAG, "Extras received at onNewIntent:  Key: " + key + " Value: " + value);
+        }
+        if(messageValues.get("notification_id")!= null){
+            NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.cancel((Integer)messageValues.get("notification_id"));
         }
         if (messageValues.get("gameInvite") != null) {
             boolean answer = (boolean) extras.get("answer");
