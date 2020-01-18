@@ -13,7 +13,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 import androidCourse.technion.quickthumbs.GameLoadingSplashScreenActivity;
 import androidCourse.technion.quickthumbs.MainPager;
@@ -22,9 +28,13 @@ import androidCourse.technion.quickthumbs.R;
 import androidCourse.technion.quickthumbs.Utils.CacheHandler;
 import androidCourse.technion.quickthumbs.database.FriendsDatabaseHandler;
 import androidCourse.technion.quickthumbs.database.GameDatabaseInviteHandler;
+import androidCourse.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
 
+import static androidCourse.technion.quickthumbs.MainUserActivity.friendUid;
 import static androidCourse.technion.quickthumbs.MainUserActivity.gameRoomsReference;
+import static androidCourse.technion.quickthumbs.MainUserActivity.mainUserActivityInstance;
 import static androidCourse.technion.quickthumbs.MainUserActivity.valueEventListener;
+import static androidCourse.technion.quickthumbs.Utils.CacheHandler.getNextTextFromSelectedTheme;
 import static androidCourse.technion.quickthumbs.personalArea.ProfileActivity.requestsIdList;
 
 public class FriendAdaptor extends RecyclerView.Adapter<FriendViewHolder>{
@@ -78,11 +88,44 @@ public class FriendAdaptor extends RecyclerView.Adapter<FriendViewHolder>{
                 //here the room for the game is created
 //                MainUserActivity.Myparam myparam = new MainUserActivity.Myparam(friendItem.getId());
 //                new MainUserActivity.FetchRandomTextForFriendsRoom().execute(myparam);
-                MainUserActivity.friendUid = friendItem.getId();
-                MainPager.vpPager.setCurrentItem(1);
+//                friendUid = friendItem.getId();
+
+                TextDataRow textCardItem = getNextTextFromSelectedTheme(getRandomThemeName());
+                MainUserActivity.Myparam myparam = new MainUserActivity.Myparam(friendItem, textCardItem.getTextId());
+                Class<?> c = MainUserActivity.class;
+                try {
+                    Method method = c.getDeclaredMethod("createSpecialRoom", MainUserActivity.Myparam.class);
+                    method.invoke(mainUserActivityInstance, myparam);
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                } catch (NoSuchMethodException e) {
+                    e.printStackTrace();
+                }
             }
 
         });
+    }
+
+    private String getRandomThemeName() {
+        CacheHandler cacheHandler = new CacheHandler(context);
+        Map<String, Boolean> allUserThemes = cacheHandler.loadThemesFromSharedPreferences();
+        List<String> userChosenThemes = new LinkedList<>();
+        for (String theme : allUserThemes.keySet()) {
+            if (allUserThemes.get(theme)) {
+                userChosenThemes.add(theme);
+            }
+        }
+        // if the user has no themes selected we will choose all for him
+        if (userChosenThemes.isEmpty()) {
+            for (String theme : allUserThemes.keySet()) {
+                userChosenThemes.add(theme);
+            }
+        }
+        //choose random theme from the user themes
+        int themesListSize = userChosenThemes.size();
+        return userChosenThemes.get(new Random().nextInt(themesListSize));
     }
 
     private void setAddFriendButton(@NonNull FriendViewHolder holder, final FriendItem friendItem, final int position) {

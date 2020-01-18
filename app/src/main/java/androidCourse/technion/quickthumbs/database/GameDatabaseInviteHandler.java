@@ -17,24 +17,26 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.Map;
 
+import androidCourse.technion.quickthumbs.personalArea.FriendsList.FriendItem;
+
 import static com.google.firebase.firestore.SetOptions.merge;
 
 public class GameDatabaseInviteHandler {
 
     public GameDatabaseInviteHandler(){}
 
-    public void inviteFriendToAGame(String friendUid,String roomKey, final Context context){
+    public void inviteFriendToAGame(final FriendItem friendItem, String roomKey, final Context context) {
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         Map<String, Object> friend = new HashMap<>();
-        friend.put("uid", friendUid);
+        friend.put("uid", getUid(context));
         friend.put("roomKey", roomKey);
-        db.collection("users").document(getUid(context)).collection("game_requests")
-                .document(friendUid).set(friend, merge())
+        db.collection("users").document(friendItem.getId()).collection("game_requests")
+                .document(getUid(context)).set(friend, merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Toast.makeText(context,"the invite has benn set from "+ getUid(context), Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, "a game invite has benn set to " + friendItem.getName(), Toast.LENGTH_LONG).show();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {

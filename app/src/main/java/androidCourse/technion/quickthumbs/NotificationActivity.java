@@ -52,17 +52,21 @@ public class NotificationActivity extends AppCompatActivity {
         if (messageValues.get("gameInvite") != null) {
             boolean answer = (boolean) extras.get("answer");
             if (answer) {
-                Intent goToMainScreen = new Intent(context,MainUserActivity.class);
+                Intent goToMainScreen = new Intent(context, MainPager.class);
                 goToMainScreen.putExtra("roomKey",messageValues.get("roomKey").toString());
+                goToMainScreen.putExtra("answer", (Boolean) messageValues.get("answer"));
+                goToMainScreen.putExtra("from", messageValues.get("from").toString());
                 startActivity(goToMainScreen);
+                return;
             } else {
                 //reject game
                 finish();
+                return;
             }
         }
 
         FriendsDatabaseHandler friendsDatabaseHandler = new FriendsDatabaseHandler();
-        if (messageValues.get("answer") != null) {
+        if (messageValues.get("answer") != null && messageValues.get("gameInvite") == null) {
             boolean answer = (boolean) extras.get("answer");
             if (answer) {
                 friendsDatabaseHandler.addFriend((String) extras.getString("from"), getApplicationContext());
