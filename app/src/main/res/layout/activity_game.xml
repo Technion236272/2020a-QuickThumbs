@@ -403,9 +403,8 @@
                             android:layout_height="wrap_content"
                             android:layout_alignParentRight="true"
                             android:layout_centerVertical="true"
-                            android:layout_marginRight="5dp"
+                            android:layout_marginRight="10dp"
                             android:background="@drawable/circle_online_indication"
-                            android:padding="5dp"
                             android:visibility="invisible" />
 
                         <TextView
@@ -414,7 +413,7 @@
                             android:layout_height="wrap_content"
                             android:layout_alignBaseline="@+id/onlineIndicator"
                             android:layout_toLeftOf="@id/onlineIndicator"
-                            android:padding="15sp"
+                            android:padding="10sp"
                             android:textColor="@color/secondaryColor"
                             android:textSize="20sp" />
 
@@ -526,7 +525,7 @@
                                 android:layout_centerHorizontal="true"
                                 android:layout_marginBottom="50dp"
                                 android:textColor="@color/secondaryDarkColor"
-                                android:textSize="20sp" />
+                                android:textSize="22sp" />
 
                             <TextView
                                 android:id="@+id/placement2"
@@ -535,7 +534,8 @@
                                 android:layout_above="@id/placement2Points"
                                 android:layout_centerHorizontal="true"
                                 android:textColor="@color/secondaryColor"
-                                android:textSize="24sp" />
+                                android:textSize="22sp"
+                                android:textStyle="bold" />
 
                         </RelativeLayout>
                     </LinearLayout>

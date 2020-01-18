@@ -8,7 +8,10 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
@@ -17,6 +20,7 @@ import android.os.VibrationEffect;
 import android.os.Vibrator;
 
 import androidCourse.technion.quickthumbs.GameLoadingSplashScreenActivity;
+import androidCourse.technion.quickthumbs.MainUserActivity;
 import androidCourse.technion.quickthumbs.R;
 import androidCourse.technion.quickthumbs.multiplayerSearch.GameRoom;
 import androidCourse.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
@@ -120,7 +124,6 @@ public class GameActivity extends AppCompatActivity {
     private Button closingPodiumButton;
     private ImageView onlineIndicator;
     private TextView opponentNameView;
-
     private RelativeLayout podiumScreen;
 
     private List<Pair<TextView, TextView>> podiumPlaces;
@@ -176,6 +179,8 @@ public class GameActivity extends AppCompatActivity {
     private long startingTimeStamp;
     private Timer synchronizedMultiplayerCounter;
     private List<Integer> roomPoints;
+
+    public static final int USER_NAME_MAX_SIZE = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -309,14 +314,18 @@ public class GameActivity extends AppCompatActivity {
                         throw new IllegalStateException("Unexpected value: " + currentPlayerIndexInRoom);
                 }
 
-                final int min = Math.min(10, opponentName.length());
+                final int min = Math.min(USER_NAME_MAX_SIZE, opponentName.length());
                 final int color = isOpponentOnline ? Color.GREEN : Color.GRAY;
 
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
+                        Resources res = getResources();
+                        final Drawable drawable = res.getDrawable(R.drawable.circle_online_indication);
+                        drawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+                        onlineIndicator.setBackground(drawable);
+
                         opponentNameView.setText(opponentName.subSequence(0, min));
-                        onlineIndicator.setBackgroundColor(color);
                     }
                 });
 
@@ -358,7 +367,10 @@ public class GameActivity extends AppCompatActivity {
                 }
 
                 int color = isOpponentOnline ? Color.GREEN : Color.GRAY;
-                onlineIndicator.setBackgroundColor(color);
+                Resources res = getResources();
+                final Drawable drawable = res.getDrawable(R.drawable.circle_online_indication);
+                drawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+                onlineIndicator.setBackground(drawable);
 
                 if (previousOtherPlayerIndex == toPosition) {   //other player didn't change his position
                     ImmutableList<Integer> currentRoomPoints = ImmutableList.of(room.usr1Points, room.usr2Points);
@@ -370,17 +382,18 @@ public class GameActivity extends AppCompatActivity {
                         allUsersResults.add(new Pair<>(room.usr1Points, room.user1));
                         allUsersResults.add(new Pair<>(room.usr2Points, room.user2));
 
-                        List<Pair<Integer, String>> podiumResults = new ArrayList<>();
+                        List<Pair<Pair<Integer, String>, Boolean>> podiumResults = new ArrayList<>();
                         for (Pair<Integer, String> p : allUsersResults) {
                             if (p.first != -1) {
-                                podiumResults.add(p);
+                                boolean isCurrentUser = p.second.equals(MainUserActivity.localUserName);
+                                podiumResults.add(new Pair<>(p, isCurrentUser));
                             }
                         }
 
-                        Collections.sort(podiumResults, new Comparator<Pair<Integer, String>>() {
+                        Collections.sort(podiumResults, new Comparator<Pair<Pair<Integer, String>, Boolean>>() {
                             @Override
-                            public int compare(Pair<Integer, String> o1, Pair<Integer, String> o2) {
-                                return o2.first - o1.first;
+                            public int compare(Pair<Pair<Integer, String>, Boolean> o1, Pair<Pair<Integer, String>, Boolean> o2) {
+                                return o2.first.first - o1.first.first;
                             }
                         });
 
@@ -405,11 +418,13 @@ public class GameActivity extends AppCompatActivity {
         });
     }
 
-    private void updatePodium(List<Pair<Integer, String>> podiumResults) {
+    private void updatePodium(List<Pair<Pair<Integer, String>, Boolean>> podiumResults) {
         int amountOfPlayersOnPodium = Math.min(3, podiumResults.size());
 
         for (int i = 0; i < amountOfPlayersOnPodium; i++) {
-            Pair<Integer, String> p = podiumResults.get(i);
+            Pair<Pair<Integer, String>, Boolean> pairBooleanPair = podiumResults.get(i);
+            Pair<Integer, String> p = pairBooleanPair.first;
+            Boolean isCurrentUser = pairBooleanPair.second;
             Integer points = p.first;
             String name = p.second;
 
@@ -417,7 +432,15 @@ public class GameActivity extends AppCompatActivity {
             TextView nameView = viewPair.first;
             TextView pointsView = viewPair.second;
 
-            nameView.setText(name);
+            int colorPrimitive = isCurrentUser ? Color.GREEN : Color.BLACK;
+            ForegroundColorSpan color = new ForegroundColorSpan(colorPrimitive);
+
+            String nameToPresent = name.substring(0, Math.min(name.length(), USER_NAME_MAX_SIZE));
+            SpannableString ss = new SpannableString(nameToPresent);
+
+            ss.setSpan(color, 0, nameToPresent.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+            nameView.setText(ss);
+
             pointsView.setText(String.valueOf(points));
         }
 

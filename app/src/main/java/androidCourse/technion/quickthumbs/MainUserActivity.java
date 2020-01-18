@@ -80,6 +80,8 @@ public class MainUserActivity extends Fragment {
     private FirebaseAuth fireBaseAuth;
     private static FirebaseFirestore db;
     public static FirebaseDatabase instance;
+    public static String localUserName;
+
     public static Button gameBtn;
     public static Button startMultiGameButton;
     DatabaseReference mDatabase;
@@ -134,6 +136,8 @@ public class MainUserActivity extends Fragment {
         searchingRooms = mDatabase.child(searchingRoomsStr);
         searchingRoomsLevel1 = searchingRooms.child(level1);
         gameRoomsReference = mDatabase.child(gameRooms);
+
+        setUserName();
 
         setCircleMenu();
 
@@ -255,7 +259,6 @@ public class MainUserActivity extends Fragment {
         closeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                rippleBackground.stopRippleAnimation();
                 setUIBackToNormal();
             }
         });
@@ -291,6 +294,37 @@ public class MainUserActivity extends Fragment {
         }, 0, 1000);
     }
 
+    public DocumentReference getUserDocumentReference() {
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(fragmentViewForButton.getContext());
+        String users = "users";
+
+        if (fireBaseAuth.getCurrentUser() != null) {
+            return db.collection(users)
+                    .document(fireBaseAuth.getUid());
+        } else if (googleAccount != null) {
+            return db.collection(users)
+                    .document(googleAccount.getId());
+        } else {
+            return db.collection(users)
+                    .document(accessToken.getUserId());
+        }
+    }
+
+    public void setUserName() {
+        getUserDocumentReference().get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    Map<String, Object> data = task.getResult().getData();
+                    String name = (String) data.get("name");
+
+                    localUserName = name;
+                    Log.d(TAG, String.format("fetched user name -> %s", name));
+                }
+            }
+        });
+    }
 
     private void startSearchForGame() {
         Log.d(TAG, "Starting to search for multi player game");
@@ -337,7 +371,7 @@ public class MainUserActivity extends Fragment {
 
                                     GameRoom gameRoom = mutableData.child(gameRooms).child(roomKey).getValue(GameRoom.class);
 
-                                    GameRoom gameRoomWithChange = new GameRoom(gameRoom.user1, gameRoom.location1, fireBaseAuth.getUid(), 0, gameRoom.textId, true, false, false, -1, -1);
+                                    GameRoom gameRoomWithChange = new GameRoom(gameRoom.user1, gameRoom.location1, localUserName, 0, gameRoom.textId, true, false, false, -1, -1);
                                     mutableData.child(gameRooms).child(roomKey).setValue(gameRoomWithChange);   //adding as an active multi-player game.
 
 
@@ -353,8 +387,6 @@ public class MainUserActivity extends Fragment {
                                 if (b) {  //was committed
                                     Log.d(TAG, "Successfully removed searching room and added to game room");
                                     setUIBackToNormal();
-
-                                    rippleBackground.stopRippleAnimation();
 
                                     GameRoom gameRoom = dataSnapshot.child(gameRooms).child(roomKey).getValue(GameRoom.class);
                                     String textId = gameRoom.textId;
@@ -616,6 +648,7 @@ public class MainUserActivity extends Fragment {
         waitingLogo.setVisibility(INVISIBLE);
         searchScreen.setVisibility(INVISIBLE);
         closeButton.setVisibility(INVISIBLE);
+        rippleBackground.stopRippleAnimation();
         searchTimer.cancel();
     }
 
@@ -623,7 +656,7 @@ public class MainUserActivity extends Fragment {
         Log.d(TAG, "Starting to create separate room");
         final String key = searchingRoomsLevel1.push().getKey();
 
-        GameRoom newRoom = new GameRoom(fireBaseAuth.getUid(), 0, null, 0, textId, false, false, false, -1, -1);
+        GameRoom newRoom = new GameRoom(localUserName, 0, null, 0, textId, false, false, false, -1, -1);
         final SearchingGrouper newSearchingGrouper = new SearchingGrouper(textId, 2, 1);
 
         gameRoomsReference.child(key).setValue(newRoom)
@@ -731,6 +764,7 @@ public class MainUserActivity extends Fragment {
 
                 checkIfTextListNeedToBeRefilled(choosenTheme);
             }
+
             return null;
         }
     }
