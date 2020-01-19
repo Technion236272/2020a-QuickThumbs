@@ -350,16 +350,19 @@ public class GameActivity extends AppCompatActivity {
                 GameRoom room = dataSnapshot.getValue(GameRoom.class);
                 int toPosition;
                 boolean isOpponentOnline;
+                int currentPlayerPoints;
 
                 switch (currentPlayerIndexInRoom) {
                     case 1:
                         toPosition = room.location2;
                         isOpponentOnline = room.usr2Online;
+                        currentPlayerPoints = room.usr1Points;
 
                         break;
                     case 2:
                         toPosition = room.location1;
                         isOpponentOnline = room.usr1Online;
+                        currentPlayerPoints = room.usr2Points;
 
                         break;
                     default:
@@ -372,12 +375,12 @@ public class GameActivity extends AppCompatActivity {
                 drawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
                 onlineIndicator.setBackground(drawable);
 
-                if (previousOtherPlayerIndex == toPosition) {   //other player didn't change his position
-                    ImmutableList<Integer> currentRoomPoints = ImmutableList.of(room.usr1Points, room.usr2Points);
+                ImmutableList<Integer> currentRoomPoints = ImmutableList.of(room.usr1Points, room.usr2Points);
 
-                    if (!roomPoints.equals(currentRoomPoints) && gameTextWordStart == -1) { //some player (current player too) updated end points, and current player finished game.
-                        roomPoints = currentRoomPoints;
+                if (!roomPoints.equals(currentRoomPoints)) { //some player (current player too) updated end points, and current player finished game.
+                    roomPoints = currentRoomPoints;
 
+                    if (gameTextWordStart == -1) {
                         List<Pair<Integer, String>> allUsersResults = new ArrayList<>();
                         allUsersResults.add(new Pair<>(room.usr1Points, room.user1));
                         allUsersResults.add(new Pair<>(room.usr2Points, room.user2));
@@ -398,7 +401,6 @@ public class GameActivity extends AppCompatActivity {
                         });
 
                         updatePodium(podiumResults);
-
                     }
 
                     return;
@@ -449,38 +451,22 @@ public class GameActivity extends AppCompatActivity {
         }
 
         YoYo.with(Techniques.Landing)
-                .duration(2000)
+                .duration(1500)
+//                .onEnd()
                 .playOn(podiumScreen);
 
         for (int i = 0; i < amountOfPlayersOnPodium; i++) {
             Pair<TextView, TextView> viewPair = podiumPlaces.get(i);
             TextView nameView = viewPair.first;
-            TextView pointsView = viewPair.second;
+//            TextView pointsView = viewPair.second;
 
-            if (i == 0) {
-                YoYo.with(Techniques.Bounce)
-                        .delay(700)
-                        .duration(600)
-                        .repeat(20)
-                        .playOn(nameView);
+            Techniques techniques = i == 0 ? Techniques.Bounce : Techniques.Shake;
 
-                YoYo.with(Techniques.Wobble)
-                        .delay(700)
-                        .duration(600)
-                        .playOn(pointsView);
-            } else { //
-                YoYo.with(Techniques.RubberBand)
-                        .delay(700)
-                        .duration(600)
-                        .repeat(20)
-                        .playOn(nameView);
-
-                YoYo.with(Techniques.Shake)
-                        .delay(700)
-                        .duration(600)
-                        .playOn(pointsView);
-
-            }
+            YoYo.with(techniques)
+                    .delay(2000)
+                    .duration(600)
+                    .repeat(100)
+                    .playOn(nameView);
         }
     }
 
