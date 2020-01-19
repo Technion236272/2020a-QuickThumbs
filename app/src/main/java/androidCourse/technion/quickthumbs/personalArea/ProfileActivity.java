@@ -10,13 +10,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
-import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,7 +22,6 @@ import android.os.Bundle;
 import androidCourse.technion.quickthumbs.MainActivity;
 import androidCourse.technion.quickthumbs.R;
 import androidCourse.technion.quickthumbs.Utils.CacheHandler;
-import androidCourse.technion.quickthumbs.Utils.FriendRequestMessageService;
 import androidCourse.technion.quickthumbs.game.GameActivity;
 import androidCourse.technion.quickthumbs.personalArea.FriendsList.FriendAdaptor;
 import androidCourse.technion.quickthumbs.personalArea.FriendsList.FriendItem;
@@ -32,6 +29,7 @@ import androidCourse.technion.quickthumbs.personalArea.FriendsList.FriendItem;
 import android.os.Environment;
 import android.os.StrictMode;
 import android.provider.MediaStore;
+import android.text.Editable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -81,7 +79,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -122,6 +119,7 @@ public class ProfileActivity extends Fragment {
     private ArrayList<FriendItem> friendsIdList;
     public static ArrayList<FriendItem> requestsIdList;
     HashMap<String, Boolean> loadedFriendsIDs = new HashMap<>();
+    private View fragment;
 
 
     @Override
@@ -137,6 +135,7 @@ public class ProfileActivity extends Fragment {
 
     public void onViewCreated(View view,
                               Bundle savedInstanceState) {
+        fragment = view;
         howMuchToLoadEachScroll = 3;
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
@@ -180,47 +179,56 @@ public class ProfileActivity extends Fragment {
                 new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        EditText email = view.findViewById(R.id.emailEditText);
-                        String friendEmail = email.getText().toString();
-                        if (friendEmail != null) {
-                            getUserDocumentItem(friendEmail);
+                        EditText emailView = view.findViewById(R.id.emailEditText);
+                        Editable emailText = emailView.getText();
+                        String friendEmail = emailText.toString();
+
+                        if (friendEmail != null && !friendEmail.isEmpty()) {
+                            v.setEnabled(false);
+                            getUserDocumentItem(friendEmail, emailText, v);
+                        } else {
+                            Toast.makeText(view.getContext(), "Email is empty", Toast.LENGTH_LONG).show();
                         }
-                        view.setEnabled(false);
                     }
                 }
         );
     }
 
-    private void getUserDocumentItem(final String friendEmail) {
+    private void getUserDocumentItem(final String friendEmail, final Editable email, final View clickable) {
         getUserDocument().get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         if (task.isSuccessful() && task.getResult() != null) {
                             DocumentSnapshot userDocument = task.getResult();
-                            addFriendRequestToDatabaseIfEmailExists(userDocument, friendEmail);
+                            addFriendRequestToDatabaseIfEmailExists(userDocument, friendEmail, email, clickable);
                             Log.d(TAG, "getUserDocumentItem success");
+                        } else {
+                            clickable.setEnabled(true);
                         }
                     }
                 });
     }
 
-    private void addFriendRequestToDatabaseIfEmailExists(final DocumentSnapshot userDocument, String friendEmail) {
+    private void addFriendRequestToDatabaseIfEmailExists(final DocumentSnapshot userDocument, String friendEmail, final Editable email, final View clickable) {
         db.collection("users").whereEqualTo("email", friendEmail).get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful() && task.getResult() != null) {
+                        if (task.isSuccessful() && task.getResult() != null && task.getResult().size() != 0) {
                             for (QueryDocumentSnapshot friendDocument : task.getResult()) {
-                                addFriendRequestToSenderFriendsCollection(userDocument, friendDocument);
+                                addFriendRequestToSenderFriendsCollection(userDocument, friendDocument, email, clickable);
                                 Log.d(TAG, "addFriendRequestToDatabaseIfEmailExists");
                             }
+                        } else {
+                            Toast.makeText(fragment.getContext(), "Email doesn't exist in the system", Toast.LENGTH_LONG).show();
+                            clickable.setEnabled(true);
                         }
                     }
                 });
     }
 
-    private void addFriendRequestToSenderFriendsCollection(final DocumentSnapshot userDocumentId, final DocumentSnapshot friendDocument) {
+    private void addFriendRequestToSenderFriendsCollection(final DocumentSnapshot userDocumentId, final DocumentSnapshot friendDocument, final Editable email, final View clickable) {
         getUserDocument().collection("requests").document(friendDocument.getId())
                 .get().addOnCompleteListener(
                 new OnCompleteListener<DocumentSnapshot>() {
@@ -228,20 +236,54 @@ public class ProfileActivity extends Fragment {
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         if (task.isSuccessful()) {
                             DocumentSnapshot friendDocumentSnapshot = task.getResult();
-                            if (!friendDocumentSnapshot.exists()) {
-                                addFriendRequestIfNotAlreadyFriends(userDocumentId, friendDocument);
+                            if (!friendDocumentSnapshot.exists() || friendDocumentSnapshot.getData() == null) {
+                                //I don't have a request from that user, so should continue ...
+                                addFriendRequestIfNoPreviousRequestsExist(userDocumentId, friendDocument, email, clickable);
                                 Log.d(TAG, "addFriendRequestToSenderFriendsCollection success");
+                            } else {
+                                Toast.makeText(fragment.getContext(), "You already have a friend request from that user", Toast.LENGTH_LONG).show();
+                                email.clear();
+                                clickable.setEnabled(true);
                             }
                         } else {
-                            addFriendRequestIfNotAlreadyFriends(userDocumentId, friendDocument);
-                            Log.d(TAG, "addFriendRequestToSenderFriendsCollection fail");
+                            Log.d(TAG, "Failed for unexpected reason");
+                            Toast.makeText(fragment.getContext(), "Failed for unexpected reason", Toast.LENGTH_LONG).show();
+                            clickable.setEnabled(true);
                         }
                     }
                 }
         );
     }
 
-    private void addFriendRequestIfNotAlreadyFriends(final DocumentSnapshot userDocumentId, final DocumentSnapshot friendDocument) {
+    private void addFriendRequestIfNoPreviousRequestsExist(final DocumentSnapshot userDocumentId, final DocumentSnapshot friendDocument, final Editable email, final View clickable) {
+        db.collection("users")
+                .document(friendDocument.getId()).collection("requests").document(userDocumentId.getId())
+                .get().addOnCompleteListener(
+                new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot friendDocumentSnapshot = task.getResult();
+                            if (!friendDocumentSnapshot.exists() || friendDocumentSnapshot.getData() == null) {
+                                //I don't have a request from that user, so should continue ...
+                                addFriendRequestIfNotAlreadyFriends(userDocumentId, friendDocument, email, clickable);
+                                Log.d(TAG, "addFriendRequestIfNoPreviousRequestsExist success");
+                            } else {
+                                Toast.makeText(fragment.getContext(), "You already sent a request", Toast.LENGTH_LONG).show();
+                                email.clear();
+                                clickable.setEnabled(true);
+                            }
+                        } else {
+                            Log.d(TAG, "Failed for unexpected reason");
+                            Toast.makeText(fragment.getContext(), "Failed for unexpected reason", Toast.LENGTH_LONG).show();
+                            clickable.setEnabled(true);
+                        }
+                    }
+                }
+        );
+    }
+
+    private void addFriendRequestIfNotAlreadyFriends(final DocumentSnapshot userDocumentId, final DocumentSnapshot friendDocument, final Editable email, final View clickable) {
         //adds only if the new friend does not exist in the collection or is deleted
         final Map<String, Object> friendMap = new HashMap<>();
         friendMap.put("email", friendDocument.get("email"));
@@ -253,12 +295,17 @@ public class ProfileActivity extends Fragment {
                         if (task.isSuccessful()) {
                             DocumentSnapshot friendDocumentSnapshot = task.getResult();
                             if (!friendDocumentSnapshot.exists()) {
-                                Log.d(TAG, "addFriendRequestIfNotAlreadyFriends success");
+                                Toast.makeText(fragment.getContext(), "Friend request sent successfully", Toast.LENGTH_LONG).show();
                                 addFriendRequest(userDocumentId, friendDocument, friendMap);
+                            } else {
+                                Toast.makeText(fragment.getContext(), "Already your friend, add other friends", Toast.LENGTH_LONG).show();
                             }
+
+                            email.clear();
+                            clickable.setEnabled(true);
                         } else {
-                            Log.d(TAG, "addFriendRequestIfNotAlreadyFriends fail");
-                            addFriendRequest(userDocumentId, friendDocument, friendMap);
+                            Toast.makeText(fragment.getContext(), "Request failed, unexpected error", Toast.LENGTH_LONG).show();
+                            clickable.setEnabled(true);
                         }
                     }
                 }
