@@ -138,10 +138,13 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
     }
 
     private void showBestStatsOnScreen(TextDataRow selectedTextItem) {
-        if (selectedTextItem.getBestScore() != "0") {
+        if (Long.valueOf(selectedTextItem.getNumberOfTimesPlayed()) != 0) {
+            Log.d(TAG, selectedTextItem.getBestScore());
+            Log.d(TAG, selectedTextItem.getFastestSpeed() );
+
             config.withAfterLogoText("Best score on this text is " + selectedTextItem.getBestScore() + ".\n" +
-                    "Fastest speed achieved on this text is " + selectedTextItem.getBestScore() +
-                    " Words per minute");
+                    "Fastest speed achieved on this text is " + selectedTextItem.getFastestSpeed() +
+                    " words per minute");
             config.getAfterLogoTextView().setGravity(Gravity.CENTER);
         } else {
             config.withAfterLogoText("You are the first one to play on this text!");

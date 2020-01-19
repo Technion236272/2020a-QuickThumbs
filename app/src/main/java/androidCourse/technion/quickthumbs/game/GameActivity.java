@@ -1548,27 +1548,38 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void updateComposerTextBestScoreAndWPM(final Double wpm, final Double score) {
-        db.collection("themes").document(selectedTextItem.getThemeName()).collection("texts")
+        db.collection("users").document(selectedTextItem.getComposer()).collection("texts")
                 .document(selectedTextItem.getTextId())
                 .get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
+                        if (task.isSuccessful() && task.getResult().exists()) {
                             DocumentSnapshot document = task.getResult();
                             Log.d(TAG, document.getId() + " => " + document.getData());
                             Double bestScore = document.getDouble("bestScore");
                             Double bestWPM = document.getDouble("bestWpm");
-                            if (bestScore != null && bestWPM != null) {
-                                if (bestScore < score)
-                                    writeBestScoreInComposerTextsCollection(score, document.getId());
-                                if (bestWPM < wpm)
-                                    writeBestWPMInComposerTextsCollection(wpm, document.getId());
+                            Long playCount = document.getLong("playCount");
+                            Map<String, Object> textStatistics = new HashMap<>();
+                            if (bestScore != null && bestWPM != null && playCount!=null) {
+                                if (bestScore < score){
+                                    textStatistics.put("bestScore",score);
+                                }else{
+                                    textStatistics.put("bestScore",bestScore);
+                                }
+                                if (bestWPM < wpm){
+                                    textStatistics.put("bestWpm", wpm);
+                                }else{
+                                    textStatistics.put("bestWpm",bestWPM);
+                                }
+                                textStatistics.put("playCount", playCount +1);
+                                writeTextStatisticsIntoComposerTextsCollection(textStatistics, document.getId());
                             } else {
-                                writeBestScoreInComposerTextsCollection(score, document.getId());
-                                writeBestWPMInComposerTextsCollection(wpm, document.getId());
+                                textStatistics.put("bestScore",score);
+                                textStatistics.put("bestWpm", wpm);
+                                textStatistics.put("playCount", 1);
+                                writeTextStatisticsIntoComposerTextsCollection(textStatistics, document.getId());
                             }
-
                         } else {
                             Log.d(TAG, "Error getting text document to write best score and wpm: ", task.getException());
                         }
@@ -1576,16 +1587,15 @@ public class GameActivity extends AppCompatActivity {
                 });
     }
 
-    private void writeBestScoreInComposerTextsCollection(Double currentScore, String documentId) {
-        Map<String, Object> temp = new HashMap<>();
-        temp.put("bestScore", currentScore);
+    private void writeTextStatisticsIntoComposerTextsCollection(final Map<String, Object>  textStatistics, String documentId) {
         db.collection("users").document(selectedTextItem.getComposer())
                 .collection("texts")
                 .document(documentId)
-                .set(temp, SetOptions.merge())
+                .set(textStatistics, merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
+                        updateTextStatisticsGlobally(textStatistics);
                         Log.d(TAG, "best score successfully updated into composer collection!");
                     }
                 })
@@ -1597,25 +1607,38 @@ public class GameActivity extends AppCompatActivity {
                 });
     }
 
-    private void writeBestWPMInComposerTextsCollection(Double currentWPM, String documentId) {
-        Map<String, Object> temp = new HashMap<>();
-        temp.put("bestWpm", currentWPM);
-        db.collection("users").document(selectedTextItem.getComposer())
-                .collection("texts")
-                .document(documentId)
-                .set(temp, SetOptions.merge())
+    private void updateTextStatisticsGlobally(Map<String, Object>  textStatistics){
+        db.collection("themes").document(selectedTextItem.getThemeName()).collection("texts")
+                .document(selectedTextItem.getTextId())
+                .set(textStatistics, merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "best wpm successfully updated into composer collection!");
+                        Log.d(TAG, "best score successfully updated into themes collection!");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing text best wpm into composer collection", e);
+                        Log.w(TAG, "Error writing text best score into themes collection", e);
                     }
                 });
+
+        db.collection("texts").document(selectedTextItem.getTextId())
+                .set(textStatistics, merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d(TAG, "best score successfully updated into texts collection!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing text best score into texts collection", e);
+                    }
+                });
+
     }
 
     private void writeTextRatingInComposerTextsCollection(Long numOfRatings, Double newAvgRating, String documentId, String composerUid) {
