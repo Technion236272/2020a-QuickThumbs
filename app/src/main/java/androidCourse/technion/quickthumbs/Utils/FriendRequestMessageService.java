@@ -48,7 +48,7 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(RemoteMessage message) {
-        if (message == null || message.getFrom()==null) {
+        if (message == null || message.getFrom() == null) {
             return;
         }
 
@@ -62,20 +62,20 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
 
         //choose the appropriate notification
         int oneTimeID = (int) SystemClock.uptimeMillis();
-        switch (title){
-                case "You are Friends!":
-                    builder = setFriendAcceptNotification(title, body, from, oneTimeID);
+        switch (title) {
+            case "You are Friends!":
+                builder = setFriendAcceptNotification(title, body, from, oneTimeID);
 
-                    break;
-                case "New Friend Request":
-                    builder = setFriendRequestNotification(title, body, from, oneTimeID);
+                break;
+            case "New Friend Request":
+                builder = setFriendRequestNotification(title, body, from, oneTimeID);
 
-                    break;
-                case "Game invite":
-                    MainUserActivity.acceptedInvitationRoomKey = roomKey;
-                    MainUserActivity.invitationSender = from;
-                    builder = setFriendGameInviteNotification(title, body, from, roomKey);
-                    break;
+                break;
+            case "Game invite":
+                MainUserActivity.acceptedInvitationRoomKey = roomKey;
+                MainUserActivity.invitationSender = from;
+                builder = setFriendGameInviteNotification(title, body, from, roomKey, oneTimeID);
+                break;
             default:
 
                 return;
@@ -89,14 +89,14 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
         notificationManager.notify(oneTimeID, builder.build());
     }
 
-    private NotificationCompat.Builder setFriendGameInviteNotification(String title, String body, String from,String roomKey,
+    private NotificationCompat.Builder setFriendGameInviteNotification(String title, String body, String from, String roomKey,
                                                                        int notification_id) {
         //the press on notification answer
         PendingIntent regularPendingIntent = setPressOnNotificationIntent(notification_id);
         //the yes answer
-        PendingIntent acceptPendingIntent = setGameAnswerPendingIntent(title, body, from,roomKey, true, notification_id);
+        PendingIntent acceptPendingIntent = setGameAnswerPendingIntent(title, body, from, roomKey, true, notification_id);
         //the no answer
-        PendingIntent rejectPendingIntent = setGameAnswerPendingIntent(title, body, from,roomKey, false, notification_id);
+        PendingIntent rejectPendingIntent = setGameAnswerPendingIntent(title, body, from, roomKey, false, notification_id);
 
         //This is the proper solution for dismiss the dialog aka the dismiss a
 
@@ -106,7 +106,7 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
                 .setContentText(body)
                 .setPriority(NotificationCompat.PRIORITY_MAX)
                 // Set the intent that will fire when the user taps the notification
-                .addAction(R.drawable.play_with_friends, "Accept", acceptPendingIntent) // #0
+                .addAction(R.drawable.account_plus, "Accept", acceptPendingIntent) // #0
                 .addAction(R.drawable.account_remove, "Reject", rejectPendingIntent)  // #1
                 .setWhen(0) //important so the whole message will be shown
                 .setAutoCancel(true);
@@ -169,8 +169,8 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
         return builder;
     }
 
-    private PendingIntent setGameAnswerPendingIntent(String title, String body, String from,String roomKey, boolean b
-                        ,int notification_id) {
+    private PendingIntent setGameAnswerPendingIntent(String title, String body, String from, String roomKey, boolean b
+            , int notification_id) {
         //the yes answer
         Intent acceptIntent = new Intent(getApplicationContext(), NotificationActivity.class);
         acceptIntent.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
@@ -182,8 +182,8 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
         acceptIntent.putExtra("title", title);
         acceptIntent.putExtra("body", body);
         acceptIntent.putExtra("from", from);
-        acceptIntent.putExtra("notification_id",notification_id);
-        int rand = new Random().nextInt('Z'-'A');
+        acceptIntent.putExtra("notification_id", notification_id);
+        int rand = new Random().nextInt('Z' - 'A');
         String xId = String.valueOf(rand);
         acceptIntent.putExtra("x_id", xId);
         acceptIntent.setAction(xId);
@@ -224,7 +224,7 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
         int rand = new Random().nextInt('Z' - 'A');
         String xId = String.valueOf(rand);
         regularIntent.putExtra("x_id", xId);
-        regularIntent.putExtra("notification_id",notification_id);
+        regularIntent.putExtra("notification_id", notification_id);
         regularIntent.setAction(xId);
         return PendingIntent.getActivity(getApplicationContext(), 1, regularIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
