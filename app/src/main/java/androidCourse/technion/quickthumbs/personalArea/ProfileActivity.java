@@ -94,7 +94,7 @@ public class ProfileActivity extends Fragment {
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private FirebaseStorage storage;
-    private static final String TAG = GameActivity.class.getSimpleName();
+    private static final String TAG = ProfileActivity.class.getSimpleName();
     public static ImageView profilePicture;
     private ImageView galleryButton;
     private ImageButton cameraButton;
@@ -150,12 +150,12 @@ public class ProfileActivity extends Fragment {
         friendsListRecyclerView = view.findViewById(R.id.friendsListRecyclerView);
         friendsListRecyclerView.setHasFixedSize(true);
         friendsIdList = new ArrayList<>();
-        checkIfUserListIsntEmpty("friends", friendsListRecyclerView, friendsIdList, 0);
+        checkIfUserListIsntEmpty("friends", friendsListRecyclerView, friendsIdList, 0, view);
 
         requestsListRecyclerView = view.findViewById(R.id.requestsListRecyclerView);
         requestsListRecyclerView.setHasFixedSize(true);
         requestsIdList = new ArrayList<>();
-        checkIfUserListIsntEmpty("requests", requestsListRecyclerView, requestsIdList, 1);
+        checkIfUserListIsntEmpty("requests", requestsListRecyclerView, requestsIdList, 1,view);
 
         displayStatistics(view);
 
@@ -185,7 +185,7 @@ public class ProfileActivity extends Fragment {
 
                         if (friendEmail != null && !friendEmail.isEmpty()) {
                             v.setEnabled(false);
-                            getUserDocumentItem(friendEmail, emailText, v);
+                            getUserDocumentItem(friendEmail, emailText, v, view);
                         } else {
                             Toast.makeText(view.getContext(), "Email is empty", Toast.LENGTH_LONG).show();
                         }
@@ -194,14 +194,14 @@ public class ProfileActivity extends Fragment {
         );
     }
 
-    private void getUserDocumentItem(final String friendEmail, final Editable email, final View clickable) {
-        getUserDocument().get()
+    private void getUserDocumentItem(final String friendEmail, final Editable email, final View clickable, final View fragmentView) {
+        getUserDocument(fragmentView).get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         if (task.isSuccessful() && task.getResult() != null) {
                             DocumentSnapshot userDocument = task.getResult();
-                            addFriendRequestToDatabaseIfEmailExists(userDocument, friendEmail, email, clickable);
+                            addFriendRequestToDatabaseIfEmailExists(userDocument, friendEmail, email, clickable, fragmentView);
                             Log.d(TAG, "getUserDocumentItem success");
                         } else {
                             clickable.setEnabled(true);
@@ -210,26 +210,33 @@ public class ProfileActivity extends Fragment {
                 });
     }
 
-    private void addFriendRequestToDatabaseIfEmailExists(final DocumentSnapshot userDocument, String friendEmail, final Editable email, final View clickable) {
+    private void addFriendRequestToDatabaseIfEmailExists(final DocumentSnapshot userDocument, String friendEmail,
+                                                         final Editable email, final View clickable,
+                                                         final View fragmentView) {
         db.collection("users").whereEqualTo("email", friendEmail).get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful() && task.getResult() != null && task.getResult().size() != 0) {
                             for (QueryDocumentSnapshot friendDocument : task.getResult()) {
-                                addFriendRequestToSenderFriendsCollection(userDocument, friendDocument, email, clickable);
+                                addFriendRequestToSenderFriendsCollection(userDocument, friendDocument,
+                                        email, clickable, fragmentView);
                                 Log.d(TAG, "addFriendRequestToDatabaseIfEmailExists");
                             }
                         } else {
-                            Toast.makeText(fragment.getContext(), "Email doesn't exist in the system", Toast.LENGTH_LONG).show();
+                            Toast.makeText(fragmentView.getContext(), "Email doesn't exist in the system", Toast.LENGTH_LONG).show();
                             clickable.setEnabled(true);
                         }
                     }
                 });
     }
 
-    private void addFriendRequestToSenderFriendsCollection(final DocumentSnapshot userDocumentId, final DocumentSnapshot friendDocument, final Editable email, final View clickable) {
-        getUserDocument().collection("requests").document(friendDocument.getId())
+    private void addFriendRequestToSenderFriendsCollection(final DocumentSnapshot userDocumentId,
+                                                           final DocumentSnapshot friendDocument,
+                                                           final Editable email, final View clickable,
+                                                           final View fragmentView) {
+
+        getUserDocument(fragmentView).collection("requests").document(friendDocument.getId())
                 .get().addOnCompleteListener(
                 new OnCompleteListener<DocumentSnapshot>() {
                     @Override
@@ -238,16 +245,16 @@ public class ProfileActivity extends Fragment {
                             DocumentSnapshot friendDocumentSnapshot = task.getResult();
                             if (!friendDocumentSnapshot.exists() || friendDocumentSnapshot.getData() == null) {
                                 //I don't have a request from that user, so should continue ...
-                                addFriendRequestIfNoPreviousRequestsExist(userDocumentId, friendDocument, email, clickable);
+                                addFriendRequestIfNoPreviousRequestsExist(userDocumentId, friendDocument, email, clickable, fragmentView);
                                 Log.d(TAG, "addFriendRequestToSenderFriendsCollection success");
                             } else {
-                                Toast.makeText(fragment.getContext(), "You already have a friend request from that user", Toast.LENGTH_LONG).show();
+                                Toast.makeText(fragmentView.getContext(), "You already have a friend request from that user", Toast.LENGTH_LONG).show();
                                 email.clear();
                                 clickable.setEnabled(true);
                             }
                         } else {
                             Log.d(TAG, "Failed for unexpected reason");
-                            Toast.makeText(fragment.getContext(), "Failed for unexpected reason", Toast.LENGTH_LONG).show();
+                            Toast.makeText(fragmentView.getContext(), "Failed for unexpected reason", Toast.LENGTH_LONG).show();
                             clickable.setEnabled(true);
                         }
                     }
@@ -255,7 +262,10 @@ public class ProfileActivity extends Fragment {
         );
     }
 
-    private void addFriendRequestIfNoPreviousRequestsExist(final DocumentSnapshot userDocumentId, final DocumentSnapshot friendDocument, final Editable email, final View clickable) {
+    private void addFriendRequestIfNoPreviousRequestsExist(final DocumentSnapshot userDocumentId,
+                                                           final DocumentSnapshot friendDocument,
+                                                           final Editable email, final View clickable,
+                                                           final View fragmentView) {
         db.collection("users")
                 .document(friendDocument.getId()).collection("requests").document(userDocumentId.getId())
                 .get().addOnCompleteListener(
@@ -266,16 +276,17 @@ public class ProfileActivity extends Fragment {
                             DocumentSnapshot friendDocumentSnapshot = task.getResult();
                             if (!friendDocumentSnapshot.exists() || friendDocumentSnapshot.getData() == null) {
                                 //I don't have a request from that user, so should continue ...
-                                addFriendRequestIfNotAlreadyFriends(userDocumentId, friendDocument, email, clickable);
+                                addFriendRequestIfNotAlreadyFriends(userDocumentId, friendDocument,
+                                        email, clickable, fragmentView);
                                 Log.d(TAG, "addFriendRequestIfNoPreviousRequestsExist success");
                             } else {
-                                Toast.makeText(fragment.getContext(), "You already sent a request", Toast.LENGTH_LONG).show();
+                                Toast.makeText(fragmentView.getContext(), "You already sent a request", Toast.LENGTH_LONG).show();
                                 email.clear();
                                 clickable.setEnabled(true);
                             }
                         } else {
                             Log.d(TAG, "Failed for unexpected reason");
-                            Toast.makeText(fragment.getContext(), "Failed for unexpected reason", Toast.LENGTH_LONG).show();
+                            Toast.makeText(fragmentView.getContext(), "Failed for unexpected reason", Toast.LENGTH_LONG).show();
                             clickable.setEnabled(true);
                         }
                     }
@@ -283,11 +294,14 @@ public class ProfileActivity extends Fragment {
         );
     }
 
-    private void addFriendRequestIfNotAlreadyFriends(final DocumentSnapshot userDocumentId, final DocumentSnapshot friendDocument, final Editable email, final View clickable) {
+    private void addFriendRequestIfNotAlreadyFriends(final DocumentSnapshot userDocumentId,
+                                                     final DocumentSnapshot friendDocument,
+                                                     final Editable email, final View clickable,
+                                                     final View fragmentView) {
         //adds only if the new friend does not exist in the collection or is deleted
         final Map<String, Object> friendMap = new HashMap<>();
         friendMap.put("email", friendDocument.get("email"));
-        getUserDocument().collection("friends").document(friendDocument.getId())
+        getUserDocument(fragmentView).collection("friends").document(friendDocument.getId())
                 .get().addOnCompleteListener(
                 new OnCompleteListener<DocumentSnapshot>() {
                     @Override
@@ -295,16 +309,16 @@ public class ProfileActivity extends Fragment {
                         if (task.isSuccessful()) {
                             DocumentSnapshot friendDocumentSnapshot = task.getResult();
                             if (!friendDocumentSnapshot.exists()) {
-                                Toast.makeText(fragment.getContext(), "Friend request sent successfully", Toast.LENGTH_LONG).show();
+                                Toast.makeText(fragmentView.getContext(), "Friend request sent successfully", Toast.LENGTH_LONG).show();
                                 addFriendRequest(userDocumentId, friendDocument, friendMap);
                             } else {
-                                Toast.makeText(fragment.getContext(), "Already your friend, add other friends", Toast.LENGTH_LONG).show();
+                                Toast.makeText(fragmentView.getContext(), "Already your friend, add other friends", Toast.LENGTH_LONG).show();
                             }
 
                             email.clear();
                             clickable.setEnabled(true);
                         } else {
-                            Toast.makeText(fragment.getContext(), "Request failed, unexpected error", Toast.LENGTH_LONG).show();
+                            Toast.makeText(fragmentView.getContext(), "Request failed, unexpected error", Toast.LENGTH_LONG).show();
                             clickable.setEnabled(true);
                         }
                     }
@@ -340,7 +354,8 @@ public class ProfileActivity extends Fragment {
                 .set(friendMap, SetOptions.merge());
     }
 
-    private void checkIfUserListIsntEmpty(String collectionName, final RecyclerView recyclerView, final ArrayList<FriendItem> list, final int noMoreLoadingIndex) {
+    private void checkIfUserListIsntEmpty(String collectionName, final RecyclerView recyclerView,
+                                          final ArrayList<FriendItem> list, final int noMoreLoadingIndex, View view) {
 //        friendsMap = cacheHandler.getUserfriendsMap();
 //        friendsIdList = cacheHandler.getUserfriendsList();
 //        if (friendsIdList.size() != 0 ){
@@ -349,7 +364,7 @@ public class ProfileActivity extends Fragment {
 //            setRecyclerViewScroller();
 //        }
 
-        fetchPersonalFriendsList(collectionName, recyclerView, list, noMoreLoadingIndex);
+        fetchPersonalFriendsList(collectionName, recyclerView, list, noMoreLoadingIndex, view);
         setRecyclerViewScroller(recyclerView, list, noMoreLoadingIndex);
     }
 
@@ -375,7 +390,8 @@ public class ProfileActivity extends Fragment {
     }
 
     private void refillFriendsList(final RecyclerView recyclerView, final ArrayList<FriendItem> list, final int noMoreLoadingIndex) {
-        db.collection("users").whereIn("uid", list)
+
+        db.collection("users").whereIn("uid", Arrays.asList(list))
                 .startAfter(lastSnapShots.get(noMoreLoadingIndex)).limit(howMuchToLoadEachScroll).get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
@@ -390,16 +406,17 @@ public class ProfileActivity extends Fragment {
                 });
     }
 
-    private void fetchPersonalFriendsList(String collectionName, final RecyclerView recyclerView, final ArrayList<FriendItem> list, final int noMoreLoadingIndex) {
-//        db.collection("users").whereIn("uid", friendsIdList)
-        db.collection("users").document(getUid()).collection(collectionName)
+    private void fetchPersonalFriendsList(String collectionName, final RecyclerView recyclerView,
+                                          final ArrayList<FriendItem> list, final int noMoreLoadingIndex,
+                                          final View view) {
+        db.collection("users").document(getUid(view)).collection(collectionName)
                 .limit(5).get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             fillList(task, recyclerView, list, noMoreLoadingIndex);
-                            setAdaptor(recyclerView, list);
+                            setAdaptor(recyclerView, list, view);
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());
                         }
@@ -407,7 +424,7 @@ public class ProfileActivity extends Fragment {
                 });
     }
 
-    private void fillList(Task<QuerySnapshot> task, RecyclerView recyclerView, ArrayList<FriendItem> list, int noMoreLoadingIndex) {
+    private void fillList(Task<QuerySnapshot> task, RecyclerView recyclerView, List<FriendItem> list, int noMoreLoadingIndex) {
         if (task.getResult() == null) {
             return;
         }
@@ -426,10 +443,10 @@ public class ProfileActivity extends Fragment {
         }
     }
 
-    private void setAdaptor(RecyclerView recyclerView, ArrayList<FriendItem> list) {
-        FriendAdaptor adapter = new FriendAdaptor(list, getActivity());
+    private void setAdaptor(RecyclerView recyclerView, ArrayList<FriendItem> list, View view) {
+        FriendAdaptor adapter = new FriendAdaptor(list, view.getContext());
         recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
     }
 
     private void profilePictureSettings(View view) {
@@ -447,15 +464,15 @@ public class ProfileActivity extends Fragment {
         }
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         boolean isLoggedInOnFacebook = accessToken != null && !accessToken.isExpired();
-        GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(getActivity());
+        GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(view.getContext());
         if (isLoggedInOnFacebook) {
             setFacebookProfilePicture();
         } else if (googleAccount != null) {
-            setGoogleProfilePicture();
+            setGoogleProfilePicture(view);
         }
     }
 
-    private void setCameraPictureLoadListener(View view) {
+    private void setCameraPictureLoadListener(final View view) {
         cameraButton = view.findViewById(R.id.cameraButton);
 
         cameraButton.setOnClickListener(new View.OnClickListener() {
@@ -464,9 +481,9 @@ public class ProfileActivity extends Fragment {
 
                 if (Build.VERSION.SDK_INT >= 22) {
 
-                    checkAndRequestForCameraPermission();
+                    checkAndRequestForCameraPermission(view);
                 } else {
-                    openCamera();
+                    openCamera(view);
                 }
 
 
@@ -474,7 +491,7 @@ public class ProfileActivity extends Fragment {
         });
     }
 
-    private void setGalleryPictureLoadListener(View view) {
+    private void setGalleryPictureLoadListener(final View view) {
         galleryButton = view.findViewById(R.id.galleryButton);
 
         galleryButton.setOnClickListener(new View.OnClickListener() {
@@ -483,7 +500,7 @@ public class ProfileActivity extends Fragment {
 
                 if (Build.VERSION.SDK_INT >= 22) {
 
-                    checkAndRequestForGalleyPermission();
+                    checkAndRequestForGalleyPermission(view);
                 } else {
                     openGallery();
                 }
@@ -494,8 +511,8 @@ public class ProfileActivity extends Fragment {
     }
 
 
-    private void setGoogleProfilePicture() {
-        GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(getActivity());
+    private void setGoogleProfilePicture(View view) {
+        GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(view.getContext());
         if (googleAccount != null) {
             URL url = null;
             Uri photoUrl = googleAccount.getPhotoUrl();
@@ -571,11 +588,11 @@ public class ProfileActivity extends Fragment {
     }
 
 
-    private void checkAndRequestForGalleyPermission() {
-        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
+    private void checkAndRequestForGalleyPermission(final View view) {
+        if (ContextCompat.checkSelfPermission(view.getContext(), Manifest.permission.READ_EXTERNAL_STORAGE)
                 != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) {
-                Toast.makeText(this.getActivity(), "Please accept for required permission", Toast.LENGTH_SHORT).show();
+                Toast.makeText(view.getContext(), "Please accept for required permission", Toast.LENGTH_SHORT).show();
             } else {
                 ActivityCompat.requestPermissions(getActivity(),
                         new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
@@ -587,19 +604,20 @@ public class ProfileActivity extends Fragment {
         }
     }
 
-    private void checkAndRequestForCameraPermission() {
-        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.CAMERA)
+    private void checkAndRequestForCameraPermission(View view) {
+        if (ContextCompat.checkSelfPermission(view.getContext(), Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.CAMERA)) {
-                Toast.makeText(this.getActivity(), "Please accept for required permission", Toast.LENGTH_SHORT).show();
+                Toast.makeText(view.getContext(), "Please accept for required permission", Toast.LENGTH_SHORT).show();
             } else {
                 ActivityCompat.requestPermissions(getActivity(),
-                        new String[]{Manifest.permission.CAMERA},
+                        new String[]{Manifest.permission.CAMERA,Manifest.permission.READ_EXTERNAL_STORAGE,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE},
                         CReqCode);
             }
 
         } else {
-            openCamera();
+            openCamera(view);
         }
     }
 
@@ -611,10 +629,10 @@ public class ProfileActivity extends Fragment {
         startActivityForResult(galleryIntent, REQUESCODE);
     }
 
-    private void openCamera() {
+    private void openCamera(View fragmentView) {
         //TODO: open gallery intent and wait for user to pick an image !
         Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        cameraPhotoURI = FileProvider.getUriForFile(getContext(), getContext().getApplicationContext().getPackageName() + ".provider", getOutputMediaFile(MEDIA_TYPE_IMAGE));
+        cameraPhotoURI = FileProvider.getUriForFile(fragmentView.getContext(), fragmentView.getContext().getApplicationContext().getPackageName() + ".provider", getOutputMediaFile(MEDIA_TYPE_IMAGE));
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraPhotoURI);
         cameraIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         cameraIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
@@ -725,7 +743,7 @@ public class ProfileActivity extends Fragment {
         Toast.makeText(getContext(), message, Toast.LENGTH_LONG).show();
     }
 
-    private void setLogOutButton(View view) {
+    private void setLogOutButton(final View view) {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         boolean isLoggedInOnFacebook = accessToken != null && !accessToken.isExpired();
         if (isLoggedInOnFacebook) {
@@ -734,7 +752,7 @@ public class ProfileActivity extends Fragment {
                     new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            facebookLogOut(v);
+                            facebookLogOut(v,view);
                         }
                     }
             );
@@ -744,16 +762,16 @@ public class ProfileActivity extends Fragment {
                     new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            logOut(v);
+                            logOut(v, view);
                         }
                     }
             );
         }
     }
 
-    private DocumentReference getUserDocument() {
+    private DocumentReference getUserDocument(View view) {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
-        GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(getActivity());
+        GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(view.getContext());
         if (mAuth.getCurrentUser() != null) {
             return db.collection("users")
                     .document(mAuth.getUid());
@@ -768,7 +786,7 @@ public class ProfileActivity extends Fragment {
     }
 
     private void displayStatistics(final View view) {
-        getUserDocument().collection("stats").document("statistics").get()
+        getUserDocument(view).collection("stats").document("statistics").get()
                 .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
@@ -808,28 +826,28 @@ public class ProfileActivity extends Fragment {
         startActivity(intent);
     }
 
-    public void facebookLogOut(View view) {
+    public void facebookLogOut(View view, final View fragmentView) {
         new GraphRequest(AccessToken.getCurrentAccessToken(), "/me/permissions/", null, HttpMethod.DELETE, new GraphRequest
                 .Callback() {
             @Override
             public void onCompleted(GraphResponse graphResponse) {
                 mAuth.signOut();
                 LoginManager.getInstance().logOut();
-                Intent i = new Intent(getActivity(), MainActivity.class);
+                Intent i = new Intent(fragmentView.getContext(), MainActivity.class);
                 getActivity().finish();
                 startActivity(i);
             }
         }).executeAsync();
     }
 
-    public void logOut(View view) {
+    public void logOut(View view, final View fragmentView) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(getActivity());
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(view.getContext());
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         boolean isLoggedInOnFacebook = accessToken != null && !accessToken.isExpired();
         if (currentUser != null && account == null) {
             mAuth.signOut();
-            Intent i = new Intent(getActivity(), MainActivity.class);
+            Intent i = new Intent(view.getContext(), MainActivity.class);
             getActivity().finish();
             startActivity(i);
         } else {
@@ -837,13 +855,13 @@ public class ProfileActivity extends Fragment {
                     .requestIdToken(getString(R.string.default_web_client_id))
                     .requestEmail()
                     .build();
-            GoogleSignInClient client = GoogleSignIn.getClient(getActivity(), gso);
+            GoogleSignInClient client = GoogleSignIn.getClient(fragmentView.getContext(), gso);
             client.signOut()
                     .addOnCompleteListener(getActivity(), new OnCompleteListener<Void>() {
                         @Override
                         public void onComplete(@NonNull Task<Void> task) {
                             mAuth.signOut();
-                            Intent i = new Intent(getActivity(), MainActivity.class);
+                            Intent i = new Intent(fragmentView.getContext(), MainActivity.class);
                             getActivity().finish();
                             startActivity(i);
                         }
@@ -851,9 +869,9 @@ public class ProfileActivity extends Fragment {
         }
     }
 
-    private String getUid() {
+    private String getUid(View view) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(getContext());
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(view.getContext());
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         if (currentUser != null) {
             return mAuth.getUid();

@@ -187,13 +187,9 @@ public class FriendItem {
     private Bitmap profilePicture;
     private Long totalScore;
 
-    public void setProfilePicture(Bitmap profilePicture) {
-        this.profilePicture = profilePicture;
-    }
-
-    public void setTotalScore(Long totalScore) {
-        this.totalScore = totalScore;
-    }
+//    public void setProfilePicture(Bitmap profilePicture) {
+//        this.profilePicture = profilePicture;
+//    }
 
     public boolean isApproved() {
         return isApproved;

@@ -27,6 +27,7 @@ import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import com.facebook.AccessToken;
@@ -43,7 +44,7 @@ import static androidCourse.technion.quickthumbs.personalArea.ProfileActivity.pr
 
 public class MainPager extends AppCompatActivity {
     private static final String TAG = MainPager.class.getSimpleName();
-    private FragmentPagerAdapter adapterViewPager;
+    private FragmentStatePagerAdapter adapterViewPager;
     private TextView pageTitle;
     private ImageButton statsButton;
     private TextView statsTitle;
@@ -281,11 +282,17 @@ public class MainPager extends AppCompatActivity {
         backToMainTitleFromTexts = findViewById(R.id.backToMainFomTextsTitle);
     }
 
-    public static class MyPagerAdapter extends FragmentPagerAdapter {
+    public static class MyPagerAdapter extends FragmentStatePagerAdapter {
         private static int NUM_ITEMS = 3;
 
-        public MyPagerAdapter(FragmentManager fragmentManager) {
-            super(fragmentManager);
+        public MyPagerAdapter(FragmentManager fm) {
+            super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+        }
+
+        @Override
+        public int getItemPosition(Object object) {
+            //will cause all cached fragments to be recreated. no problem.
+            return POSITION_NONE;
         }
 
         // Returns total number of pages
