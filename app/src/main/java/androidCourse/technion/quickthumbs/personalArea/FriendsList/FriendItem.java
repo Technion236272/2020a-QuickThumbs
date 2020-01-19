@@ -27,29 +27,29 @@ import static androidCourse.technion.quickthumbs.FirestoreConstants.themeField;
 import static androidCourse.technion.quickthumbs.FirestoreConstants.usersCollection;
 
 public class FriendItem {
-    private String id;
+    private String uid;
     private String name;
     private String email;
     private Bitmap friendProfilePicture;
-    private long totalScore;
+    private long TotalScore;
 
     public FriendItem() {
     }
 
-    public FriendItem(String id, String name, String email, Bitmap friendProfilePicture, long totalScore) {
-        this.id = id;
+    public FriendItem(String uid, String name, String email, Bitmap friendProfilePicture, long TotalScore) {
+        this.uid = uid;
         this.name = name;
         this.email = email;
         this.friendProfilePicture = friendProfilePicture;
-        this.totalScore = totalScore;
+        this.TotalScore = TotalScore;
     }
 
-    public String getId() {
-        return id;
+    public String getuid() {
+        return uid;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setuid(String uid) {
+        this.uid = uid;
     }
 
     public String getName() {
@@ -99,60 +99,20 @@ public class FriendItem {
     }
 
     public long getTotalScore() {
-        return totalScore;
+        return TotalScore;
     }
 
-    public void setTotalScore(String uid) {
-        FirebaseFirestore db;
-        db = FirebaseFirestore.getInstance();
-        db.collection(usersCollection)
-                .document(uid).collection(statsCollection).document(statisticsDocument).get()
-                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                        if (task.isSuccessful()) {
-                            long score = task.getResult().getLong("TotalScore");
-                            totalScore = score;
-
-                        } else {
-                        }
-                    }
-                });
+    public void setTotalScore(long TotalScore) {
+        this.TotalScore = TotalScore;
     }
 
 
     public FriendItem(final DocumentSnapshot document, boolean isApproved) {
-        FirebaseStorage storage = FirebaseStorage.getInstance();
-        StorageReference storageRef = storage.getReference().child("users");
-        StorageReference userStorage = storageRef.child(document.getId());
-        StorageReference profilePictureRef = userStorage.child("/profilePicture.JPEG");
-        final long ONE_MEGABYTE = 1024 * 1024;
-        try {
-            profilePictureRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
-                @Override
-                public void onSuccess(byte[] bytes) {
-                    // Data for "images/island.jpg" is returns, use this as needed
-                    friendProfilePicture = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                    setFriendAttributes(document);
-//                showMessage("picture was loaded from storage");
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    // Handle any errors
-                    friendProfilePicture = null;
-                    setFriendAttributes(document);
-                }
-            });
-        } catch (Exception e) {
-            friendProfilePicture = null;
-            setFriendAttributes(document);
-            //no such picture exist
-        }
+        setFriendAttributes(document);
     }
 
     private void setFriendAttributes(DocumentSnapshot document) {
-        this.id = document.getId();
+        this.uid = document.getId();
 //        setEmailAndName(document.getId());
         if (document.get("email") == null) {
             email = "";
@@ -165,9 +125,9 @@ public class FriendItem {
             name = document.get("name").toString();
         }
         if (document.getLong("TotalScore") == null) {
-            this.totalScore = 0;
+            this.TotalScore = 0;
         } else {
-            this.totalScore = document.getLong("TotalScore");
+            this.TotalScore = document.getLong("TotalScore");
         }
     }
 
