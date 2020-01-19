@@ -328,15 +328,5 @@ public class MainPager extends AppCompatActivity {
         new CacheHandler.TextCacheRefill().execute();
 
     }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-//        FirebaseAuth fireBaseAuth = FirebaseAuth.getInstance();
-//        FirebaseFirestore db = FirebaseFirestore.getInstance();
-//        CacheHandler cacheHandler = new CacheHandler(getApplicationContext());
-//        cacheHandler.getPersonalThemesDataFromDB();
-//        new CacheHandler.DownloadFromStorage().execute();
-    }
 }
 
