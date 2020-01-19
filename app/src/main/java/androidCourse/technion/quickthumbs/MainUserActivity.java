@@ -41,6 +41,7 @@ import com.facebook.AccessToken;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -93,6 +94,7 @@ public class MainUserActivity extends Fragment {
     DatabaseReference searchingRoomsLevel1;
     public static DatabaseReference gameRoomsReference;
     public static ValueEventListener valueEventListener;
+    public static ValueEventListener friendInvitevalueEventListener;
 
     ImageButton closeButton;
     CircleMenuView menu;
@@ -165,12 +167,13 @@ public class MainUserActivity extends Fragment {
     private void checkIfHasGameInvitation() {
         Intent intent = getActivity().getIntent();
         if (intent.hasExtra("roomKey")) {
+            acceptedInvitationRoomKey = intent.getStringExtra("roomKey");
             if (intent.hasExtra("answer") && intent.getBooleanExtra("answer", false)) {
                 startMultiplaterGameUiChanges();
-                acceptedInvitationRoomKey = intent.getStringExtra("roomKey");
-                StartSpecifiedGame(String.valueOf(acceptedInvitationRoomKey));
-            } else {
-                closeMultiPlayerRoom(intent.getStringExtra("roomKey"));
+                StartSpecifiedGame(acceptedInvitationRoomKey);
+            } else if (intent.hasExtra("answer") && !intent.getBooleanExtra("answer", false)) {
+//                closeMultiPlayerRoom(acceptedInvitationRoomKey);
+                NotifyThatGameRejected(acceptedInvitationRoomKey);
             }
         }
     }
@@ -255,7 +258,8 @@ public class MainUserActivity extends Fragment {
         alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                closeMultiPlayerRoom(acceptedInvitationRoomKey);
+//                closeMultiPlayerRoom(acceptedInvitationRoomKey);
+                NotifyThatGameRejected(acceptedInvitationRoomKey);
             }
         });
 
@@ -264,13 +268,13 @@ public class MainUserActivity extends Fragment {
     }
 
     public void closeMultiPlayerRoom(String roomKey) {
-        gameRoomsReference.child(roomKey).setValue(null).addOnCompleteListener(new OnCompleteListener<Void>() {
+        gameRoomsReference.child(roomKey).removeValue().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful()) {
                     acceptedInvitationRoomKey = "-1";
                     Toast.makeText(getActivity(), "the invitation was canceled", Toast.LENGTH_LONG).show();
-
+                    setUIBackToNormal();
                 } else {
                     acceptedInvitationRoomKey = "-1";
                     Log.d(TAG, "maybe already erased ...");
@@ -291,13 +295,17 @@ public class MainUserActivity extends Fragment {
         setSearchTimer();
     }
 
-    private void setCloseMultiplayerSerchButtonListener() {
+    public void setCloseMultiplayerSerchButtonListener() {
         closeButton = getActivity().findViewById(R.id.closeButton);
         closeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (localGameRoomKey != null && valueEventListener != null) {
                     gameRoomsReference.child(localGameRoomKey).removeEventListener(valueEventListener);
+                    localGameRoomKey = null;
+                }
+                if (localGameRoomKey != null && friendInvitevalueEventListener != null) {
+                    gameRoomsReference.child(localGameRoomKey).removeEventListener(friendInvitevalueEventListener);
                     localGameRoomKey = null;
                 }
 
@@ -516,12 +524,45 @@ public class MainUserActivity extends Fragment {
 
         );
     }
-    ///here the shit i added - aka mori
+
+    private void NotifyThatGameRejected(final String roomKey) {
+        Log.d(TAG, "Going to the right room");
+        amountOfPlayerView.setText("Searching Room ...");
+        acceptedInvitationRoomKey = "-1";
+        gameRoomsReference.child(roomKey).runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                if (mutableData.getValue() == null) {
+                    return Transaction.success(mutableData);
+                }
+
+                GameRoom gameRoom = mutableData.getValue(GameRoom.class);
+
+                GameRoom gameRoomWithUserAdded = new GameRoom(null, gameRoom.location1, localUserName, 0, gameRoom.textId, false, false, false, -1, -1);
+
+                mutableData.setValue(gameRoomWithUserAdded);
+
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
+                if (b) {  //was committed
+                    Log.d(TAG, "Successfully changed the game room");
+//                    setUIBackToNormal();
+//                    rippleBackground.stopRippleAnimation();
+                } else {
+                    Log.d(TAG, "Friend enter game should not fail!!, might be connectivity issues or any other unexpected problem");
+                }
+            }
+        });
+    }
 
     private void StartSpecifiedGame(final String roomKey) {
         Log.d(TAG, "Going to the right room");
         amountOfPlayerView.setText("Searching Room ...");
-
+        acceptedInvitationRoomKey = "-1";
         gameRoomsReference.child(roomKey).runTransaction(new Transaction.Handler() {
             @NonNull
             @Override
@@ -564,6 +605,7 @@ public class MainUserActivity extends Fragment {
                     i.putExtra("startingTimeStamp", System.currentTimeMillis());
                     context.startActivity(i);
                 } else {
+
                     Log.d(TAG, "Friend enter game should not fail!!, might be connectivity issues or any other unexpected problem");
                 }
             }
@@ -602,42 +644,54 @@ public class MainUserActivity extends Fragment {
 
     public void setGameForFriends(final String roomKey, final String textId, final int indexInRoom) {
         Log.d(TAG, "adding listener for game flag");
-        gameRoomsReference.child(roomKey).addValueEventListener(new ValueEventListener() {
-                                                                    @Override
-                                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                                        if (!dataSnapshot.exists() ||
-                                                                                !dataSnapshot.getValue(GameRoom.class).started) {
-                                                                            return;
-                                                                        }
+        localGameRoomKey = roomKey;
+        friendInvitevalueEventListener = gameRoomsReference.child(roomKey).addValueEventListener(new ValueEventListener() {
+                                                                                                     @Override
+                                                                                                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                                                         if (!dataSnapshot.exists()) {
+                                                                                                             return;
+                                                                                                         }
 
-                                                                        Log.d(TAG, "Flag was turned in game room so user should move to game");
+                                                                                                         GameRoom gameRoom = dataSnapshot.getValue(GameRoom.class);
 
-                                                                        int currentAmount = 2;
-                                                                        int targetAmount = 2;
-                                                                        amountOfPlayerView.setText(String.format("%s out of %s in room ...", currentAmount, targetAmount));
+                                                                                                         if (gameRoom.started) {
 
-                                                                        setUIBackToNormal();
+                                                                                                             Log.d(TAG, "Flag was turned in game room so user should move to game");
 
-                                                                        //game starts here;
-                                                                        Context context = fragmentViewForButton.getContext();
-                                                                        Intent i = new Intent(context, GameLoadingSplashScreenActivity.class);
-                                                                        i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                                                                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                                                                        i.putExtra("id", textId);
-                                                                        i.putExtra("roomKey", roomKey);
-                                                                        i.putExtra("indexInRoom", indexInRoom);
-                                                                        i.putExtra("startingTimeStamp", System.currentTimeMillis());
-                                                                        context.startActivity(i);
+                                                                                                             int currentAmount = 2;
+                                                                                                             int targetAmount = 2;
+                                                                                                             amountOfPlayerView.setText(String.format("%s out of %s in room ...", currentAmount, targetAmount));
 
-                                                                        gameRoomsReference.child(roomKey).removeEventListener(this);
-                                                                    }
+                                                                                                             setUIBackToNormal();
 
-                                                                    @Override
-                                                                    public void onCancelled(@NonNull DatabaseError databaseError) {
-                                                                        Toast.makeText(getActivity(), "the invitation was canceled", Toast.LENGTH_LONG).show();
-                                                                        setUIBackToNormal();
-                                                                    }
-                                                                }
+                                                                                                             //game starts here;
+                                                                                                             Context context = fragmentViewForButton.getContext();
+                                                                                                             Intent i = new Intent(context, GameLoadingSplashScreenActivity.class);
+                                                                                                             i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                                                                                                             i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                                                                             i.putExtra("id", textId);
+                                                                                                             i.putExtra("roomKey", roomKey);
+                                                                                                             i.putExtra("indexInRoom", indexInRoom);
+                                                                                                             i.putExtra("startingTimeStamp", System.currentTimeMillis());
+                                                                                                             context.startActivity(i);
+
+                                                                                                             gameRoomsReference.child(roomKey).removeEventListener(this);
+                                                                                                         } else if (gameRoom.user1 == null) {//the game hasn't started yet but an alteration was made in the room
+                                                                                                             closeMultiPlayerRoom(roomKey);
+
+                                                                                                         } else {
+                                                                                                             Log.d(TAG, "should not get herem BUG!!!");
+                                                                                                         }
+
+
+                                                                                                     }
+
+                                                                                                     @Override
+                                                                                                     public void onCancelled(@NonNull DatabaseError databaseError) {
+                                                                                                         Toast.makeText(getActivity(), "the invitation was canceled", Toast.LENGTH_LONG).show();
+                                                                                                         setUIBackToNormal();
+                                                                                                     }
+                                                                                                 }
 
         );
     }
@@ -652,8 +706,6 @@ public class MainUserActivity extends Fragment {
         }
     }
 
-
-    ///end my stuff added - mori
 
     private void setUIBackToNormal() {
         menu.setEventListener(listener);

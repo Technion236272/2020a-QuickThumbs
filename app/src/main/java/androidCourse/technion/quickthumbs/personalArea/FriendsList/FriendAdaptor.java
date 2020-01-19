@@ -84,28 +84,42 @@ public class FriendAdaptor extends RecyclerView.Adapter<FriendViewHolder>{
             @Override
             public void onClick(View v) {
                 //here last search for a game is canceled
-//                gameRoomsReference.removeEventListener(valueEventListener);//TODO: if alreadt=y searching then remove it
+                closeOtherMultiPlayerCalls();
                 //here the room for the game is created
-//                MainUserActivity.Myparam myparam = new MainUserActivity.Myparam(friendItem.getId());
-//                new MainUserActivity.FetchRandomTextForFriendsRoom().execute(myparam);
-//                friendUid = friendItem.getId();
-
-                TextDataRow textCardItem = getNextTextFromSelectedTheme(getRandomThemeName());
-                MainUserActivity.Myparam myparam = new MainUserActivity.Myparam(friendItem, textCardItem.getTextId());
-                Class<?> c = MainUserActivity.class;
-                try {
-                    Method method = c.getDeclaredMethod("createSpecialRoom", MainUserActivity.Myparam.class);
-                    method.invoke(mainUserActivityInstance, myparam);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
-                }
+                createGameInviteCall(friendItem);
             }
 
         });
+    }
+
+    private void closeOtherMultiPlayerCalls() {
+        Class<?> c = MainUserActivity.class;
+        try {
+            Method method = c.getDeclaredMethod("setCloseMultiplayerSerchButtonListener", null);
+            method.invoke(mainUserActivityInstance, null);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void createGameInviteCall(FriendItem friendItem) {
+        TextDataRow textCardItem = getNextTextFromSelectedTheme(getRandomThemeName());
+        MainUserActivity.Myparam myparam = new MainUserActivity.Myparam(friendItem, textCardItem.getTextId());
+        Class<?> c = MainUserActivity.class;
+        try {
+            Method method = c.getDeclaredMethod("createSpecialRoom", MainUserActivity.Myparam.class);
+            method.invoke(mainUserActivityInstance, myparam);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
     }
 
     private String getRandomThemeName() {

@@ -52,15 +52,20 @@ public class NotificationActivity extends AppCompatActivity {
         if (messageValues.get("gameInvite") != null) {
             boolean answer = (boolean) extras.get("answer");
             if (answer) {
-                Intent goToMainScreen = new Intent(context, MainPager.class);
+                Intent goToMainScreen = new Intent(this, MainPager.class);
+                goToMainScreen.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 goToMainScreen.putExtra("roomKey",messageValues.get("roomKey").toString());
                 goToMainScreen.putExtra("answer", (Boolean) messageValues.get("answer"));
                 goToMainScreen.putExtra("from", messageValues.get("from").toString());
                 startActivity(goToMainScreen);
                 return;
             } else {
-                //reject game
-                finish();
+                Intent goToMainScreen = new Intent(this, MainPager.class);
+                goToMainScreen.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                goToMainScreen.putExtra("roomKey", messageValues.get("roomKey").toString());
+                goToMainScreen.putExtra("answer", (Boolean) messageValues.get("answer"));
+                goToMainScreen.putExtra("from", messageValues.get("from").toString());
+                startActivity(goToMainScreen);
                 return;
             }
         }

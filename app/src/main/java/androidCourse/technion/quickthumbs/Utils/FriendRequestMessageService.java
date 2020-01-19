@@ -7,6 +7,8 @@ import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Icon;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,10 +22,14 @@ import androidx.core.app.NotificationManagerCompat;
 import com.facebook.AccessToken;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
@@ -35,6 +41,7 @@ import androidCourse.technion.quickthumbs.NotificationActivity;
 import androidCourse.technion.quickthumbs.R;
 
 import static android.graphics.drawable.Icon.createWithResource;
+import static androidCourse.technion.quickthumbs.personalArea.ProfileActivity.profilePicture;
 
 
 public class FriendRequestMessageService extends FirebaseMessagingService {
@@ -66,7 +73,44 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
         NotificationCompat.Builder builder;
         if (fromId == getUid())//prevent self sending notification
             return;
-        //choose the appropriate notification
+
+        getSenderPhoto(title, body, from, fromId, roomKey);
+
+    }
+
+    private void getSenderPhoto(final String title, final String body, final String from, final String fromId, final String roomKey) {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference().child("users");
+        StorageReference userStorage = storageRef.child(fromId);
+        StorageReference profilePictureRef = userStorage.child("/profilePicture.JPEG");
+
+        final long ONE_MEGABYTE = 1024 * 1024;
+        try {
+            profilePictureRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] bytes) {
+                    // Data for "images/island.jpg" is returns, use this as needed
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    HandleNotification(title, body, from, fromId, roomKey, bitmap);
+//                showMessage("picture was loaded from storage");
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle any errors
+                    HandleNotification(title, body, from, fromId, roomKey, null);
+//                showMessage("picture not found on storage");
+                }
+            });
+        } catch (Exception e) {
+
+        }
+
+    }
+
+    private void HandleNotification(String title, String body, String from, String fromId, String roomKey,
+                                    Bitmap senderPhoto) {
+        NotificationCompat.Builder builder;//choose the appropriate notification
         int oneTimeID = (int) SystemClock.uptimeMillis();
         switch (title) {
             case "You are Friends!":
@@ -89,11 +133,13 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
 
         builder.setOngoing(false);
         builder.setAutoCancel(true);
+        setNotificationSenderImage(senderPhoto, builder);
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(getApplicationContext());
 
         // notificationId is a unique int for each notification that you must define
         notificationManager.notify(oneTimeID, builder.build());
     }
+
 
     private NotificationCompat.Builder setFriendGameInviteNotification(String title, String body, String from, String fromId, String roomKey,
                                                                        int notification_id) {
@@ -117,7 +163,6 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
                 .setWhen(0) //important so the whole message will be shown
                 .setAutoCancel(true);
 
-        setNotificationSenderImage(fromId, builder);
         return builder;
     }
 
@@ -142,7 +187,6 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
                 .setWhen(0) //important so the whole message will be shown
                 .setAutoCancel(true);
 
-        setNotificationSenderImage(fromId, builder);
         return builder;
     }
 
@@ -171,7 +215,6 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
                 .setAutoCancel(true);
 
 
-        setNotificationSenderImage(fromId, builder);
         return builder;
     }
 
@@ -196,12 +239,14 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
         return PendingIntent.getActivity(getApplicationContext(), 1, acceptIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
-    private void setNotificationSenderImage(String from, NotificationCompat.Builder builder) {
+    private void setNotificationSenderImage(Bitmap senderImage, NotificationCompat.Builder builder) {
+        if (senderImage == null) {
+            return;
+        }
         CacheHandler cacheHandler = new CacheHandler(getApplicationContext());
         if (cacheHandler.isUsingProfilePicture()) {
-            cacheHandler.getProfilePicture(from, builder);
-//            Bitmap icon=cacheHandler.ShrinkBitmap(profilePicture,64,64);
-//            builder.setLargeIcon(icon);
+            Bitmap icon = cacheHandler.ShrinkBitmap(senderImage, 64, 64);
+            builder.setLargeIcon(icon);
         }
     }
 
