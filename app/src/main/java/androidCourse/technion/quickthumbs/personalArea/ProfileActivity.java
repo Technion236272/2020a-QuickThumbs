@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -45,6 +46,7 @@ import com.facebook.GraphRequest;
 import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.login.LoginManager;
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -60,6 +62,7 @@ import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
@@ -106,7 +109,9 @@ public class ProfileActivity extends Fragment {
     private SharedPreferences sharedpreferences;
     private CacheHandler cacheHandler;
     private RecyclerView friendsListRecyclerView;
+    private FriendAdaptor friendAdaptor;
     private RecyclerView requestsListRecyclerView;
+    private FriendAdaptor requestAdaptor;
     final ArrayList<FriendItem> friendsList = new ArrayList<>();
     private List<DocumentSnapshot> lastSnapShots;
     //    private DocumentSnapshot lastFriendSnapShot = null;
@@ -116,9 +121,6 @@ public class ProfileActivity extends Fragment {
 //    boolean noMoreLoadingRequests;
     private int howMuchToLoadEachScroll;
     private HashMap<String, FriendItem> friendsMap;
-    private ArrayList<FriendItem> friendsIdList;
-    public static ArrayList<FriendItem> requestsIdList;
-    HashMap<String, Boolean> loadedFriendsIDs = new HashMap<>();
     private View fragment;
 
 
@@ -147,16 +149,6 @@ public class ProfileActivity extends Fragment {
         noMoreLoading = Arrays.asList(false, false);
         lastSnapShots = Arrays.asList(null, null);
 
-        friendsListRecyclerView = view.findViewById(R.id.friendsListRecyclerView);
-        friendsListRecyclerView.setHasFixedSize(true);
-        friendsIdList = new ArrayList<>();
-        checkIfUserListIsntEmpty("friends", friendsListRecyclerView, friendsIdList, 0, view);
-
-        requestsListRecyclerView = view.findViewById(R.id.requestsListRecyclerView);
-        requestsListRecyclerView.setHasFixedSize(true);
-        requestsIdList = new ArrayList<>();
-        checkIfUserListIsntEmpty("requests", requestsListRecyclerView, requestsIdList, 1,view);
-
         displayStatistics(view);
 
         setLogOutButton(view);
@@ -172,6 +164,46 @@ public class ProfileActivity extends Fragment {
                     }
                 }
         );
+        setFriendsList(view);
+        setRequestsList(view);
+    }
+
+    private void setFriendsList(View view) {
+        //handling the recycler view part
+        friendsListRecyclerView = (RecyclerView) getActivity().findViewById(R.id.friendsListRecyclerView);
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        friendsListRecyclerView.setHasFixedSize(true);
+        // use a linear layout manager
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
+        friendsListRecyclerView.setLayoutManager(layoutManager);
+
+        Query query = db.collection("users").document(getUid(view)).collection("friends")
+                .orderBy("TotalScore", Query.Direction.ASCENDING);
+        final FirestoreRecyclerOptions<FriendItem> friends = new FirestoreRecyclerOptions.Builder<FriendItem>()
+                .setQuery(query, FriendItem.class)
+                .build();
+        friendAdaptor = new FriendAdaptor(friends, getContext(), true);
+        friendsListRecyclerView.setAdapter(friendAdaptor);
+    }
+
+    private void setRequestsList(View view) {
+        //handling the recycler view part
+        requestsListRecyclerView = (RecyclerView) getActivity().findViewById(R.id.requestsListRecyclerView);
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        requestsListRecyclerView.setHasFixedSize(true);
+        // use a linear layout manager
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
+        requestsListRecyclerView.setLayoutManager(layoutManager);
+
+        Query query = db.collection("users").document(getUid(view)).collection("requests")
+                .orderBy("email", Query.Direction.ASCENDING);
+        final FirestoreRecyclerOptions<FriendItem> requests = new FirestoreRecyclerOptions.Builder<FriendItem>()
+                .setQuery(query, FriendItem.class)
+                .build();
+        requestAdaptor = new FriendAdaptor(requests, getContext(), false);
+        requestsListRecyclerView.setAdapter(requestAdaptor);
     }
 
     private void setSendFriendRequestButton(final View view) {
@@ -352,101 +384,6 @@ public class ProfileActivity extends Fragment {
         db.collection("users").document(friendDocument.getId()).collection("friends")
                 .document(userDocument.getId())
                 .set(friendMap, SetOptions.merge());
-    }
-
-    private void checkIfUserListIsntEmpty(String collectionName, final RecyclerView recyclerView,
-                                          final ArrayList<FriendItem> list, final int noMoreLoadingIndex, View view) {
-//        friendsMap = cacheHandler.getUserfriendsMap();
-//        friendsIdList = cacheHandler.getUserfriendsList();
-//        if (friendsIdList.size() != 0 ){
-//            Log.i(TAG,"not empty friends ");
-//            fetchPersonalFriendsList();
-//            setRecyclerViewScroller();
-//        }
-
-        fetchPersonalFriendsList(collectionName, recyclerView, list, noMoreLoadingIndex, view);
-        setRecyclerViewScroller(recyclerView, list, noMoreLoadingIndex);
-    }
-
-
-    private void setRecyclerViewScroller(final RecyclerView recyclerView, final ArrayList<FriendItem> list, final int noMoreLoadingIndex) {
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(final RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                if (dy > 0) {
-                    // Scrolling up
-                    Log.i("RecyclerView scrolled: ", "scroll down!");
-                    if (list.size() != 0 && !noMoreLoading.get(noMoreLoadingIndex)) {
-                        refillFriendsList(recyclerView, list, noMoreLoadingIndex);
-                    }
-                } else if (dy < 0) {
-                    // Scrolling down
-                    Log.i("RecyclerView scrolled: ", "scroll up!");
-                } else if (dx < 0) {
-                }
-            }
-        });
-    }
-
-    private void refillFriendsList(final RecyclerView recyclerView, final ArrayList<FriendItem> list, final int noMoreLoadingIndex) {
-
-        db.collection("users").whereIn("uid", Arrays.asList(list))
-                .startAfter(lastSnapShots.get(noMoreLoadingIndex)).limit(howMuchToLoadEachScroll).get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            fillList(task, recyclerView, list, noMoreLoadingIndex);
-                            recyclerView.getAdapter().notifyDataSetChanged();
-                        } else {
-                            Log.d(TAG, "getAllThemes:" + "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-    }
-
-    private void fetchPersonalFriendsList(String collectionName, final RecyclerView recyclerView,
-                                          final ArrayList<FriendItem> list, final int noMoreLoadingIndex,
-                                          final View view) {
-        db.collection("users").document(getUid(view)).collection(collectionName)
-                .limit(5).get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            fillList(task, recyclerView, list, noMoreLoadingIndex);
-                            setAdaptor(recyclerView, list, view);
-                        } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
-                        }
-                    }
-                });
-    }
-
-    private void fillList(Task<QuerySnapshot> task, RecyclerView recyclerView, List<FriendItem> list, int noMoreLoadingIndex) {
-        if (task.getResult() == null) {
-            return;
-        }
-        for (DocumentSnapshot document : task.getResult()) {
-//            Log.d(TAG, "friend is : " + document.get("email").toString());
-            boolean isApproved = noMoreLoadingIndex == 0 ? true : false;
-            FriendItem item = new FriendItem(document, isApproved);
-            if (loadedFriendsIDs.get(document.getId()) == null) {
-                loadedFriendsIDs.put(document.getId(), true);
-                list.add(item);
-                lastSnapShots.set(noMoreLoadingIndex, document);
-            } else {
-                noMoreLoading.set(noMoreLoadingIndex, true);
-                recyclerView.clearOnScrollListeners();
-            }
-        }
-    }
-
-    private void setAdaptor(RecyclerView recyclerView, ArrayList<FriendItem> list, View view) {
-        FriendAdaptor adapter = new FriendAdaptor(list, view.getContext());
-        recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
     }
 
     private void profilePictureSettings(View view) {
@@ -905,6 +842,34 @@ public class ProfileActivity extends Fragment {
         intent.putExtra(Intent.EXTRA_TEXT, link.toString());
 
         startActivity(Intent.createChooser(intent, "Share Link"));
+    }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        friendAdaptor.startListening();
+        requestAdaptor.startListening();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        friendAdaptor.stopListening();
+        requestAdaptor.stopListening();
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        friendAdaptor.startListening();
+        requestAdaptor.startListening();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        friendAdaptor.stopListening();
+        requestAdaptor.stopListening();
     }
 
 }

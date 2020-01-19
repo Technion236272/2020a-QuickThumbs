@@ -10,6 +10,8 @@ import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 
@@ -35,21 +37,24 @@ import static androidCourse.technion.quickthumbs.MainUserActivity.gameRoomsRefer
 import static androidCourse.technion.quickthumbs.MainUserActivity.mainUserActivityInstance;
 import static androidCourse.technion.quickthumbs.MainUserActivity.valueEventListener;
 import static androidCourse.technion.quickthumbs.Utils.CacheHandler.getNextTextFromSelectedTheme;
-import static androidCourse.technion.quickthumbs.personalArea.ProfileActivity.requestsIdList;
 
-public class FriendAdaptor extends RecyclerView.Adapter<FriendViewHolder>{
-    List<FriendItem> friendsList;
+public class FriendAdaptor extends FirestoreRecyclerAdapter<FriendItem, FriendViewHolder> {
+    FirestoreRecyclerOptions<FriendItem> friendsList;
     Context context;
+    Boolean isFriend;
     private static final String TAG = FriendAdaptor.class.getSimpleName();
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
 
-    public FriendAdaptor(List<FriendItem> friendsList, Context context) {
+    public FriendAdaptor(@NonNull FirestoreRecyclerOptions<FriendItem> friendsList, Context context, Boolean isFriend) {
+        super(friendsList);
         this.context = context;
         this.friendsList = friendsList;
+        this.isFriend = isFriend;
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
     }
+
     @NonNull
     @Override
     public FriendViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -58,24 +63,22 @@ public class FriendAdaptor extends RecyclerView.Adapter<FriendViewHolder>{
 
         return holder;
     }
-
     @Override
-    public void onBindViewHolder(@NonNull final FriendViewHolder holder, final int position) {
-        holder.friendName.setText(friendsList.get(position).getName());
-        if (friendsList.get(position).getProfilePicture() != null){
-            holder.friendProfilePicture.setImageBitmap(friendsList.get(position).getProfilePicture());
+    public void onBindViewHolder(@NonNull final FriendViewHolder holder, final int position, @NonNull FriendItem friendItem) {
+        holder.friendName.setText(friendItem.getName());
+        if (friendItem.getFriendProfilePicture() != null) {
+            holder.friendProfilePicture.setImageBitmap(friendItem.getFriendProfilePicture());
         }
-        holder.friendTotalScore.setText(friendsList.get(position).getTotalScore().toString());
-        if ( friendsList.get(position).isApproved()){
+        holder.friendTotalScore.setText(String.valueOf(friendItem.getTotalScore()));
+        if (isFriend) {
             holder.addFriendButton.setVisibility(View.GONE);
             holder.removeRequestButton.setVisibility(View.GONE);
+        } else {
+            holder.playWithFriend.setVisibility(View.GONE);
         }
-//        else{//TODO: set it back to on
-//            holder.playWithFriend.setVisibility(View.GONE);
-//        }
-        setPlayButtonListener(holder, friendsList.get(position));
-        setAddFriendButton(holder, friendsList.get(position),position);
-        setRemoveRequestButton(holder, friendsList.get(position),position);
+        setPlayButtonListener(holder, friendItem);
+        setAddFriendButton(holder, friendItem, position);
+        setRemoveRequestButton(holder, friendItem, position);
 
     }
 
@@ -148,8 +151,6 @@ public class FriendAdaptor extends RecyclerView.Adapter<FriendViewHolder>{
             public void onClick(View v) {
                 FriendsDatabaseHandler friendsDatabaseHandler = new FriendsDatabaseHandler();
                 friendsDatabaseHandler.addFriend(friendItem.getId(), context);
-                friendItem.setApproved(true);
-                requestsIdList.remove(position);
             }
 
         });
@@ -161,7 +162,6 @@ public class FriendAdaptor extends RecyclerView.Adapter<FriendViewHolder>{
             public void onClick(View v) {
                 FriendsDatabaseHandler friendsDatabaseHandler = new FriendsDatabaseHandler();
                 friendsDatabaseHandler.removeRequest(friendItem.getId(), context);
-                requestsIdList.remove(position);
             }
 
         });
@@ -174,7 +174,7 @@ public class FriendAdaptor extends RecyclerView.Adapter<FriendViewHolder>{
 
     @Override
     public int getItemCount() {
-        return friendsList.size();
+        return friendsList.getSnapshots().size();
     }
 
 }
