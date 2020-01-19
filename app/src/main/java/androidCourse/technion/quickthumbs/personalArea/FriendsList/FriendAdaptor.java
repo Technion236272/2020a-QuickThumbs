@@ -2,6 +2,8 @@ package androidCourse.technion.quickthumbs.personalArea.FriendsList;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,8 +14,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.firebase.ui.firestore.FirestoreRecyclerAdapter;
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -64,11 +70,39 @@ public class FriendAdaptor extends FirestoreRecyclerAdapter<FriendItem, FriendVi
         return holder;
     }
     @Override
-    public void onBindViewHolder(@NonNull final FriendViewHolder holder, final int position, @NonNull FriendItem friendItem) {
-        holder.friendName.setText(friendItem.getName());
-        if (friendItem.getFriendProfilePicture() != null) {
-            holder.friendProfilePicture.setImageBitmap(friendItem.getFriendProfilePicture());
+    public void onBindViewHolder(@NonNull final FriendViewHolder holder, final int position, @NonNull final FriendItem friendItem) {
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        StorageReference storageRef = storage.getReference().child("users");
+        StorageReference userStorage = storageRef.child(friendItem.getuid());
+        StorageReference profilePictureRef = userStorage.child("/profilePicture.JPEG");
+        final long ONE_MEGABYTE = 1024 * 1024;
+        try {
+            profilePictureRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
+                @Override
+                public void onSuccess(byte[] bytes) {
+                    // Data for "images/island.jpg" is returns, use this as needed
+                    Bitmap picture = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+                    holder.friendProfilePicture.setImageBitmap(picture);
+                    setHolderData(holder, position, friendItem);
+//                showMessage("picture was loaded from storage");
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle any errors
+                    setHolderData(holder, position, friendItem);
+                }
+            });
+        } catch (Exception e) {
+            setHolderData(holder, position, friendItem);
+            //no such picture exist
         }
+        setHolderData(holder, position, friendItem);
+
+    }
+
+    private void setHolderData(@NonNull FriendViewHolder holder, int position, @NonNull FriendItem friendItem) {
+        holder.friendName.setText(friendItem.getName());
         holder.friendTotalScore.setText(String.valueOf(friendItem.getTotalScore()));
         if (isFriend) {
             holder.addFriendButton.setVisibility(View.GONE);
@@ -79,7 +113,6 @@ public class FriendAdaptor extends FirestoreRecyclerAdapter<FriendItem, FriendVi
         setPlayButtonListener(holder, friendItem);
         setAddFriendButton(holder, friendItem, position);
         setRemoveRequestButton(holder, friendItem, position);
-
     }
 
     private void setPlayButtonListener(@NonNull FriendViewHolder holder, final FriendItem friendItem) {
@@ -150,7 +183,7 @@ public class FriendAdaptor extends FirestoreRecyclerAdapter<FriendItem, FriendVi
             @Override
             public void onClick(View v) {
                 FriendsDatabaseHandler friendsDatabaseHandler = new FriendsDatabaseHandler();
-                friendsDatabaseHandler.addFriend(friendItem.getId(), context);
+                friendsDatabaseHandler.addFriend(friendItem.getuid(), context);
             }
 
         });
@@ -161,7 +194,7 @@ public class FriendAdaptor extends FirestoreRecyclerAdapter<FriendItem, FriendVi
             @Override
             public void onClick(View v) {
                 FriendsDatabaseHandler friendsDatabaseHandler = new FriendsDatabaseHandler();
-                friendsDatabaseHandler.removeRequest(friendItem.getId(), context);
+                friendsDatabaseHandler.removeRequest(friendItem.getuid(), context);
             }
 
         });

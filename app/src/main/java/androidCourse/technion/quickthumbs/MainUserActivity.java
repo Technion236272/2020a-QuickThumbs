@@ -614,7 +614,7 @@ public class MainUserActivity extends Fragment {
     }
 
     public void createSpecialRoom(final Myparam myparam) {
-        final String friendUid = myparam.friendItem.getId();
+        final String friendUid = myparam.friendItem.getuid();
         final String textId = myparam.textId;
         Log.d(TAG, "Starting to create separate room");
         final String key = searchingRoomsLevel1.push().getKey();

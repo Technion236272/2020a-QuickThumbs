@@ -179,7 +179,7 @@ public class ProfileActivity extends Fragment {
         friendsListRecyclerView.setLayoutManager(layoutManager);
 
         Query query = db.collection("users").document(getUid(view)).collection("friends")
-                .orderBy("TotalScore", Query.Direction.ASCENDING);
+                .orderBy("TotalScore", Query.Direction.DESCENDING);
         final FirestoreRecyclerOptions<FriendItem> friends = new FirestoreRecyclerOptions.Builder<FriendItem>()
                 .setQuery(query, FriendItem.class)
                 .build();
@@ -198,7 +198,7 @@ public class ProfileActivity extends Fragment {
         requestsListRecyclerView.setLayoutManager(layoutManager);
 
         Query query = db.collection("users").document(getUid(view)).collection("requests")
-                .orderBy("email", Query.Direction.ASCENDING);
+                .orderBy("email", Query.Direction.DESCENDING);
         final FirestoreRecyclerOptions<FriendItem> requests = new FirestoreRecyclerOptions.Builder<FriendItem>()
                 .setQuery(query, FriendItem.class)
                 .build();

@@ -31,7 +31,7 @@ public class GameDatabaseInviteHandler {
         Map<String, Object> friend = new HashMap<>();
         friend.put("uid", getUid(context));
         friend.put("roomKey", roomKey);
-        db.collection("users").document(friendItem.getId()).collection("game_requests")
+        db.collection("users").document(friendItem.getuid()).collection("game_requests")
                 .document(getUid(context)).set(friend, merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override

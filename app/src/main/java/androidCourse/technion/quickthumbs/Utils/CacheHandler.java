@@ -572,7 +572,7 @@ public class CacheHandler {
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             Log.d(TAG, "user friend server list "+document.getId() + " => " + document.getData());
                             FriendItem friendItem = new FriendItem(document,false);
-                            friendMapFromServer.put(friendItem.getId(), friendItem);
+                            friendMapFromServer.put(friendItem.getuid(), friendItem);
                         }
                         if ( finalLoadedFrindsMap.size() != friendMapFromServer.size()) {
                             updateFriendMapFromServer(friendMapFromServer);
