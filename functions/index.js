@@ -4,6 +4,7 @@ admin.initializeApp(functions.config().firebase);
 const functionTriggers = functions.region('europe-west1').firestore;
 const db = admin.firestore()
 
+
 exports.user_sent_request = functions.firestore.document('/users/{user_id}/requests/{friend_id}').onCreate((snap, context) => {
     const user_id = context.params.user_id;
     const friend_id = context.params.friend_id;
@@ -21,8 +22,8 @@ exports.user_sent_request = functions.firestore.document('/users/{user_id}/reque
             data: {
                 title: 'New Friend Request',
                 body: friend_name + ' sent you a friend request!',
-				senderId: friend_id,
-                sender: friend_id
+                sender: friend_name,
+                senderId: friend_id
             },
         };
 
@@ -72,9 +73,9 @@ exports.friend_accepted_user_request = functions.firestore.document('/users/{fri
         const payload = {
             data: {
                 title: 'You are Friends!',
-				senderId: user_id,
                 body: user_name + ' is happy to play with you!',
-                sender: user_id
+                sender: user_name,
+                senderId: user_id
             },
         };
 
@@ -96,6 +97,39 @@ exports.friend_accepted_user_request = functions.firestore.document('/users/{fri
     });
 });
 
+
+exports.update_statistics = functions.firestore.document('/users/{user_id}/stats/statistics').onWrite((change, context) => {
+
+    console.log('update statistics for friends triggered');
+
+	// Exit when the data is deleted.
+    if (!change.after.exists) {
+        return null;
+    }
+
+	const user_id = context.params.user_id;
+	const score = change.after.data().TotalScore;
+    const accuracy = change.after.data().avgAccuracy;
+    const CPM = change.after.data().avgCPM;
+    const WPM = change.after.data().avgWPM;
+
+	const res = db.collection('users').doc(user_id).collection('friends').get().then(friendsDocuments => {
+		const promises = [];
+		friendsDocuments.forEach(friendSnap => {
+			const setFriend = db.collection('users').doc(friendSnap.data().uid).collection('friends').doc(user_id).set({TotalScore: score, avgAccuracy : accuracy,
+                                  			avgCPM : CPM, avgWPM : WPM}, { merge: true });
+			promises.push(setFriend)
+		});
+		return Promise.all(promises);
+		}).catch(error => {
+			console.log(error)
+			// handle error
+		});
+
+	return res;
+});
+
+
 exports.user_game_invite = functions.firestore.document('/users/{user_id}/game_requests/{friend_id}').onCreate((snap, context) => {
     const user_id = context.params.user_id;
     const friend_id = context.params.friend_id;
@@ -103,11 +137,11 @@ exports.user_game_invite = functions.firestore.document('/users/{user_id}/game_r
     console.log('friend_id ' + friend_id);
 
     console.log('game invite request notification event triggered');
-	
+
 	db.collection('users').doc(friend_id).get().then((doc) => {
 
 				const friend_name = doc.data().name;
-			  
+
 				return db.collection('users').doc(user_id).collection('game_requests').doc(friend_id).get().then((doc) => {
 					console.log(doc);
 					const room_key	= doc.data().roomKey;
@@ -143,11 +177,10 @@ exports.user_game_invite = functions.firestore.document('/users/{user_id}/game_r
 		  }).catch(error => {
 			  console.log(error.message);
 		  });
-
-
-
-
 });
+
+
+
 
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
