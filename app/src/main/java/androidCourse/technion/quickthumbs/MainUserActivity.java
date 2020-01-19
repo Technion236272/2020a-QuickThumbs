@@ -258,6 +258,7 @@ public class MainUserActivity extends Fragment {
                 closeMultiPlayerRoom(acceptedInvitationRoomKey);
             }
         });
+
         AlertDialog alertDialog = alertDialogBuilder.create();
         alertDialog.show();
     }
@@ -531,7 +532,7 @@ public class MainUserActivity extends Fragment {
 
                 GameRoom gameRoom = mutableData.getValue(GameRoom.class);
 
-                GameRoom gameRoomWithUserAdded = new GameRoom(gameRoom.user1, gameRoom.location1, getUid(), 0, gameRoom.textId, true, false, false, -1, -1);
+                GameRoom gameRoomWithUserAdded = new GameRoom(gameRoom.user1, gameRoom.location1, localUserName, 0, gameRoom.textId, true, false, false, -1, -1);
 
                 mutableData.setValue(gameRoomWithUserAdded);
 
@@ -576,8 +577,7 @@ public class MainUserActivity extends Fragment {
         Log.d(TAG, "Starting to create separate room");
         final String key = searchingRoomsLevel1.push().getKey();
 
-
-        GameRoom newRoom = new GameRoom(fireBaseAuth.getUid(), 0, null, 0, textId, false, false, false, -1, -1);
+        GameRoom newRoom = new GameRoom(localUserName, 0, null, 0, textId, false, false, false, -1, -1);
 
         gameRoomsReference.child(key).setValue(newRoom)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
