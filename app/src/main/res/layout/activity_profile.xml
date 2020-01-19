@@ -182,64 +182,65 @@
                 android:textStyle="bold" />
 
             <EditText
-                android:id = "@+id/emailEditText"
+                android:id="@+id/emailEditText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/FriendsHeader"
-                android:layout_marginLeft="15dp"
-                android:textColorHint="@color/primaryTextColor"
-                android:hint = "Enter Friend's Email"
                 android:layout_alignParentLeft="true"
+                android:layout_marginLeft="15dp"
+                android:layout_toLeftOf="@id/sendFriendRequestButton"
+                android:hint="Enter Friend's Email"
                 android:inputType="textEmailAddress"
-                android:layout_toLeftOf="@id/sendFriendRequestButton"/>
+                android:textColorHint="@color/primaryTextColor"
+                android:textColor="@android:color/white"/>
 
             <Button
                 android:id="@+id/sendFriendRequestButton"
+                style="@style/SecondaryColorRoundedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Send Friend Request"
-                style="@style/SecondaryColorRoundedButton"
-                android:layout_alignParentRight="true"
-                android:layout_marginRight="15dp"
                 android:layout_above="@id/friendsListRecyclerView"
-                android:layout_gravity="top"/>
+                android:layout_alignParentRight="true"
+                android:layout_gravity="top"
+                android:layout_marginRight="15dp"
+                android:text="Send Friend Request" />
 
-<!--            <RadioGroup-->
-<!--                android:id="@+id/rdogrp"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:layout_margin="8dp"-->
-<!--                android:gravity="center"-->
-<!--                android:layout_above="@id/friendsListRecyclerView"-->
-<!--                android:layout_below="@id/sendFriendRequestButton"-->
-<!--                android:orientation="horizontal" >-->
+            <!--            <RadioGroup-->
+            <!--                android:id="@+id/rdogrp"-->
+            <!--                android:layout_width="wrap_content"-->
+            <!--                android:layout_height="wrap_content"-->
+            <!--                android:layout_margin="8dp"-->
+            <!--                android:gravity="center"-->
+            <!--                android:layout_above="@id/friendsListRecyclerView"-->
+            <!--                android:layout_below="@id/sendFriendRequestButton"-->
+            <!--                android:orientation="horizontal" >-->
 
-<!--                <RadioButton-->
-<!--                    android:id="@+id/friendsList"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_margin="0dp"-->
-<!--                    style="@style/LightPrimaryRoundedButton"-->
-<!--                    android:button="@null"-->
-<!--                    android:checked="true"-->
-<!--                    android:gravity="center" />-->
+            <!--                <RadioButton-->
+            <!--                    android:id="@+id/friendsList"-->
+            <!--                    android:layout_width="wrap_content"-->
+            <!--                    android:layout_height="wrap_content"-->
+            <!--                    android:layout_margin="0dp"-->
+            <!--                    style="@style/LightPrimaryRoundedButton"-->
+            <!--                    android:button="@null"-->
+            <!--                    android:checked="true"-->
+            <!--                    android:gravity="center" />-->
 
-<!--                <RadioButton-->
-<!--                    android:id="@+id/requestsList"-->
-<!--                    android:layout_width="wrap_content"-->
-<!--                    android:layout_height="wrap_content"-->
-<!--                    android:layout_margin="0dp"-->
-<!--                    style="@style/LightPrimaryRoundedButton"-->
-<!--                    android:button="@null"-->
-<!--                    android:gravity="center" />-->
+            <!--                <RadioButton-->
+            <!--                    android:id="@+id/requestsList"-->
+            <!--                    android:layout_width="wrap_content"-->
+            <!--                    android:layout_height="wrap_content"-->
+            <!--                    android:layout_margin="0dp"-->
+            <!--                    style="@style/LightPrimaryRoundedButton"-->
+            <!--                    android:button="@null"-->
+            <!--                    android:gravity="center" />-->
 
-<!--            </RadioGroup>-->
+            <!--            </RadioGroup>-->
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/friendsListRecyclerView"
                 android:layout_width="match_parent"
-                android:layout_below = "@id/emailEditText"
                 android:layout_height="350dp"
+                android:layout_below="@id/emailEditText"
                 android:layout_marginLeft="15dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginRight="15dp"
@@ -251,8 +252,8 @@
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/requestsListRecyclerView"
                 android:layout_width="match_parent"
-                android:layout_below = "@id/friendsListRecyclerView"
                 android:layout_height="350dp"
+                android:layout_below="@id/friendsListRecyclerView"
                 android:layout_marginLeft="15dp"
                 android:layout_marginTop="10dp"
                 android:layout_marginRight="15dp"
