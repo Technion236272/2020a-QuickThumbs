@@ -55,7 +55,7 @@ public class MainPager extends AppCompatActivity {
     private ImageButton backToMainButtonFromStatistics;
     private FirebaseAuth mAuth;
 
-    public static ViewPager vpPager;
+    ViewPager vpPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

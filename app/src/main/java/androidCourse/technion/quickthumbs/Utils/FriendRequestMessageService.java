@@ -25,6 +25,7 @@ import java.nio.charset.CharsetDecoder;
 import java.util.Random;
 
 import androidCourse.technion.quickthumbs.MainPager;
+import androidCourse.technion.quickthumbs.MainUserActivity;
 import androidCourse.technion.quickthumbs.NotificationActivity;
 import androidCourse.technion.quickthumbs.R;
 
@@ -55,6 +56,7 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
         String title = message.getData().get("title");
         String body = message.getData().get("body");
         String from = message.getData().get("sender");// from the 25 index is the uid of the sender
+        String fromId = message.getData().get("senderId");// from the 25 index is the uid of the sender
         String roomKey = message.getData().get("room");
         NotificationCompat.Builder builder;
 
@@ -70,9 +72,13 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
 
                     break;
                 case "Game invite":
-                default:
-                    builder = setFriendGameInviteNotification(title, body, from, roomKey, oneTimeID);
+                    MainUserActivity.acceptedInvitationRoomKey = roomKey;
+                    MainUserActivity.invitationSender = from;
+                    builder = setFriendGameInviteNotification(title, body, from, roomKey);
                     break;
+            default:
+
+                return;
         }
 
         builder.setOngoing(false);
@@ -158,6 +164,8 @@ public class FriendRequestMessageService extends FirebaseMessagingService {
                 .setWhen(0) //important so the whole message will be shown
                 .setAutoCancel(true);
 
+
+        setNotificationSenderImage(from, builder);
         return builder;
     }
 

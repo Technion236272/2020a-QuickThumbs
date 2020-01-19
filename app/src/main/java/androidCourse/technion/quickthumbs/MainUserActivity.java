@@ -3,7 +3,9 @@ package androidCourse.technion.quickthumbs;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -15,6 +17,7 @@ import androidCourse.technion.quickthumbs.database.FriendsDatabaseHandler;
 import androidCourse.technion.quickthumbs.database.GameDatabaseInviteHandler;
 import androidCourse.technion.quickthumbs.multiplayerSearch.GameRoom;
 import androidCourse.technion.quickthumbs.multiplayerSearch.SearchingGrouper;
+import androidCourse.technion.quickthumbs.personalArea.FriendsList.FriendItem;
 import androidCourse.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
 import androidCourse.technion.quickthumbs.theme.ThemeSelectPopUp;
 
@@ -30,6 +33,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 
@@ -103,11 +107,13 @@ public class MainUserActivity extends Fragment {
     long startTime;
     RippleBackground rippleBackground;
     private CircleMenuView.EventListener listener;
-    private String acceptedInvitationRoomKey = "-1";
+    public static String acceptedInvitationRoomKey = "-1";
+    public static String invitationSender = "";
     public static String friendUid = null;
     private String[] basicThemes = {"Comedy", "Music", "Movies", "Science", "Games", "Literature"};
     private static Map<String, Boolean> allUserThemes = new HashMap<>();
     private static TextDataRow textCardItem = null;
+    public static MainUserActivity mainUserActivityInstance;
     private String localGameRoomKey;
 
     @Override
@@ -128,7 +134,7 @@ public class MainUserActivity extends Fragment {
         fragmentViewForButton = view;
         fireBaseAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-
+        mainUserActivityInstance = MainUserActivity.this;
         if (instance == null) {
             instance = FirebaseDatabase.getInstance();
         }
@@ -152,15 +158,20 @@ public class MainUserActivity extends Fragment {
         searchTimerView = view.findViewById(R.id.searchTimer);
         searchScreen = view.findViewById(R.id.searchScreen);
 
+        checkIfHasGameInvitation();
+
+    }
+
+    private void checkIfHasGameInvitation() {
         Intent intent = getActivity().getIntent();
         if (intent.hasExtra("roomKey")) {
-            acceptedInvitationRoomKey = intent.getStringExtra("roomKey");
-            StartSpecifiedGame(String.valueOf(acceptedInvitationRoomKey));
-        }
-
-        if (friendUid != null) {
-            Myparam myparam = new Myparam(friendUid);
-            new MainUserActivity.FetchRandomTextForFriendsRoom().execute(myparam);
+            if (intent.hasExtra("answer") && intent.getBooleanExtra("answer", false)) {
+                startMultiplaterGameUiChanges();
+                acceptedInvitationRoomKey = intent.getStringExtra("roomKey");
+                StartSpecifiedGame(String.valueOf(acceptedInvitationRoomKey));
+            } else {
+                closeMultiPlayerRoom(intent.getStringExtra("roomKey"));
+            }
         }
     }
 
@@ -206,44 +217,21 @@ public class MainUserActivity extends Fragment {
 
 
                     case 1:
-                        menu.setEventListener(null);
-                        waitingLogo.setVisibility(VISIBLE);
-                        menu.setVisibility(INVISIBLE);
-                        searchScreen.setVisibility(VISIBLE);
-                        closeButton.setVisibility(VISIBLE);
-
-
-                        startRippleBackground();
-
-                        setSearchTimer();
+                        startMultiplaterGameUiChanges();
 
                         startSearchForGame();
 
                         break;
 
                     case 2:
-                        menu.setEventListener(null);
-                        waitingLogo.setVisibility(VISIBLE);
-                        menu.setVisibility(INVISIBLE);
-                        searchScreen.setVisibility(VISIBLE);
-                        closeButton.setVisibility(VISIBLE);
-                        startRippleBackground();
+                        startMultiplaterGameUiChanges();
 
-                        setSearchTimer();
-
-                        if (acceptedInvitationRoomKey != "-1") {
-                            StartSpecifiedGame(String.valueOf(acceptedInvitationRoomKey));
+                        if (acceptedInvitationRoomKey != "-1") {//has an open invitation
+                            open(waitingLogo);
+//                            StartSpecifiedGame(String.valueOf(acceptedInvitationRoomKey));
                         } else {
                             //TODO: implement pop up friends list
                             if (friendUid != null) {
-                                CacheHandler cacheHandler = new CacheHandler(getContext());
-                                allUserThemes = cacheHandler.loadThemesFromSharedPreferences();
-                                final String choosenTheme = getRandomThemeName();
-
-                                TextDataRow textCardItem = getNextTextFromSelectedTheme(choosenTheme);
-                                Myparam myparam = new Myparam(friendUid);
-                                myparam.setTextId(textCardItem.getTextId());
-                                createSpecialRoom(myparam);
 //                                new MainUserActivity.FetchRandomTextForFriendsRoom().execute(myparam);
                             }
                         }
@@ -253,6 +241,53 @@ public class MainUserActivity extends Fragment {
         };
         menu.setEventListener(listener);
 
+    }
+
+    public void open(View view) {
+        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+        alertDialogBuilder.setMessage("You have a game invitation from " + invitationSender);
+        alertDialogBuilder.setPositiveButton("yes", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface arg0, int arg1) {
+                StartSpecifiedGame(String.valueOf(acceptedInvitationRoomKey));
+            }
+        });
+        alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                closeMultiPlayerRoom(acceptedInvitationRoomKey);
+            }
+        });
+        AlertDialog alertDialog = alertDialogBuilder.create();
+        alertDialog.show();
+    }
+
+    public void closeMultiPlayerRoom(String roomKey) {
+        gameRoomsReference.child(roomKey).setValue(null).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful()) {
+                    acceptedInvitationRoomKey = "-1";
+                    Toast.makeText(getActivity(), "the invitation was canceled", Toast.LENGTH_LONG).show();
+
+                } else {
+                    acceptedInvitationRoomKey = "-1";
+                    Log.d(TAG, "maybe already erased ...");
+                    Toast.makeText(getActivity(), "room was already erased", Toast.LENGTH_LONG).show();
+                }
+            }
+        });
+    }
+
+    private void startMultiplaterGameUiChanges() {
+        menu.setEventListener(null);
+        waitingLogo.setVisibility(VISIBLE);
+        menu.setVisibility(INVISIBLE);
+        searchScreen.setVisibility(VISIBLE);
+        closeButton.setVisibility(VISIBLE);
+        startRippleBackground();
+
+        setSearchTimer();
     }
 
     private void setCloseMultiplayerSerchButtonListener() {
@@ -535,8 +570,8 @@ public class MainUserActivity extends Fragment {
 
     }
 
-    public void createSpecialRoom(Myparam myparam) {
-        final String friendUid = myparam.friendId;
+    public void createSpecialRoom(final Myparam myparam) {
+        final String friendUid = myparam.friendItem.getId();
         final String textId = myparam.textId;
         Log.d(TAG, "Starting to create separate room");
         final String key = searchingRoomsLevel1.push().getKey();
@@ -556,7 +591,8 @@ public class MainUserActivity extends Fragment {
                             setGameForFriends(key, textId, 1);
 
                             GameDatabaseInviteHandler gameDatabaseInviteHandler = new GameDatabaseInviteHandler();
-                            gameDatabaseInviteHandler.inviteFriendToAGame(friendUid, key, getActivity());
+                            gameDatabaseInviteHandler.inviteFriendToAGame(myparam.friendItem, key, getActivity());
+                            startMultiplaterGameUiChanges();
                         } else {
                             throw new RuntimeException("bug I guess");
                         }
@@ -598,6 +634,7 @@ public class MainUserActivity extends Fragment {
 
                                                                     @Override
                                                                     public void onCancelled(@NonNull DatabaseError databaseError) {
+                                                                        Toast.makeText(getActivity(), "the invitation was canceled", Toast.LENGTH_LONG).show();
                                                                         setUIBackToNormal();
                                                                     }
                                                                 }
@@ -606,44 +643,12 @@ public class MainUserActivity extends Fragment {
     }
 
     public static class Myparam {
-        private String friendId;
+        private FriendItem friendItem;
         private String textId;
 
-        public Myparam(String friendId) {
-            this.friendId = friendId;
-        }
-
-        public void setTextId(String textId) {
+        public Myparam(FriendItem friendItem, String textId) {
+            this.friendItem = friendItem;
             this.textId = textId;
-        }
-    }
-
-    public class FetchRandomTextForFriendsRoom extends AsyncTask<Myparam, Void, Void> {
-
-
-        @Override
-        protected Void doInBackground(Myparam... myparams) {
-            CacheHandler cacheHandler = new CacheHandler(getContext());
-            allUserThemes = cacheHandler.loadThemesFromSharedPreferences();
-            final String choosenTheme = getRandomThemeName();
-
-            TextDataRow textCardItem = getNextTextFromSelectedTheme(choosenTheme);
-            if (textCardItem == null) {
-                fetchRandomTextSpecifiedForUsers();
-            } else {
-                String textId = textCardItem.getTextId();
-                myparams[0].setTextId(textId);
-                try {
-                    Class<?> c = MainUserActivity.class;
-                    Method method = c.getDeclaredMethod("createSpecialRoom", String.class);
-                    method.invoke(MainUserActivity.this, myparams[0]);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                checkIfTextListNeedToBeRefilled(choosenTheme);
-            }
-            return null;
         }
     }
 
