@@ -72,8 +72,10 @@
                         android:layout_alignParentLeft="true"
                         android:layout_marginLeft="5dp"
                         android:layout_marginRight="5dp"
-                        android:text="better than your average by "
+                        android:layout_marginBottom="10dp"
+                        android:text="Better than your average by "
                         android:textSize="19sp"
+                        android:textColor="@color/primaryTextColor"
                         android:textStyle="bold" />
 
                     <TextView
@@ -84,8 +86,8 @@
                         android:layout_marginRight="10dp"
                         android:layout_toRightOf="@id/wpmCompareLine"
                         android:text="5"
-                        android:textColor="@color/primaryDarkColor"
-                        android:textSize="25sp"
+                        android:textSize="19sp"
+                        android:textColor="@color/primaryTextColor"
                         android:textStyle="bold" />
 
 
@@ -95,8 +97,9 @@
                         android:layout_height="wrap_content"
                         android:layout_alignBaseline="@id/wpmCompareNumber"
                         android:layout_toRightOf="@id/wpmCompareNumber"
-                        android:text="wpn"
-                        android:textSize="25sp"
+                        android:text="wpm"
+                        android:textSize="19sp"
+                        android:textColor="@color/primaryTextColor"
                         android:textStyle="bold" />
 
                     <TextView
@@ -480,7 +483,7 @@
                 android:layout_centerHorizontal="true"
                 android:padding="10dp"
                 android:text="PLACEMENTS"
-                android:textColor="@color/secondaryDarkColor"
+                android:textColor="@color/primaryTextColor"
                 android:textSize="40sp"
                 android:textStyle="bold|italic" />
 
@@ -524,7 +527,7 @@
                                 android:layout_alignParentBottom="true"
                                 android:layout_centerHorizontal="true"
                                 android:layout_marginBottom="50dp"
-                                android:textColor="@color/secondaryDarkColor"
+                                android:textColor="@color/primaryTextColor"
                                 android:textSize="22sp" />
 
                             <TextView
@@ -558,7 +561,7 @@
                                 android:layout_alignParentBottom="true"
                                 android:layout_centerHorizontal="true"
                                 android:layout_marginBottom="100dp"
-                                android:textColor="@color/secondaryDarkColor"
+                                android:textColor="@color/primaryTextColor"
                                 android:textSize="20sp" />
 
                             <TextView
@@ -593,7 +596,7 @@
                                 android:layout_alignParentBottom="true"
                                 android:layout_centerHorizontal="true"
                                 android:layout_marginBottom="20dp"
-                                android:textColor="@color/secondaryDarkColor"
+                                android:textColor="@color/primaryTextColor"
                                 android:textSize="20sp" />
 
                             <TextView
@@ -626,6 +629,7 @@
                             android:layout_alignParentBottom="true"
                             android:layout_centerHorizontal="true"
                             android:layout_marginBottom="10dp"
+                            android:textColor="@color/primaryTextColor"
                             android:background="@android:drawable/ic_menu_close_clear_cancel" />
                     </RelativeLayout>
 

@@ -17,6 +17,7 @@ import androidCourse.technion.quickthumbs.database.FriendsDatabaseHandler;
 import androidCourse.technion.quickthumbs.database.GameDatabaseInviteHandler;
 import androidCourse.technion.quickthumbs.multiplayerSearch.GameRoom;
 import androidCourse.technion.quickthumbs.multiplayerSearch.SearchingGrouper;
+import androidCourse.technion.quickthumbs.personalArea.FriendsList.FriendAdaptor;
 import androidCourse.technion.quickthumbs.personalArea.FriendsList.FriendItem;
 import androidCourse.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
 import androidCourse.technion.quickthumbs.theme.ThemeSelectPopUp;
@@ -38,6 +39,7 @@ import android.widget.Toast;
 import androidx.fragment.app.Fragment;
 
 import com.facebook.AccessToken;
+import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -100,7 +102,7 @@ public class MainUserActivity extends Fragment {
     CircleMenuView menu;
     ImageView waitingLogo;
     private static View fragmentViewForButton;
-
+    private FriendAdaptor friendAdaptor;
     private TextView amountOfPlayerView;
     private TextView searchTimerView;
     private RelativeLayout searchScreen;
@@ -145,6 +147,14 @@ public class MainUserActivity extends Fragment {
         searchingRooms = mDatabase.child(searchingRoomsStr);
         searchingRoomsLevel1 = searchingRooms.child(level1);
         gameRoomsReference = mDatabase.child(gameRooms);
+
+        String uid = getUid();
+        com.google.firebase.firestore.Query query = db.collection("users").document(uid).collection("friends")
+                .orderBy("TotalScore", com.google.firebase.firestore.Query.Direction.DESCENDING);
+        final FirestoreRecyclerOptions<FriendItem> friends = new FirestoreRecyclerOptions.Builder<FriendItem>()
+                .setQuery(query, FriendItem.class)
+                .build();
+        friendAdaptor = new FriendAdaptor(friends, view.getContext(), true);
 
         setUserName();
 
@@ -227,6 +237,7 @@ public class MainUserActivity extends Fragment {
                         break;
 
                     case 2:
+
                         startMultiplaterGameUiChanges();
 
                         if (acceptedInvitationRoomKey != "-1") {//has an open invitation
@@ -236,6 +247,9 @@ public class MainUserActivity extends Fragment {
                             //TODO: implement pop up friends list
                             if (friendUid != null) {
 //                                new MainUserActivity.FetchRandomTextForFriendsRoom().execute(myparam);
+                            }else{
+                                GameInvitePopUp invitePopUp = new GameInvitePopUp();
+                                invitePopUp.showPopupWindow(fragmentViewForButton, fragmentViewForButton.findViewById(R.id.RelativeLayout1),friendAdaptor);
                             }
                         }
                         break;
@@ -757,6 +771,9 @@ public class MainUserActivity extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
+        if(friendAdaptor!= null){
+            friendAdaptor.stopListening();
+        }
     }
 
 
@@ -768,6 +785,9 @@ public class MainUserActivity extends Fragment {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         boolean isLoggedIn = accessToken != null && !accessToken.isExpired();
         if (checkIfUserLoggedIn(currentUser, account, isLoggedIn)) return;
+        if(friendAdaptor!= null){
+            friendAdaptor.startListening();
+        }
         //the part where i insert the user to the db just ot make sure he's there in case no user has been made
     }
 
@@ -941,6 +961,24 @@ public class MainUserActivity extends Fragment {
             return accessToken.getUserId();
         }
     }
+
+    @Override
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
+        if(friendAdaptor!= null){
+            friendAdaptor.startListening();
+        }
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if(friendAdaptor!= null){
+            friendAdaptor.stopListening();
+        }
+    }
+
+
 
 
 }

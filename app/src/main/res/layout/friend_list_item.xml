@@ -4,94 +4,109 @@
     android:id="@+id/friendCardView"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="5dp"
     android:clickable="true"
     android:focusable="true"
     android:foreground="?android:attr/selectableItemBackground"
     app:cardCornerRadius="5dp"
+    android:layout_marginBottom="2dp"
+
     app:cardElevation="5dp">
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    <RelativeLayout
         android:id="@+id/friendCardItem"
         android:layout_width="match_parent"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
+
         android:layout_height="wrap_content"
-        android:background="@color/secondaryLightColor"
-        android:padding="20dp">
+        android:orientation="horizontal">
 
         <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
             android:id="@+id/friendProfilePicture"
             android:layout_width="82dp"
             android:layout_height="82dp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginRight="12dp"
-            android:layout_marginEnd="12dp"
+            android:layout_gravity="center_vertical"
             android:src="@drawable/placeholder"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="5dp"
             app:civ_border_color="#FF000000"
             app:civ_border_width="2dp" />
 
-        <TextView
-            android:id="@+id/friendName"
+        <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_alignParentTop="true"
-            android:layout_toRightOf="@+id/friendProfilePicture"
-            android:layout_toEndOf="@+id/friendProfilePicture"
-            android:text="Friend Name"
-            android:textSize="20sp" />
-
-        <TextView
-            android:id="@+id/friendTotalScore"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/friendName"
-            android:layout_marginTop="5sp"
-            android:layout_toRightOf="@+id/friendProfilePicture"
-            android:layout_toEndOf="@+id/friendProfilePicture"
-            android:text="stats" />
-
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/addFriendButton"
-            app:srcCompat="@drawable/ic_account_plus_black_48dp"
-            android:contentDescription="play With Him"
-            android:background="@color/transparent"
-            android:layout_width="?attr/actionBarSize"
-            android:layout_height="?attr/actionBarSize"
-            android:layout_below="@id/friendTotalScore"
-            android:layout_toEndOf="@id/friendProfilePicture"
+            android:layout_marginLeft="5dp"
+            android:layout_marginRight="5dp"
             android:layout_toRightOf="@id/friendProfilePicture"
-            android:gravity="center" />
+            android:orientation="vertical">
 
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/removeRequestButton"
-            app:srcCompat="@drawable/ic_account_remove_black_48dp"
-            android:contentDescription="remove Him"
-            android:background="@color/transparent"
-            android:layout_width="?attr/actionBarSize"
-            android:layout_height="?attr/actionBarSize"
-            android:layout_below="@id/friendTotalScore"
-            android:layout_toEndOf="@id/addFriendButton"
-            android:layout_toRightOf="@id/addFriendButton"
-            android:layout_marginLeft="20dp"
+            <TextView
+                android:id="@+id/friendName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_marginBottom="5sp"
+                android:text="Friend Name"
+                android:layout_marginLeft="5dp"
+                android:textColor="@color/secondaryTextColor"
+                android:textSize="20sp"
+                android:textStyle="bold" />
 
-            android:gravity="center" />
+            <TextView
+                android:id="@+id/friendTotalScoreHeader"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@+id/friendName"
+                android:layout_marginLeft="5dp"
+                android:text="Total Score:"
+                android:textColor="@color/secondaryTextColor"
+                android:textSize="17sp" />
+
+            <TextView
+                android:id="@+id/friendTotalScore"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_marginBottom="5sp"
+                android:layout_below="@+id/friendTotalScoreHeader"
+                android:text="stats"
+                android:textColor="@color/secondaryTextColor"
+                android:textSize="17sp" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/addFriendButton"
+                android:layout_width="?attr/actionBarSize"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_below="@id/friendName"
+                android:background="@color/transparent"
+                android:contentDescription="play With Him"
+                android:gravity="center"
+                app:srcCompat="@drawable/ic_account_plus_black_48dp" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/removeRequestButton"
+                android:layout_width="?attr/actionBarSize"
+                android:layout_height="?attr/actionBarSize"
+                android:layout_below="@id/friendName"
+                android:layout_marginLeft="5dp"
+                android:layout_toRightOf="@id/addFriendButton"
+                android:background="@color/transparent"
+                android:contentDescription="remove Him"
+                android:gravity="center"
+                app:srcCompat="@drawable/ic_account_remove_black_48dp" />
+        </RelativeLayout>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/playWithFriend"
-            app:srcCompat="@drawable/play_with_friends"
-            android:contentDescription="play With Him"
-            android:background="@color/transparent"
             android:layout_width="?attr/actionBarSize"
             android:layout_height="?attr/actionBarSize"
-            android:layout_below="@id/friendTotalScore"
-            android:layout_toEndOf="@id/removeRequestButton"
-            android:layout_toRightOf="@id/removeRequestButton"
-            android:layout_marginLeft="20dp"
-            android:gravity="center" />
-
+            android:layout_gravity="right"
+            android:layout_marginRight="5dp"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:background="@color/transparent"
+            android:contentDescription="play With Him"
+            android:gravity="center"
+            app:srcCompat="@drawable/play_with_friends" />
     </RelativeLayout>
-
-
 </androidx.cardview.widget.CardView>

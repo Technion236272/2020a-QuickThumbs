@@ -149,8 +149,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             Toast.makeText(MainActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         }
-
-                        // ...
                     }
                 });
     }
@@ -232,6 +230,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             addUserDataToCollection(changedUser);
                         } else {
                             // If sign in fails, display a message to the user.
+                            Toast.makeText(MainActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
                         }
 
@@ -291,6 +291,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
+                        Toast.makeText(MainActivity.this, "Successfully signed in.", Toast.LENGTH_LONG)
+                                .show();
                         moveToMainUserActivityIfAlreadyLoggedIn();
                         Log.d(TAG, "User was inserted to to DB!");
                     }
@@ -310,11 +312,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         String emailText = ((EditText) findViewById(emailMainActivity)).getText().toString();
         String passwordText = ((EditText) findViewById(passwordMainActivity)).getText().toString();
-
-        if (emailText.isEmpty() || passwordText.isEmpty()) {
-            Toast.makeText(MainActivity.this, "Sign in failed.", Toast.LENGTH_LONG)
+        if (emailText.isEmpty()){
+            Toast.makeText(MainActivity.this, "Please enter your email.", Toast.LENGTH_LONG)
                     .show();
+            return;
+        }
 
+        if (passwordText.isEmpty()) {
+            Toast.makeText(MainActivity.this, "Please enter your password.", Toast.LENGTH_LONG)
+                    .show();
             return;
         }
 

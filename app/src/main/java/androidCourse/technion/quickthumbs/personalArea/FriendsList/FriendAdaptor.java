@@ -109,6 +109,8 @@ public class FriendAdaptor extends FirestoreRecyclerAdapter<FriendItem, FriendVi
             holder.removeRequestButton.setVisibility(View.GONE);
         } else {
             holder.playWithFriend.setVisibility(View.GONE);
+            holder.friendTotalScore.setVisibility(View.GONE);
+            holder.totalScoreHeader.setVisibility(View.GONE);
         }
         setPlayButtonListener(holder, friendItem);
         setAddFriendButton(holder, friendItem, position);

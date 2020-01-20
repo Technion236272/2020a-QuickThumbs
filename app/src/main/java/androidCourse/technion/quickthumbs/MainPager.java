@@ -144,7 +144,7 @@ public class MainPager extends AppCompatActivity {
             public void onPageSelected(int position) {
                 switch (position) {
                     case 0:
-                        pageTitle.setText("Statistics");
+                        pageTitle.setText("Profile");
                         setToolbarMainActivityButtonsVisibility(View.INVISIBLE);
                         setToolbarStatisticsButtonsVisibility(View.VISIBLE);
                         setToolbarTextsButtonsVisibility(View.INVISIBLE);
@@ -327,6 +327,17 @@ public class MainPager extends AppCompatActivity {
 
         new CacheHandler.TextCacheRefill().execute();
 
+    }
+
+
+    @Override
+    public void onStop(){
+        super.onStop();
+        FirebaseAuth fireBaseAuth = FirebaseAuth.getInstance();
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        CacheHandler cacheHandler = new CacheHandler(getApplicationContext());
+        cacheHandler.updateUserThemesSelectionOnDB();
+        new CacheHandler.TextCacheRefill().execute();
     }
 }
 

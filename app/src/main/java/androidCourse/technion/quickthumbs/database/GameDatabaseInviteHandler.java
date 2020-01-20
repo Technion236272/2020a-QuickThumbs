@@ -36,7 +36,7 @@ public class GameDatabaseInviteHandler {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Toast.makeText(context, "a game invite has benn set to " + friendItem.getName(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(context, "a game invite has been sent to " + friendItem.getName(), Toast.LENGTH_LONG).show();
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {

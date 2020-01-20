@@ -199,107 +199,42 @@
                 style="@style/SecondaryColorRoundedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_above="@id/friendsListRecyclerView"
+                android:padding="10dp"
                 android:layout_alignParentRight="true"
                 android:layout_gravity="top"
+                android:layout_above="@id/pager"
                 android:layout_marginRight="15dp"
                 android:text="Send Friend Request" />
 
-            <!--            <RadioGroup-->
-            <!--                android:id="@+id/rdogrp"-->
-            <!--                android:layout_width="wrap_content"-->
-            <!--                android:layout_height="wrap_content"-->
-            <!--                android:layout_margin="8dp"-->
-            <!--                android:gravity="center"-->
-            <!--                android:layout_above="@id/friendsListRecyclerView"-->
-            <!--                android:layout_below="@id/sendFriendRequestButton"-->
-            <!--                android:orientation="horizontal" >-->
-
-            <!--                <RadioButton-->
-            <!--                    android:id="@+id/friendsList"-->
-            <!--                    android:layout_width="wrap_content"-->
-            <!--                    android:layout_height="wrap_content"-->
-            <!--                    android:layout_margin="0dp"-->
-            <!--                    style="@style/LightPrimaryRoundedButton"-->
-            <!--                    android:button="@null"-->
-            <!--                    android:checked="true"-->
-            <!--                    android:gravity="center" />-->
-
-            <!--                <RadioButton-->
-            <!--                    android:id="@+id/requestsList"-->
-            <!--                    android:layout_width="wrap_content"-->
-            <!--                    android:layout_height="wrap_content"-->
-            <!--                    android:layout_margin="0dp"-->
-            <!--                    style="@style/LightPrimaryRoundedButton"-->
-            <!--                    android:button="@null"-->
-            <!--                    android:gravity="center" />-->
-
-            <!--            </RadioGroup>-->
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/friendsListRecyclerView"
-                android:layout_width="match_parent"
-                android:layout_height="350dp"
+            <androidx.viewpager.widget.ViewPager
+                android:id="@+id/pager"
                 android:layout_below="@id/emailEditText"
-                android:layout_marginLeft="15dp"
                 android:layout_marginTop="10dp"
-                android:layout_marginRight="15dp"
-                android:layout_marginBottom="20dp"
-                android:background="@color/primaryTextColor"
-                android:fastScrollEnabled="true"
-                android:scrollbars="vertical" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/requestsListRecyclerView"
                 android:layout_width="match_parent"
-                android:layout_height="350dp"
-                android:layout_below="@id/friendsListRecyclerView"
-                android:layout_marginLeft="15dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginRight="15dp"
-                android:layout_marginBottom="20dp"
-                android:background="@color/primaryTextColor"
-                android:fastScrollEnabled="true"
-                android:scrollbars="vertical" />
+                android:layout_height="350dp">
 
-            <!--            <RelativeLayout-->
-            <!--                android:id="@+id/addFriendLayout"-->
-            <!--                android:layout_width="wrap_content"-->
-            <!--                android:layout_height="wrap_content"-->
-            <!--                android:layout_alignBottom="@+id/friendsListRecyclerView"-->
-            <!--                android:layout_alignParentEnd="true"-->
-            <!--                android:layout_alignParentRight="true"-->
-            <!--                android:orientation="vertical"-->
-            <!--                android:paddingEnd="30dp"-->
-            <!--                android:paddingRight="30dp"-->
-            <!--                android:paddingBottom="10dp"-->
-            <!--                android:visibility="visible">-->
-            <!--                <com.google.android.material.floatingactionbutton.FloatingActionButton-->
-            <!--                    android:id="@+id/addFriendButton"-->
-            <!--                    android:layout_width="wrap_content"-->
-            <!--                    android:layout_height="wrap_content"-->
-            <!--                    android:layout_marginEnd="5dp"-->
-            <!--                    android:layout_marginRight="5dp"-->
-            <!--                    android:layout_marginBottom="5dp"-->
-            <!--                    android:adjustViewBounds="true"-->
-            <!--                    android:contentDescription="@string/logo"-->
-            <!--                    android:src="@drawable/ic_add_circle_24dp"-->
-            <!--                    app:tint="@color/secondaryTextColor" />-->
-            <!--            </RelativeLayout>-->
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/tab_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/primaryTextColor"
+                     />
+
+            </androidx.viewpager.widget.ViewPager>
 
             <Button
                 android:id="@+id/logOutButton"
                 style="@style/SecondaryColorRoundedButton"
-                android:layout_below="@id/requestsListRecyclerView"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="10dp"
+                android:layout_below="@id/pager"
                 android:text="@string/LogOut" />
 
             <com.facebook.login.widget.LoginButton
                 android:id="@+id/facebook_log_out_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/requestsListRecyclerView"
+                android:layout_below="@id/pager"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="10dp" />
 
@@ -307,12 +242,13 @@
                 android:id="@+id/shareButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/logOutButton"
-                android:layout_centerHorizontal="true"
-                android:layout_marginTop="15dp"
                 android:adjustViewBounds="true"
                 android:background="@color/transparent"
+                android:layout_below="@id/pager"
+                android:layout_marginTop="10dp"
                 android:contentDescription="share"
+                android:layout_marginLeft="10dp"
+                android:layout_marginBottom="10dp"
                 android:src="@drawable/ic_share_black_24dp"
                 app:backgroundTint="@color/secondaryColor"
                 app:tint="@color/secondaryTextColor" />

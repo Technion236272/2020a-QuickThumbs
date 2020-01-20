@@ -43,7 +43,7 @@
             android:windowSoftInputMode="stateAlwaysHidden"
             android:screenOrientation="portrait"/>
         <activity
-            android:name="androidCourse.technion.quickthumbs.personalArea.FriendsActivity"
+            android:name="androidCourse.technion.quickthumbs.personalArea.FriendsFragment"
             android:label="@string/Friends"
             android:parentActivityName="androidCourse.technion.quickthumbs.personalArea.ProfileActivity"
             android:windowSoftInputMode="stateAlwaysHidden"
