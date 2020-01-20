@@ -38,6 +38,7 @@ import androidCourse.technion.quickthumbs.database.FriendsDatabaseHandler;
 import androidCourse.technion.quickthumbs.database.GameDatabaseInviteHandler;
 import androidCourse.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
 
+import static androidCourse.technion.quickthumbs.GameInvitePopUp.FriendInvitepopupWindow;
 import static androidCourse.technion.quickthumbs.MainUserActivity.friendUid;
 import static androidCourse.technion.quickthumbs.MainUserActivity.gameRoomsReference;
 import static androidCourse.technion.quickthumbs.MainUserActivity.mainUserActivityInstance;
@@ -125,6 +126,10 @@ public class FriendAdaptor extends FirestoreRecyclerAdapter<FriendItem, FriendVi
                 closeOtherMultiPlayerCalls();
                 //here the room for the game is created
                 createGameInviteCall(friendItem);
+                //close popUp invite room
+                if (FriendInvitepopupWindow != null) {
+                    FriendInvitepopupWindow.dismiss();
+                }
             }
 
         });
