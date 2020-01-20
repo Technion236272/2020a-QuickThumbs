@@ -163,7 +163,7 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
 
-                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+//                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
 
                         int currentThemeCount= 0 ;
                         if (document.getLong("textsCount") !=  null){
@@ -171,11 +171,11 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
                         }
                         changeThemeData(titleText, mainText, themesSelect, currentThemeCount, language, script);
                     } else {
-                        Log.d(TAG, "No such document");
+//                        Log.d(TAG, "No such document");
                         changeThemeData(titleText, mainText, themesSelect, 0, language, script);
                     }
                 } else {
-                    Log.d(TAG, "get failed with ", task.getException());
+//                    Log.d(TAG, "get failed with ", task.getException());
                     changeThemeData(titleText, mainText, themesSelect, 0, language, script);
                 }
             }
@@ -190,7 +190,7 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "DocumentSnapshot successfully written!");
+//                        Log.d(TAG, "DocumentSnapshot successfully written!");
                         AddTextToCollection(titleText,mainText,themesSelect,currentThemeCount,language, script);
                     }
                 })
@@ -227,7 +227,7 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "DocumentSnapshot successfully written!");
+//                        Log.d(TAG, "DocumentSnapshot successfully written!");
                         updateUserTexts(textDocumentName);
                     }
                 })
@@ -251,18 +251,18 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
 
-                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+//                        Log.d(TAG, "DocumentSnapshot data: " + document.getData());
                         int userTextsAmount= 0 ;
                         if (document.getLong("textsAdded") !=  null){
                             userTextsAmount = document.getLong("textsAdded").intValue();
                         }
                         changeUserData(userTextsAmount,textAddedId);
                     } else {
-                        Log.d(TAG, "No such document");
+//                        Log.d(TAG, "No such document");
                         changeUserData(0,textAddedId);
                     }
                 } else {
-                    Log.d(TAG, "get failed with ", task.getException());
+//                    Log.d(TAG, "get failed with ", task.getException());
                     changeUserData(0,textAddedId);
                 }
             }
@@ -278,7 +278,7 @@ public class AddTextActivity extends AppCompatActivity implements AdapterView.On
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "DocumentSnapshot successfully written!");
+//                        Log.d(TAG, "DocumentSnapshot successfully written!");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {

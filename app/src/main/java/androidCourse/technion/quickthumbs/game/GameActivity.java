@@ -655,7 +655,7 @@ public class GameActivity extends AppCompatActivity {
     private void setGameTextAndLogicAndEnding(TextView gameTextView) {
         Intent i = getIntent();
         if (i.hasExtra("text") && !changed) {
-            Log.d(TAG, "being set");
+//            Log.d(TAG, "being set");
             gameTextView.setText(i.getExtras().getString("text"));
             String id = i.getExtras().getString("id");
             String title = i.getExtras().getString("title");
@@ -743,7 +743,7 @@ public class GameActivity extends AppCompatActivity {
         currentWordEditor.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                Log.d(TAG, "beforeTextChanged start ...");
+//                Log.d(TAG, "beforeTextChanged start ...");
 
                 if (shouldStartTimer && gameRoomKey == null) {
                     gameStartTimeStamp = System.currentTimeMillis();
@@ -751,15 +751,15 @@ public class GameActivity extends AppCompatActivity {
                     shouldStartTimer = false;
                 }
 
-                Log.d(TAG, "beforeTextChanged finish ...");
+//                Log.d(TAG, "beforeTextChanged finish ...");
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                Log.d(TAG, "onTextChanged start ...");
+//                Log.d(TAG, "onTextChanged start ...");
 
                 if (!currentWordEditor.hasFocus()) {
-                    Log.d(TAG, "onTextChanged finished because of s.clear() ...");
+//                    Log.d(TAG, "onTextChanged finished because of s.clear() ...");
                     passOnAfterTextChanged = true;
                     currentWordEditor.requestFocus();
 
@@ -773,15 +773,15 @@ public class GameActivity extends AppCompatActivity {
                     logicOnRemovingKey();
                 }
 
-                Log.d(TAG, "onTextChanged finish ...");
+//                Log.d(TAG, "onTextChanged finish ...");
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-                Log.d(TAG, "afterTextChanged start ...");
+//                Log.d(TAG, "afterTextChanged start ...");
 
                 if (passOnAfterTextChanged) {
-                    Log.d(TAG, "afterTextChanged finished because of s.clear() ...");
+//                    Log.d(TAG, "afterTextChanged finished because of s.clear() ...");
                     passOnAfterTextChanged = false;
 
                     return;
@@ -830,7 +830,7 @@ public class GameActivity extends AppCompatActivity {
                     forwardCommand = true;
                 }
 
-                Log.d(TAG, "afterTextChanged finish ...");
+//                Log.d(TAG, "afterTextChanged finish ...");
             }
 
         });
@@ -1004,15 +1004,15 @@ public class GameActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             DocumentSnapshot document = task.getResult();
                             if (document.exists()) {
-                                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+//                                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
                                 Double avgWpm = document.getDouble("avgWPM");
                                 setSpeedComparedNumber(currentGameWpn, String.valueOf(avgWpm));
 
                             } else {
-                                Log.d(TAG, "No such document - reading statistics");
+//                                Log.d(TAG, "No such document - reading statistics");
                             }
                         } else {
-                            Log.d(TAG, "reading statistics failed with ", task.getException());
+//                            Log.d(TAG, "reading statistics failed with ", task.getException());
                         }
                     }
                 });
@@ -1107,7 +1107,7 @@ public class GameActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             DocumentSnapshot document = task.getResult();
                             if (document.exists()) {
-                                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+//                                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
                                 Long numOfGames = document.getLong(numOfGamesField);
                                 Double newAvgAccuracy =
                                         calcNewAvgAfterAddingElement(document.getDouble(accuracyField), numOfGames, accuracy);
@@ -1120,12 +1120,12 @@ public class GameActivity extends AppCompatActivity {
                                 writeToUserStatistics(numOfGames + 1, newAvgAccuracy, newAvgWPM, newAvgCPM, newTotalScore);
                                 writeGameResult(wpm, cpm, accuracy, points);
                             } else {
-                                Log.d(TAG, "No such document");
+//                                Log.d(TAG, "No such document");
                                 writeToUserStatistics(1, accuracy, wpm, cpm, points);
                                 writeGameResult(wpm, cpm, accuracy, points);
                             }
                         } else {
-                            Log.d(TAG, "get failed with ", task.getException());
+//                            Log.d(TAG, "get failed with ", task.getException());
                             writeToUserStatistics(1, accuracy, wpm, cpm, points);
                             writeGameResult(wpm, cpm, accuracy, points);
                         }
@@ -1158,7 +1158,7 @@ public class GameActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "user game result successfully written!");
+//                        Log.d(TAG, "user game result successfully written!");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -1186,7 +1186,7 @@ public class GameActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "user average statistics successfully written!");
+//                        Log.d(TAG, "user average statistics successfully written!");
                     }
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -1471,7 +1471,7 @@ public class GameActivity extends AppCompatActivity {
                                 if (task.isSuccessful()) {
                                     boolean ratedTextPreviously = false;
                                     for (QueryDocumentSnapshot document : task.getResult()) {
-                                        Log.d(TAG, document.getId() + " => " + document.getData());
+//                                        Log.d(TAG, document.getId() + " => " + document.getData());
                                         Double textRating = document.getDouble(textRatingField);
                                         if (textRating != null)
                                             ratedTextPreviously = true;
@@ -1482,7 +1482,7 @@ public class GameActivity extends AppCompatActivity {
 
                                     }
                                 } else {
-                                    Log.d(TAG, "Error getting documents: ", task.getException());
+//                                    Log.d(TAG, "Error getting documents: ", task.getException());
                                 }
                             }
                         });
@@ -1501,7 +1501,7 @@ public class GameActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "text rating successfully written into user game result!");
+//                        Log.d(TAG, "text rating successfully written into user game result!");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -1526,7 +1526,7 @@ public class GameActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, document.getId() + " => " + document.getData());
+//                                Log.d(TAG, document.getId() + " => " + document.getData());
                                 Double textRating = document.getDouble(textRatingField);
                                 Long numOfRatings = document.getLong(numOfRatingsField);
                                 if (textRating != null && numOfRatings != null) {
@@ -1541,7 +1541,7 @@ public class GameActivity extends AppCompatActivity {
                                 }
                             }
                         } else {
-                            Log.d(TAG, "Error getting text document to write rating: ", task.getException());
+//                            Log.d(TAG, "Error getting text document to write rating: ", task.getException());
                         }
                     }
                 });
@@ -1556,7 +1556,7 @@ public class GameActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                         if (task.isSuccessful() && task.getResult().exists()) {
                             DocumentSnapshot document = task.getResult();
-                            Log.d(TAG, document.getId() + " => " + document.getData());
+//                            Log.d(TAG, document.getId() + " => " + document.getData());
                             Double bestScore = document.getDouble("bestScore");
                             Double bestWPM = document.getDouble("bestWpm");
                             Long playCount = document.getLong("playCount");
@@ -1581,7 +1581,7 @@ public class GameActivity extends AppCompatActivity {
                                 writeTextStatisticsIntoComposerTextsCollection(textStatistics, document.getId());
                             }
                         } else {
-                            Log.d(TAG, "Error getting text document to write best score and wpm: ", task.getException());
+//                            Log.d(TAG, "Error getting text document to write best score and wpm: ", task.getException());
                         }
                     }
                 });
@@ -1596,7 +1596,7 @@ public class GameActivity extends AppCompatActivity {
                     @Override
                     public void onSuccess(Void aVoid) {
                         updateTextStatisticsGlobally(textStatistics);
-                        Log.d(TAG, "best score successfully updated into composer collection!");
+//                        Log.d(TAG, "best score successfully updated into composer collection!");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -1614,7 +1614,7 @@ public class GameActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "best score successfully updated into themes collection!");
+//                        Log.d(TAG, "best score successfully updated into themes collection!");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -1629,7 +1629,7 @@ public class GameActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "best score successfully updated into texts collection!");
+//                        Log.d(TAG, "best score successfully updated into texts collection!");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -1649,7 +1649,7 @@ public class GameActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "text rating successfully written into composer collection!");
+//                        Log.d(TAG, "text rating successfully written into composer collection!");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -1675,7 +1675,7 @@ public class GameActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "text rating successfully written into themes collection!");
+//                        Log.d(TAG, "text rating successfully written into themes collection!");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -1692,7 +1692,7 @@ public class GameActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "text rating successfully written into texts collection!");
+//                        Log.d(TAG, "text rating successfully written into texts collection!");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {

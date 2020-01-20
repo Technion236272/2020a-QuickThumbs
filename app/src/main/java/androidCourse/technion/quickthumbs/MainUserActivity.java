@@ -194,33 +194,33 @@ public class MainUserActivity extends Fragment {
         listener = new CircleMenuView.EventListener() {
             @Override
             public void onMenuOpenAnimationStart(@NonNull CircleMenuView view) {
-                Log.d("D", "onMenuOpenAnimationStart");
+//                Log.d("D", "onMenuOpenAnimationStart");
             }
 
             @Override
             public void onMenuOpenAnimationEnd(@NonNull CircleMenuView view) {
-                Log.d("D", "onMenuOpenAnimationEnd");
+//                Log.d("D", "onMenuOpenAnimationEnd");
             }
 
             @Override
             public void onMenuCloseAnimationStart(@NonNull CircleMenuView view) {
-                Log.d("D", "onMenuCloseAnimationStart");
+//                Log.d("D", "onMenuCloseAnimationStart");
             }
 
             @Override
             public void onMenuCloseAnimationEnd(@NonNull CircleMenuView view) {
-                Log.d("D", "onMenuCloseAnimationEnd");
+//                Log.d("D", "onMenuCloseAnimationEnd");
             }
 
             @Override
             public void onButtonClickAnimationStart(@NonNull CircleMenuView view, int index) {
-                Log.d("D", "onButtonClickAnimationStart| index: " + index);
+//                Log.d("D", "onButtonClickAnimationStart| index: " + index);
 
             }
 
             @Override
             public void onButtonClickAnimationEnd(@NonNull CircleMenuView view, int index) {
-                Log.d("D", "onButtonClickAnimationEnd| index: " + index);
+//                Log.d("D", "onButtonClickAnimationEnd| index: " + index);
                 switch (index) {
                     case 0:
                         ThemeSelectPopUp popUpWindow = new ThemeSelectPopUp();
@@ -291,7 +291,7 @@ public class MainUserActivity extends Fragment {
                     setUIBackToNormal();
                 } else {
                     acceptedInvitationRoomKey = "-1";
-                    Log.d(TAG, "maybe already erased ...");
+//                    Log.d(TAG, "maybe already erased ...");
                     Toast.makeText(getActivity(), "room was already erased", Toast.LENGTH_LONG).show();
                 }
             }
@@ -384,14 +384,14 @@ public class MainUserActivity extends Fragment {
                     String name = (String) data.get("name");
 
                     localUserName = name;
-                    Log.d(TAG, String.format("fetched user name -> %s", name));
+//                    Log.d(TAG, String.format("fetched user name -> %s", name));
                 }
             }
         });
     }
 
     private void startSearchForGame() {
-        Log.d(TAG, "Starting to search for multi player game");
+//        Log.d(TAG, "Starting to search for multi player game");
         amountOfPlayerView.setText("Searching Room ...");
 
         int magicNumber = 10;
@@ -403,7 +403,7 @@ public class MainUserActivity extends Fragment {
                 long childrenCount = dataSnapshot.getChildrenCount();
 
                 if (childrenCount == 0) {
-                    Log.d(TAG, "Found out that there are no rooms exist");
+//                    Log.d(TAG, "Found out that there are no rooms exist");
 
                     new FetchRandomTextId().execute();
 
@@ -417,7 +417,7 @@ public class MainUserActivity extends Fragment {
                     if (chosenIndex == i) {
                         final String roomKey = data.getKey();
 
-                        Log.d(TAG, String.format("Trying to catch room with key -> %s", roomKey));
+//                        Log.d(TAG, String.format("Trying to catch room with key -> %s", roomKey));
 
                         mDatabase.runTransaction(new Transaction.Handler() {
                             @NonNull
@@ -453,7 +453,7 @@ public class MainUserActivity extends Fragment {
                             public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
                                 if (dataSnapshot != null && dataSnapshot.exists()) {
                                     if (b) {  //was committed
-                                        Log.d(TAG, "Successfully removed searching room and added to game room");
+//                                        Log.d(TAG, "Successfully removed searching room and added to game room");
 
                                         setUIBackToNormal();
 
@@ -474,7 +474,7 @@ public class MainUserActivity extends Fragment {
                                         i.putExtra("startingTimeStamp", System.currentTimeMillis());
                                         context.startActivity(i);
                                     } else {
-                                        Log.d(TAG, "Starting room creation process");
+//                                        Log.d(TAG, "Starting room creation process");
 
                                         new FetchRandomTextId().execute();
 
@@ -492,13 +492,13 @@ public class MainUserActivity extends Fragment {
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                Log.d(TAG, databaseError.getMessage());
+//                Log.d(TAG, databaseError.getMessage());
             }
         });
     }
 
     private void setStartMultiplayerGameWhenFlagActivated(final String roomKey, final String textId, final int indexInRoom) {
-        Log.d(TAG, "adding listener for game flag");
+//        Log.d(TAG, "adding listener for game flag");
         localGameRoomKey = roomKey;
         valueEventListener = gameRoomsReference.child(roomKey).addValueEventListener(new ValueEventListener() {
                                                                                          @Override
@@ -508,7 +508,7 @@ public class MainUserActivity extends Fragment {
                                                                                                  return;
                                                                                              }
 
-                                                                                             Log.d(TAG, "Flag was turned in game room so user should move to game");
+//                                                                                             Log.d(TAG, "Flag was turned in game room so user should move to game");
 
                                                                                              int currentAmount = 2;
                                                                                              int targetAmount = 2;
@@ -540,7 +540,7 @@ public class MainUserActivity extends Fragment {
     }
 
     private void NotifyThatGameRejected(final String roomKey) {
-        Log.d(TAG, "Going to the right room");
+//        Log.d(TAG, "Going to the right room");
         amountOfPlayerView.setText("Searching Room ...");
         acceptedInvitationRoomKey = "-1";
         gameRoomsReference.child(roomKey).runTransaction(new Transaction.Handler() {
@@ -563,18 +563,18 @@ public class MainUserActivity extends Fragment {
             @Override
             public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
                 if (b) {  //was committed
-                    Log.d(TAG, "Successfully changed the game room");
+//                    Log.d(TAG, "Successfully changed the game room");
 //                    setUIBackToNormal();
 //                    rippleBackground.stopRippleAnimation();
                 } else {
-                    Log.d(TAG, "Friend enter game should not fail!!, might be connectivity issues or any other unexpected problem");
+//                    Log.d(TAG, "Friend enter game should not fail!!, might be connectivity issues or any other unexpected problem");
                 }
             }
         });
     }
 
     private void StartSpecifiedGame(final String roomKey) {
-        Log.d(TAG, "Going to the right room");
+//        Log.d(TAG, "Going to the right room");
         amountOfPlayerView.setText("Searching Room ...");
         acceptedInvitationRoomKey = "-1";
         gameRoomsReference.child(roomKey).runTransaction(new Transaction.Handler() {
@@ -597,7 +597,7 @@ public class MainUserActivity extends Fragment {
             @Override
             public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
                 if (b) {  //was committed
-                    Log.d(TAG, "Successfully added to game room");
+//                    Log.d(TAG, "Successfully added to game room");
                     setUIBackToNormal();
 
                     rippleBackground.stopRippleAnimation();
@@ -620,7 +620,7 @@ public class MainUserActivity extends Fragment {
                     context.startActivity(i);
                 } else {
 
-                    Log.d(TAG, "Friend enter game should not fail!!, might be connectivity issues or any other unexpected problem");
+//                    Log.d(TAG, "Friend enter game should not fail!!, might be connectivity issues or any other unexpected problem");
                 }
             }
         });
@@ -630,7 +630,7 @@ public class MainUserActivity extends Fragment {
     public void createSpecialRoom(final Myparam myparam) {
         final String friendUid = myparam.friendItem.getuid();
         final String textId = myparam.textId;
-        Log.d(TAG, "Starting to create separate room");
+//        Log.d(TAG, "Starting to create separate room");
         final String key = searchingRoomsLevel1.push().getKey();
 
         GameRoom newRoom = new GameRoom(localUserName, 0, null, 0, textId, false, false, false, -1, -1);
@@ -657,7 +657,7 @@ public class MainUserActivity extends Fragment {
     }
 
     public void setGameForFriends(final String roomKey, final String textId, final int indexInRoom) {
-        Log.d(TAG, "adding listener for game flag");
+//        Log.d(TAG, "adding listener for game flag");
         localGameRoomKey = roomKey;
         friendInvitevalueEventListener = gameRoomsReference.child(roomKey).addValueEventListener(new ValueEventListener() {
                                                                                                      @Override
@@ -670,7 +670,7 @@ public class MainUserActivity extends Fragment {
 
                                                                                                          if (gameRoom.started) {
 
-                                                                                                             Log.d(TAG, "Flag was turned in game room so user should move to game");
+//                                                                                                             Log.d(TAG, "Flag was turned in game room so user should move to game");
 
                                                                                                              int currentAmount = 2;
                                                                                                              int targetAmount = 2;
@@ -694,7 +694,7 @@ public class MainUserActivity extends Fragment {
                                                                                                              closeMultiPlayerRoom(roomKey);
 
                                                                                                          } else {
-                                                                                                             Log.d(TAG, "should not get herem BUG!!!");
+//                                                                                                             Log.d(TAG, "should not get herem BUG!!!");
                                                                                                          }
 
 
@@ -732,7 +732,7 @@ public class MainUserActivity extends Fragment {
     }
 
     public void createSeparateRoom(final String textId) {
-        Log.d(TAG, "Starting to create separate room");
+//        Log.d(TAG, "Starting to create separate room");
         final String key = searchingRoomsLevel1.push().getKey();
 
         GameRoom newRoom = new GameRoom(localUserName, 0, null, 0, textId, false, false, false, -1, -1);
@@ -864,15 +864,15 @@ public class MainUserActivity extends Fragment {
                 if (task.isSuccessful()) {
                     DocumentSnapshot document = task.getResult();
                     if (document.exists()) {
-                        Log.d(TAG, "getRandomTheme:" + "DocumentSnapshot data: " + document.getData());
+//                        Log.d(TAG, "getRandomTheme:" + "DocumentSnapshot data: " + document.getData());
                         int textsAmount = document.getLong("textsCount").intValue();
                         getRandomText(choosenTheme, textsAmount);
                     } else {
-                        Log.d(TAG, "getRandomTheme:" + "No such document");
+//                        Log.d(TAG, "getRandomTheme:" + "No such document");
                         //TODO: is it possible that we will reach here?
                     }
                 } else {
-                    Log.d(TAG, "getRandomTheme:" + "get failed with ", task.getException());
+//                    Log.d(TAG, "getRandomTheme:" + "get failed with ", task.getException());
                     //TODO: is it possible that we will reach here?
                 }
             }
@@ -923,7 +923,7 @@ public class MainUserActivity extends Fragment {
                         }
                     }
                 } else {
-                    Log.d(TAG, "getRandomText: " + "get failed with ", task.getException());
+//                    Log.d(TAG, "getRandomText: " + "get failed with ", task.getException());
                 }
             }
         });
