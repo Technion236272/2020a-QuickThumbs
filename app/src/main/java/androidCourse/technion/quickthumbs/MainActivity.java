@@ -106,24 +106,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         facebookLogIn.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                Log.d(TAG, "facebook:onSuccess:" + loginResult);
+//                Log.d(TAG, "facebook:onSuccess:" + loginResult);
                 handleFacebookAccessToken(loginResult.getAccessToken());
             }
 
             @Override
             public void onCancel() {
-                Log.d(TAG, "facebook:onCancel");
+//                Log.d(TAG, "facebook:onCancel");
             }
 
             @Override
             public void onError(FacebookException error) {
-                Log.d(TAG, "facebook:onError", error);
+//                Log.d(TAG, "facebook:onError", error);
             }
         });
     }
 
     private void handleFacebookAccessToken(final AccessToken token) {
-        Log.d(TAG, "handleFacebookAccessToken:" + token);
+//        Log.d(TAG, "handleFacebookAccessToken:" + token);
 
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         fireBaseAuth.signInWithCredential(credential)
@@ -132,7 +132,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful() && fireBaseAuth.getCurrentUser()!=null) {
                             // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithCredential:success");
+//                            Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = fireBaseAuth.getCurrentUser();
                             String email = user.getEmail();
                             String uid = fireBaseAuth.getUid();
@@ -209,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     // START auth_with_google
     private void firebaseAuthWithGoogle(final GoogleSignInAccount acct) {
-        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
+//        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         fireBaseAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
@@ -217,7 +217,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful() && fireBaseAuth.getCurrentUser()!=null) {
                             // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithCredential:success");
+//                            Log.d(TAG, "signInWithCredential:success");
                             Map<String, Object> changedUser = new HashMap<>();
                             changedUser.put("uid", fireBaseAuth.getUid());
                             changedUser.put("email", fireBaseAuth.getCurrentUser().getEmail());
@@ -256,7 +256,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             startActivity(intent);
             finish();
-            Log.d(TAG, "already signed in user: " + uid);
+//            Log.d(TAG, "already signed in user: " + uid);
             return;
         }
         if (currentUser != null) {
@@ -267,7 +267,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
                 startActivity(intent);
                 finish();
-                Log.d(TAG, "already signed in user: " + uid);
+//                Log.d(TAG, "already signed in user: " + uid);
                 return;
             }
         }
@@ -281,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             startActivity(intent);
             finish();
-            Log.d(TAG, "already signed in user: " + uid);
+//            Log.d(TAG, "already signed in user: " + uid);
         }
     }
 
@@ -294,13 +294,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         Toast.makeText(MainActivity.this, "Successfully signed in.", Toast.LENGTH_LONG)
                                 .show();
                         moveToMainUserActivityIfAlreadyLoggedIn();
-                        Log.d(TAG, "User was inserted to to DB!");
+//                        Log.d(TAG, "User was inserted to to DB!");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing document", e);
+//                        Log.w(TAG, "Error writing document", e);
                     }
                 });
     }
@@ -342,7 +342,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                                         changedUser.put("name", userMail.substring(0,userMail.indexOf("@")));
                                     }
                                     addUserDataToCollection(changedUser);
-                                    Log.d(TAG, "successfully signed in user: " + uid);
+//                                    Log.d(TAG, "successfully signed in user: " + uid);
                                 } else {
                                     Toast.makeText(MainActivity.this, "Authentication failed. Please verify your email.", Toast.LENGTH_LONG)
                                             .show();
@@ -364,7 +364,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            Log.d(TAG, "Verification mail sent successfully");
+//                            Log.d(TAG, "Verification mail sent successfully");
 //                            finish();
                             Toast.makeText(MainActivity.this,
                                     "Verification email sent to " + user.getEmail(),

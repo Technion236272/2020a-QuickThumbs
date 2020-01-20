@@ -113,7 +113,7 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
                     DocumentSnapshot data = task.getResult();
 
                     if (data == null) {
-                        Log.d(TAG, "getRandomText: another round");
+//                        Log.d(TAG, "getRandomText: another round");
                     } else {
                         TextDataRow textCardItem = TextDataRow.createTextCardItem(data, roomKey, indexInRoom, startingTimeStamp);
                         final Intent intent = setIntentForTheGame(textCardItem);
@@ -131,7 +131,7 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
                     }
 
                 } else {
-                    Log.d(TAG, "getRandomText: " + "get failed with ", task.getException());
+//                    Log.d(TAG, "getRandomText: " + "get failed with ", task.getException());
                 }
             }
         });
@@ -139,8 +139,8 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
 
     private void showBestStatsOnScreen(TextDataRow selectedTextItem) {
         if (Long.valueOf(selectedTextItem.getNumberOfTimesPlayed()) != 0) {
-            Log.d(TAG, selectedTextItem.getBestScore());
-            Log.d(TAG, selectedTextItem.getFastestSpeed() );
+//            Log.d(TAG, selectedTextItem.getBestScore());
+//            Log.d(TAG, selectedTextItem.getFastestSpeed() );
 
             config.withAfterLogoText("Best score on this text is " + selectedTextItem.getBestScore() + ".\n" +
                     "Fastest speed achieved on this text is " + selectedTextItem.getFastestSpeed() +
@@ -293,15 +293,15 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()) {
-                            Log.d(TAG, "getRandomTheme:" + "DocumentSnapshot data: " + document.getData());
+//                            Log.d(TAG, "getRandomTheme:" + "DocumentSnapshot data: " + document.getData());
                             int textsAmount = document.getLong("textsCount").intValue();
                             getRandomText(choosenTheme, textsAmount);
                         } else {
-                            Log.d(TAG, "getRandomTheme:" + "No such document");
+//                            Log.d(TAG, "getRandomTheme:" + "No such document");
                             //TODO: is it possible that we will reach here?
                         }
                     } else {
-                        Log.d(TAG, "getRandomTheme:" + "get failed with ", task.getException());
+//                        Log.d(TAG, "getRandomTheme:" + "get failed with ", task.getException());
                         //TODO: is it possible that we will reach here?
                     }
                 }
@@ -337,10 +337,10 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         if (task.getResult().isEmpty()) {
                             fetchRandomTextSpecifiedForUsers();
-                            Log.d(TAG, "getRandomText: another round");
+//                            Log.d(TAG, "getRandomText: another round");
                         } else {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, "getRandomText: " + "DocumentSnapshot data: " + document.getData());
+//                                Log.d(TAG, "getRandomText: " + "DocumentSnapshot data: " + document.getData());
                                 TextDataRow textCardItem = TextDataRow.createTextCardItem(document, null, -1, null);
                                 int playCount = Integer.parseInt(textCardItem.getNumberOfTimesPlayed());
                                 String composer = textCardItem.getComposer();
@@ -353,7 +353,7 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
                             }
                         }
                     } else {
-                        Log.d(TAG, "getRandomText: " + "get failed with ", task.getException());
+//                        Log.d(TAG, "getRandomText: " + "get failed with ", task.getException());
                     }
                 }
             });

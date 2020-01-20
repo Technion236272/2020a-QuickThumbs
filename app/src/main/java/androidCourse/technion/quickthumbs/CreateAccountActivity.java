@@ -84,7 +84,7 @@ public class CreateAccountActivity extends AppCompatActivity {
                             FirebaseUser user = fireBaseAuth.getCurrentUser();
                             String uid = user.getUid();
                             sendUserEmailVerification(user);
-                            Log.d(TAG, "successfully created user for uid: " + uid);
+//                            Log.d(TAG, "successfully created user for uid: " + uid);
                         } else {
                             Toast.makeText(CreateAccountActivity.this, "Creation failed.", Toast.LENGTH_LONG)
                                     .show();
@@ -103,13 +103,13 @@ public class CreateAccountActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            Log.d(TAG, "Verification mail sent successfully");
+//                            Log.d(TAG, "Verification mail sent successfully");
                             Toast.makeText(CreateAccountActivity.this,
                                     "Verification email sent to " + user.getEmail(),
                                     Toast.LENGTH_SHORT).show();
                             finish();
                         } else {
-                            Log.e(TAG, "sendEmailVerification", task.getException());
+//                            Log.e(TAG, "sendEmailVerification", task.getException());
                             Toast.makeText(CreateAccountActivity.this,
                                     "Failed to send verification email.",
                                     Toast.LENGTH_SHORT).show();

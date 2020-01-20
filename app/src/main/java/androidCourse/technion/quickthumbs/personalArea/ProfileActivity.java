@@ -203,7 +203,7 @@ public class ProfileActivity extends Fragment {
                         if (task.isSuccessful() && task.getResult() != null) {
                             DocumentSnapshot userDocument = task.getResult();
                             addFriendRequestToDatabaseIfEmailExists(userDocument, friendEmail, email, clickable, fragmentView);
-                            Log.d(TAG, "getUserDocumentItem success");
+//                            Log.d(TAG, "getUserDocumentItem success");
                         } else {
                             clickable.setEnabled(true);
                         }
@@ -222,7 +222,7 @@ public class ProfileActivity extends Fragment {
                             for (QueryDocumentSnapshot friendDocument : task.getResult()) {
                                 addFriendRequestToSenderFriendsCollection(userDocument, friendDocument,
                                         email, clickable, fragmentView);
-                                Log.d(TAG, "addFriendRequestToDatabaseIfEmailExists");
+//                                Log.d(TAG, "addFriendRequestToDatabaseIfEmailExists");
                             }
                         } else {
                             Toast.makeText(fragmentView.getContext(), "Email doesn't exist in the system", Toast.LENGTH_LONG).show();
@@ -247,7 +247,7 @@ public class ProfileActivity extends Fragment {
                             if (!friendDocumentSnapshot.exists() || friendDocumentSnapshot.getData() == null) {
                                 //I don't have a request from that user, so should continue ...
                                 addFriendRequestIfNoPreviousRequestsExist(userDocumentId, friendDocument, email, clickable, fragmentView);
-                                Log.d(TAG, "addFriendRequestToSenderFriendsCollection success");
+//                                Log.d(TAG, "addFriendRequestToSenderFriendsCollection success");
                             } else {
                                 Toast.makeText(fragmentView.getContext(), "You already have a friend request from that user", Toast.LENGTH_LONG).show();
                                 email.clear();
