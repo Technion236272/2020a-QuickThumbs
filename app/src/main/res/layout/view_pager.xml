@@ -47,7 +47,7 @@
             android:layout_height="wrap_content"
             android:layout_alignParentLeft="true"
             android:layout_marginLeft="10dp"
-            android:text= "Stats"
+            android:text= "@string/Profile"
             android:textColor="@color/primaryTextColor"
             android:layout_below = "@id/statsImageButton" />
 

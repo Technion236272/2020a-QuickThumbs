@@ -37,7 +37,7 @@ import java.util.Map;
 
 
 public class ThemeSelectPopUp {
-    private static final String TAG = AddTextActivity.class.getSimpleName();
+    private static final String TAG = ThemeSelectPopUp.class.getSimpleName();
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
     private RecyclerView recyclerView;

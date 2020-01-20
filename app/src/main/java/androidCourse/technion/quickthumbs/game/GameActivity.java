@@ -1031,11 +1031,11 @@ public class GameActivity extends AppCompatActivity {
 
         if (wpmCompareNumber >= 0) {
             color = new ForegroundColorSpan(Color.GREEN);
-            textIndication = "better than your average by ";
+            textIndication = "Better than your average by ";
             techniques = Techniques.Bounce;
         } else {
             color = new ForegroundColorSpan(Color.RED);
-            textIndication = "worse than your average by ";
+            textIndication = "Worse than your average by ";
             techniques = Techniques.Shake;
         }
 

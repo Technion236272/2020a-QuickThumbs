@@ -39,7 +39,7 @@
                     app:rb_scale="6">
                     <androidCourse.technion.quickthumbs.Utils.CircleMenuView
                         android:id="@+id/circle_menu"
-                        android:layout_width="420dp"
+                        android:layout_width="match_parent"
                         android:layout_height="300dp"
                         android:layout_centerInParent="true"
                         android:adjustViewBounds="true"
@@ -49,7 +49,7 @@
                     <ImageView
                         android:id="@+id/waitingLogo"
                         android:visibility="invisible"
-                        android:layout_width="420dp"
+                        android:layout_width="match_parent"
                         android:layout_height="300dp"
                         android:layout_centerInParent="true"
                         android:adjustViewBounds="true"

@@ -6,11 +6,13 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -23,7 +25,6 @@ import android.os.Bundle;
 import androidCourse.technion.quickthumbs.MainActivity;
 import androidCourse.technion.quickthumbs.R;
 import androidCourse.technion.quickthumbs.Utils.CacheHandler;
-import androidCourse.technion.quickthumbs.game.GameActivity;
 import androidCourse.technion.quickthumbs.personalArea.FriendsList.FriendAdaptor;
 import androidCourse.technion.quickthumbs.personalArea.FriendsList.FriendItem;
 
@@ -55,6 +56,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.dynamiclinks.DynamicLink;
@@ -164,47 +166,14 @@ public class ProfileActivity extends Fragment {
                     }
                 }
         );
-        setFriendsList(view);
-        setRequestsList(view);
+
+        ViewPager viewPager = view.findViewById(R.id.pager);
+        FriendsPagerAdapter adapterViewPager = new FriendsPagerAdapter(getChildFragmentManager());
+        viewPager.setAdapter(adapterViewPager);
+        TabLayout tabLayout = view.findViewById(R.id.tab_layout);
+        tabLayout.setupWithViewPager(viewPager);
     }
 
-    private void setFriendsList(View view) {
-        //handling the recycler view part
-        friendsListRecyclerView = (RecyclerView) getActivity().findViewById(R.id.friendsListRecyclerView);
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
-        friendsListRecyclerView.setHasFixedSize(true);
-        // use a linear layout manager
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
-        friendsListRecyclerView.setLayoutManager(layoutManager);
-
-        Query query = db.collection("users").document(getUid(view)).collection("friends")
-                .orderBy("TotalScore", Query.Direction.DESCENDING);
-        final FirestoreRecyclerOptions<FriendItem> friends = new FirestoreRecyclerOptions.Builder<FriendItem>()
-                .setQuery(query, FriendItem.class)
-                .build();
-        friendAdaptor = new FriendAdaptor(friends, getContext(), true);
-        friendsListRecyclerView.setAdapter(friendAdaptor);
-    }
-
-    private void setRequestsList(View view) {
-        //handling the recycler view part
-        requestsListRecyclerView = (RecyclerView) getActivity().findViewById(R.id.requestsListRecyclerView);
-        // use this setting to improve performance if you know that changes
-        // in content do not change the layout size of the RecyclerView
-        requestsListRecyclerView.setHasFixedSize(true);
-        // use a linear layout manager
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
-        requestsListRecyclerView.setLayoutManager(layoutManager);
-
-        Query query = db.collection("users").document(getUid(view)).collection("requests")
-                .orderBy("email", Query.Direction.DESCENDING);
-        final FirestoreRecyclerOptions<FriendItem> requests = new FirestoreRecyclerOptions.Builder<FriendItem>()
-                .setQuery(query, FriendItem.class)
-                .build();
-        requestAdaptor = new FriendAdaptor(requests, getContext(), false);
-        requestsListRecyclerView.setAdapter(requestAdaptor);
-    }
 
     private void setSendFriendRequestButton(final View view) {
         view.findViewById(R.id.sendFriendRequestButton).setOnClickListener(
@@ -759,7 +728,7 @@ public class ProfileActivity extends Fragment {
     }
 
     public void moveToFriendsActivity(View view) {
-        Intent intent = new Intent(getActivity(), FriendsActivity.class);
+        Intent intent = new Intent(getActivity(), FriendsFragment.class);
         startActivity(intent);
     }
 
@@ -843,35 +812,45 @@ public class ProfileActivity extends Fragment {
 
         startActivity(Intent.createChooser(intent, "Share Link"));
     }
+}
 
-    @Override
-    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
-        super.onViewStateRestored(savedInstanceState);
-        friendAdaptor.startListening();
-        requestAdaptor.startListening();
+
+class FriendsPagerAdapter extends FragmentStatePagerAdapter {
+    private static int NUM_ITEMS = 2;
+
+    public FriendsPagerAdapter(FragmentManager fm){
+        super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        friendAdaptor.stopListening();
-        requestAdaptor.stopListening();
+    public int getCount() {
+        return NUM_ITEMS;
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        friendAdaptor.startListening();
-        requestAdaptor.startListening();
+    public CharSequence getPageTitle(int position) {
+        switch (position) {
+            case 0: // Fragment # 0 - This will show Friends Fragment
+                return "Friends";
+            case 1: // Fragment # 1 - This will show Friend Requests Fragment
+                return "Friend Requests";
+            default:
+                return null;
+        }
     }
 
+    @NonNull
     @Override
-    public void onStop() {
-        super.onStop();
-        friendAdaptor.stopListening();
-        requestAdaptor.stopListening();
+    public Fragment getItem(int position) {
+        switch (position) {
+            case 0: // Fragment # 0 - This will show Friends Fragment
+                return new FriendsFragment();
+            case 1: // Fragment # 1 - This will show Friend Requests Fragment
+                return new FriendRequestsFragment();
+            default:
+                return null;
+        }
     }
-
 }
 
 
