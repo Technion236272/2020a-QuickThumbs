@@ -366,15 +366,37 @@ public class CircleMenuView extends FrameLayout {
         });
     }
 
+    public class FloatingImageButton extends FloatingActionButton {
+
+
+        public FloatingImageButton(Context context) {
+            super(context);
+        }
+
+        public FloatingImageButton(Context context, AttributeSet attrs) {
+            super(context, attrs);
+        }
+
+        @Override
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+            setPadding(0, 0, 0, 0);
+            setScaleType(ScaleType.CENTER_INSIDE);
+
+
+        }
+    }
+
     private void initButtons(@NonNull Context context, @NonNull List<Integer> icons, @NonNull List<Integer> colors) {
         final int buttonsCount = Math.min(icons.size(), colors.size());
         for (int i = 0; i < buttonsCount; i++) {
-            final FloatingActionButton button = new FloatingActionButton(context);
+            final FloatingImageButton button = new FloatingImageButton(context);
             button.setImageResource(icons.get(i));
             button.setBackgroundTintList(ColorStateList.valueOf(colors.get(i)));
             button.setClickable(true);
             button.setOnClickListener(new OnButtonClickListener());
             button.setOnLongClickListener(new OnButtonLongClickListener());
+//            button.setCustomSize(170);
             button.setScaleX(0);
             button.setScaleY(0);
             button.setLayoutParams(new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT));
