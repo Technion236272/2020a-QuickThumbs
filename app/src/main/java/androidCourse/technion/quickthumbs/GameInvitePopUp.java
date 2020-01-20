@@ -29,7 +29,7 @@ public class GameInvitePopUp {
     private RecyclerView recyclerView;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
-
+    public static PopupWindow FriendInvitepopupWindow;
     public void showPopupWindow(final View view, View callingLayout, FriendAdaptor friendAdaptor) {
         LayoutInflater inflater = (LayoutInflater) view.getContext()
                 .getSystemService(view.getContext().LAYOUT_INFLATER_SERVICE);
@@ -37,7 +37,7 @@ public class GameInvitePopUp {
 
         //setRecyclerViewHeight(popupView);
 
-        final PopupWindow popupWindow = new PopupWindow(
+        FriendInvitepopupWindow = new PopupWindow(
                 popupView,
                 ViewGroup.LayoutParams.WRAP_CONTENT, //popup width
                 ViewGroup.LayoutParams.WRAP_CONTENT, //popup height
@@ -45,17 +45,17 @@ public class GameInvitePopUp {
         );
 
         if(Build.VERSION.SDK_INT>=21){
-            popupWindow.setElevation(5.0f);
+            FriendInvitepopupWindow.setElevation(5.0f);
         }
 
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        setBackToMainButton(popupView,popupWindow);
+        setBackToMainButton(popupView, FriendInvitepopupWindow);
 
-        setOnDismissListener(popupWindow, popupWindow);
+        setOnDismissListener(FriendInvitepopupWindow, FriendInvitepopupWindow);
 
-        popupWindow.showAtLocation(callingLayout, Gravity.CENTER,0,0);
+        FriendInvitepopupWindow.showAtLocation(callingLayout, Gravity.CENTER, 0, 0);
 
         setListAdapter(popupView,view, friendAdaptor);
     }
