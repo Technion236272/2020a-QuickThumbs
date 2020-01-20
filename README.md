@@ -47,16 +47,40 @@ Icons made by <a href="https://www.flaticon.com/authors/wanicon" title="wanicon"
 Icons made by <a href="https://www.flaticon.com/authors/wanicon" title="wanicon">wanicon</a> from <a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
 
 ### Libraries and project used
+
+[Google Play Services](https://developers.google.com/android/reference/packages) for play-services-auth and com.google.android.material
+- [terms of use](https://policies.google.com/terms)
+
+[Facebook Developer](https://developers.facebook.com/) - Facebook users login [Platform Policy](https://developers.facebook.com/policy/)
+
 [FireBase services:](https://firebase.google.com/terms)
 
 * firebase-database
 * firebase-firestore
 * firebase-analytics
 * firebase-auth
+* firebase-ml-natural-language
+* firebase-dynamic-links
+* firebase-messaging
+* firebase-storage
+
+
+[Github: Ramotion Circlemenu](https://github.com/Ramotion/circle-menu-android/blob/master/LICENSE)
 
 [Github: daimajia/AndroidViewAnimations project](https://github.com/daimajia/AndroidViewAnimations)
 
-[Github: r0adkll/Slidr project](https://github.com/r0adkll/Slidr)
+[Github: balysv/material-ripple project](https://github.com/balysv/material-ripple/blob/master/LICENSE)
+
+[Github: skyfishjy/android-ripple-background](https://github.com/skyfishjy/android-ripple-background/blob/master/LICENSE)
+
+[Github: hdodenhof/CircleImageView](https://github.com/hdodenhof/CircleImageView/blob/master/LICENSE.txt)
+
+[Github: pantrif/EasySplashScreen](https://github.com/pantrif/EasySplashScreen)
+
+[Github: appus-studio/Zoom-Splash](https://github.com/appus-studio/Zoom-Splash)
+
+[Google Gson](https://github.com/google/gson)
+
 
 [privacy policy](https://pastebin.com/YNPRJWyg)
 
