@@ -172,6 +172,7 @@ public class MainUserActivity extends Fragment {
 
         checkIfHasGameInvitation();
 
+        Toast.makeText(view.getContext(), "Press on the logo to start play", Toast.LENGTH_SHORT).show();
     }
 
     private void checkIfHasGameInvitation() {
@@ -238,7 +239,6 @@ public class MainUserActivity extends Fragment {
 
                     case 2:
 
-                        startMultiplaterGameUiChanges();
 
                         if (acceptedInvitationRoomKey != "-1") {//has an open invitation
                             open(waitingLogo);
@@ -267,6 +267,7 @@ public class MainUserActivity extends Fragment {
             @Override
             public void onClick(DialogInterface arg0, int arg1) {
                 StartSpecifiedGame(String.valueOf(acceptedInvitationRoomKey));
+                startMultiplaterGameUiChanges();
             }
         });
         alertDialogBuilder.setNegativeButton("No", new DialogInterface.OnClickListener() {
