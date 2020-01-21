@@ -23,7 +23,8 @@
         android:layout_height="wrap_content"
         android:scrollbars="vertical"
         android:layout_below="@id/selectThemesTitle"
-        android:layout_above="@id/startGamePopUpButton"/>
+        android:layout_above="@id/startGamePopUpButton"
+        android:layout_marginTop="15dp" />
 
     <TextView
         android:id="@+id/startGamePopUpButton"
@@ -60,7 +61,6 @@
         android:layout_alignParentBottom="true"
         android:layout_alignBaseline="@id/startGamePopUpButton"
         android:layout_alignParentRight="true"
-        android:layout_marginTop="21dp"
         android:layout_marginRight="5dp"
         android:foregroundGravity="bottom"
         android:gravity="bottom"

@@ -1,121 +1,258 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/profileLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true">
-<RelativeLayout xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+    android:background="@drawable/background"
     android:orientation="vertical"
-    android:id="@+id/profileLayout"
-    android:background="@drawable/gradiant_color"
     tools:context="androidCourse.technion.quickthumbs.personalArea.ProfileActivity">
 
-    <ImageView
-        android:id="@+id/achievementBadge"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"
-        android:layout_centerHorizontal="true"
-        android:contentDescription="@string/AchievementBadge"
-        app:srcCompat="@drawable/placeholder" />
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-    <TextView
-        android:id="@+id/Accuracy"
-        android:layout_below="@id/achievementBadge"
-        android:layout_marginTop="5dp"
-        android:layout_marginLeft="15dp"
-        android:textColor="@color/primaryTextColor"
-        android:text="@string/Accuracy"
-        android:layout_alignParentLeft="true"
-        style = "@style/BlackTextHeader" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/AccuracyValue"
-        style="@style/BlackTextHeader"
-        android:textColor="@color/primaryTextColor"
-        android:layout_toRightOf="@id/Accuracy"
-        android:layout_marginLeft="5dp"
-        android:layout_alignBaseline="@id/Accuracy"
-        android:layout_marginTop="5dp"
-        android:text="@string/emptyText" />
-    <TextView
-        android:id="@+id/WPM"
-        style="@style/BlackTextHeader"
-        android:layout_below="@id/Accuracy"
-        android:layout_marginTop="5dp"
-        android:textColor="@color/primaryTextColor"
-        android:layout_alignParentLeft="true"
-        android:layout_marginLeft="15dp"
-        android:text="@string/WPM"/>
+            <de.hdodenhof.circleimageview.CircleImageView xmlns:app="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/profilePicture"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:contentDescription="@string/AchievementBadge"
+                android:src="@drawable/placeholder"
+                app:civ_border_color="#FF000000"
+                app:civ_border_width="2dp" />
 
-    <TextView
-        android:id="@+id/WPMValue"
-        style="@style/BlackTextHeader"
-        android:layout_alignBaseline="@id/WPM"
-        android:layout_toRightOf="@id/WPM"
-        android:layout_marginTop="5dp"
-        android:layout_marginLeft="5dp"
-        android:textColor="@color/primaryTextColor"
-        android:text="@string/emptyText" />
+            <ImageButton
+                android:id="@+id/cameraButton"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignEnd="@id/profilePicture"
+                android:layout_alignRight="@id/profilePicture"
+                android:layout_alignBottom="@id/profilePicture"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="100dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginBottom="15dp"
+                android:background="@color/secondaryTextColor"
+                android:src="@drawable/ic_photo_camera_24dp" />
 
-    <TextView
-        android:id="@+id/CPM"
-        style="@style/BlackTextHeader"
-        android:layout_below="@id/WPM"
-        android:layout_marginLeft="15dp"
-        android:layout_marginTop="5dp"
-        android:layout_alignParentLeft="true"
-        android:textColor="@color/primaryTextColor"
-        android:text="@string/CPM"/>
+            <ImageButton
+                android:id="@+id/galleryButton"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignStart="@id/cameraButton"
+                android:layout_alignLeft="@id/cameraButton"
+                android:layout_alignBottom="@id/cameraButton"
+                android:layout_centerHorizontal="true"
+                android:layout_marginStart="25dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginTop="25dp"
+                android:layout_marginEnd="25dp"
+                android:layout_marginRight="25dp"
+                android:layout_marginBottom="25dp"
+                android:background="@color/secondaryTextColor"
+                android:src="@drawable/ic_insert_photo_24dp" />
 
-    <TextView
-        android:id="@+id/CPMValue"
-        style="@style/BlackTextHeader"
-        android:layout_toRightOf="@id/CPM"
-        android:layout_marginTop="5dp"
-        android:layout_marginLeft="5dp"
-        android:layout_alignBaseline="@id/CPM"
-        android:textColor="@color/primaryTextColor"
-        android:text="@string/emptyText" />
+            <View
+                android:id="@+id/line1"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@id/profilePicture"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:background="@color/primaryTextColor" />
 
-    <TextView
-        android:id="@+id/Score"
-        style="@style/BlackTextHeader"
-        android:layout_below="@id/CPM"
-        android:layout_marginTop="5dp"
-        android:textColor="@color/primaryTextColor"
-        android:layout_marginLeft="15dp"
-        android:layout_alignParentLeft="true"
-        android:text="@string/Score" />
+            <TextView
+                android:id="@+id/StatisticsHeader"
+                style="@style/BlackTextHeader"
+                android:layout_below="@id/line1"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="15dp"
+                android:text="@string/statistics"
+                android:textColor="@color/primaryTextColor"
+                android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/ScoreValue"
-        style="@style/BlackTextHeader"
-        android:layout_toRightOf="@id/Score"
-        android:layout_marginTop="5dp"
-        android:layout_marginLeft="5dp"
-        android:text="@string/emptyText"
-        android:layout_alignBaseline="@id/Score"
-        android:textColor="@color/primaryTextColor"
-        />
+            <TextView
+                android:id="@+id/Accuracy"
+                style="@style/BlackTextHeader"
+                android:layout_below="@id/StatisticsHeader"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="5dp"
+                android:text="@string/Accuracy"
+                android:textColor="@color/primaryTextColor" />
 
-    <Button
-        android:id="@+id/logOutButton"
-        style="@style/SecondaryColorRoundedButton"
-        android:layout_below="@id/Score"
-        android:layout_marginTop="10dp"
-        android:layout_centerHorizontal="true"
-        android:text="@string/LogOut" />
+            <TextView
+                android:id="@+id/AccuracyValue"
+                style="@style/BlackTextHeader"
+                android:layout_alignBaseline="@id/Accuracy"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_toRightOf="@id/Accuracy"
+                android:text="@string/emptyText"
+                android:textColor="@color/primaryTextColor" />
 
-    <com.facebook.login.widget.LoginButton
-        android:id="@+id/facebook_log_out_button"
-        android:layout_width="wrap_content"
-        android:layout_below="@id/Score"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_centerHorizontal="true"/>
+            <TextView
+                android:id="@+id/WPM"
+                style="@style/BlackTextHeader"
+                android:layout_below="@id/Accuracy"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="5dp"
+                android:text="@string/WPM"
+                android:textColor="@color/primaryTextColor" />
+
+            <TextView
+                android:id="@+id/WPMValue"
+                style="@style/BlackTextHeader"
+                android:layout_alignBaseline="@id/WPM"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_toRightOf="@id/WPM"
+                android:text="@string/emptyText"
+                android:textColor="@color/primaryTextColor" />
+
+            <TextView
+                android:id="@+id/CPM"
+                style="@style/BlackTextHeader"
+                android:layout_below="@id/WPM"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="5dp"
+                android:text="@string/CPM"
+                android:textColor="@color/primaryTextColor" />
+
+            <TextView
+                android:id="@+id/CPMValue"
+                style="@style/BlackTextHeader"
+                android:layout_alignBaseline="@id/CPM"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_toRightOf="@id/CPM"
+                android:text="@string/emptyText"
+                android:textColor="@color/primaryTextColor" />
+
+            <TextView
+                android:id="@+id/Score"
+                style="@style/BlackTextHeader"
+                android:layout_below="@id/CPM"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="15dp"
+                android:layout_marginTop="5dp"
+                android:text="@string/Score"
+                android:textColor="@color/primaryTextColor" />
+
+            <TextView
+                android:id="@+id/ScoreValue"
+                style="@style/BlackTextHeader"
+                android:layout_alignBaseline="@id/Score"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="5dp"
+                android:layout_toRightOf="@id/Score"
+                android:text="@string/emptyText"
+                android:textColor="@color/primaryTextColor" />
+
+
+            <View
+                android:id="@+id/line2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:layout_below="@id/Score"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"
+                android:background="@color/primaryTextColor" />
+
+            <TextView
+                android:id="@+id/FriendsHeader"
+                style="@style/BlackTextHeader"
+                android:layout_below="@id/line2"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="15dp"
+                android:text="@string/friends"
+                android:textColor="@color/primaryTextColor"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/emailEditText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/FriendsHeader"
+                android:layout_alignParentLeft="true"
+                android:layout_marginLeft="15dp"
+                android:layout_toLeftOf="@id/sendFriendRequestButton"
+                android:hint="Enter Friend's Email"
+                android:inputType="textEmailAddress"
+                android:textColorHint="@color/primaryTextColor"
+                android:textColor="@android:color/white"/>
+
+            <Button
+                android:id="@+id/sendFriendRequestButton"
+                style="@style/SecondaryColorRoundedButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:layout_alignParentRight="true"
+                android:layout_gravity="top"
+                android:layout_above="@id/pager"
+                android:layout_marginRight="15dp"
+                android:text="Send Friend Request" />
+
+            <androidx.viewpager.widget.ViewPager
+                android:id="@+id/pager"
+                android:layout_below="@id/emailEditText"
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="350dp">
+
+                <com.google.android.material.tabs.TabLayout
+                    android:id="@+id/tab_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/primaryTextColor"
+                     />
+
+            </androidx.viewpager.widget.ViewPager>
+
+            <Button
+                android:id="@+id/logOutButton"
+                style="@style/SecondaryColorRoundedButton"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="10dp"
+                android:layout_below="@id/pager"
+                android:text="@string/LogOut" />
+
+            <com.facebook.login.widget.LoginButton
+                android:id="@+id/facebook_log_out_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/pager"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="10dp" />
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/shareButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:adjustViewBounds="true"
+                android:background="@color/transparent"
+                android:layout_below="@id/pager"
+                android:layout_marginTop="10dp"
+                android:contentDescription="share"
+                android:layout_marginLeft="10dp"
+                android:layout_marginBottom="10dp"
+                android:src="@drawable/ic_share_black_24dp"
+                app:backgroundTint="@color/secondaryColor"
+                app:tint="@color/secondaryTextColor" />
+
+        </RelativeLayout>
+    </ScrollView>
 </RelativeLayout>
-</ScrollView>

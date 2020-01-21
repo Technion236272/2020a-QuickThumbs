@@ -5,19 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="androidCourse.technion.quickthumbs.personalArea.FriendsActivity">
+    tools:context="androidCourse.technion.quickthumbs.personalArea.FriendsFragment">
 
-    <include
-        layout= "@layout/toolbar"
-        android:id="@+id/friendsToolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/texts_recycler_view"
+        android:id="@+id/friendsListRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/friendsToolbar"
-        android:scrollbars="vertical"/>
-
+        android:layout_height="350dp"
+        android:layout_marginTop="2dp"
+        android:layout_marginBottom="10dp"
+        android:fastScrollEnabled="true"
+        android:scrollbars="vertical" />
 </RelativeLayout>

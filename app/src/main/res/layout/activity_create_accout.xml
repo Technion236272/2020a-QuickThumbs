@@ -1,70 +1,77 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true">
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/gradiant_color"
+    android:background="@drawable/background"
     android:orientation="vertical"
     tools:context="androidCourse.technion.quickthumbs.CreateAccountActivity">
 
     <include
         android:id="@+id/createAccountToolbar"
-        layout= "@layout/toolbar"
+        layout="@layout/toolbar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
-    <EditText
-        android:id="@+id/emailCreateAccount"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="60dp"
-        android:layout_marginRight="60dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="5dp"
-        android:drawableLeft="@drawable/ic_adb_24dp"
-        android:ems="10"
-        android:hint="@string/email"
-        android:textColorHint="@color/primaryTextColor"
-        android:textColor="@color/primaryTextColor"
-        android:inputType="textEmailAddress"
-        />
-
-    <EditText
-        android:id="@+id/passwordCreateAccount"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="60dp"
-        android:layout_marginRight="60dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
-        android:drawableLeft="@drawable/ic_lock_24dp"
-        android:hint="@string/password"
-        android:ems="10"
-        android:textColorHint="@color/primaryTextColor"
-        android:textColor="@color/primaryTextColor"
-        android:inputType="textPassword"/>
-
-    <LinearLayout
+    <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:paddingRight="50dip"
-        android:paddingLeft="50dip"
-        android:orientation="vertical">
+        android:fillViewport="true">
 
-        <Button
-            android:id="@+id/signOutButton"
-            style="@style/SecondaryColorRoundedButton"
-            android:layout_width="fill_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:layout_gravity="center"
-            android:layout_marginTop="40dp"
-            android:text="@string/create_an_account" />
-    </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            tools:context="androidCourse.technion.quickthumbs.CreateAccountActivity">
 
+
+            <EditText
+                android:id="@+id/emailCreateAccount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="60dp"
+                android:layout_marginTop="20dp"
+                android:layout_marginRight="60dp"
+                android:layout_marginBottom="5dp"
+                android:drawableLeft="@drawable/ic_adb_24dp"
+                android:ems="10"
+                android:hint="@string/email"
+                android:inputType="textEmailAddress"
+                android:textColor="@color/primaryTextColor"
+                android:textColorHint="@color/primaryTextColor" />
+
+            <EditText
+                android:id="@+id/passwordCreateAccount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="60dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginRight="60dp"
+                android:layout_marginBottom="5dp"
+                android:drawableLeft="@drawable/ic_lock_24dp"
+                android:ems="10"
+                android:hint="@string/password"
+                android:inputType="textPassword"
+                android:textColor="@color/primaryTextColor"
+                android:textColorHint="@color/primaryTextColor" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:paddingLeft="50dip"
+                android:paddingRight="50dip">
+
+                <Button
+                    android:id="@+id/signOutButton"
+                    style="@style/SecondaryColorRoundedButton"
+                    android:layout_width="fill_parent"
+                    android:layout_height="?attr/actionBarSize"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="40dp"
+                    android:text="@string/create_an_account" />
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
 </LinearLayout>
-</ScrollView>

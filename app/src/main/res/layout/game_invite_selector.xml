@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@drawable/pop_up_background"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <TextView
+        android:id = "@+id/inviteFriendsTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="5dp"
+        android:textStyle="bold"
+        android:textSize="20sp"
+        android:textColor="@color/secondaryTextColor"
+        android:text="Invite your friend for a game:" />
+
+<!--    <fragment-->
+<!--        android:id="@+id/friends_fragment_selector"-->
+<!--        android:name="androidCourse.technion.quickthumbs.personalArea.FriendsFragment"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
+<!--        android:layout_above = "@+id/friendsBackToMainPopUpButton"-->
+<!--        android:layout_below = "@id/inviteFriendsTitle" />-->
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/friendsRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_below = "@id/inviteFriendsTitle"
+        android:layout_height="match_parent"
+        android:layout_above="@id/friendsBackToMainPopUpButton"
+        android:fastScrollEnabled="true"
+        android:scrollbars="vertical" />
+
+    <TextView
+        android:id="@+id/friendsBackToMainPopUpButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:text="Cancel"
+        android:textSize="20sp"
+        android:layout_marginRight="20dp"
+        android:textColor="@color/primaryColor"
+        android:textStyle="bold"
+        android:layout_marginBottom="10dp"
+        android:layout_alignParentRight="true"
+        />
+</RelativeLayout>
+

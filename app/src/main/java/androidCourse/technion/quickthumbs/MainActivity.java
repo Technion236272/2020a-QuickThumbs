@@ -3,9 +3,16 @@ package androidCourse.technion.quickthumbs;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
-import androidCourse.technion.quickthumbs.R;
+
+import androidCourse.technion.quickthumbs.Utils.AppOpeningSplashScreen;
+import androidCourse.technion.quickthumbs.Utils.FriendRequestMessageService;
+
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -36,6 +43,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.messaging.FirebaseMessaging;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -56,6 +64,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        setOpeningSplashScreen();
+
         FirebaseApp.initializeApp(this);
         fireBaseAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
@@ -67,6 +77,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setFacebookSignInConfigurations();
 
         setButtonsListeners();
+
+    }
+
+
+
+    private void setOpeningSplashScreen() {
+        AppOpeningSplashScreen.Builder splash = new AppOpeningSplashScreen.Builder(this);
+        //Set custom color of background:
+        splash.setBackgroundImage(getResources().getDrawable(R.drawable.background));
+        //Set custom image for background:
+//        splash.setBackgroundImage(getResources().getDrawable(R.mipmap.ic_launcher_foreground));
+        //Set custom image for splash:
+        splash.setSplashImage(getResources().getDrawable(R.drawable.ic_launcher_foreground));
+        //Set custom color of splash image:
+        splash.setSplashImageColor(getResources().getColor(R.color.primaryDarkColor));
+        splash.create();
+//        splash.setOneShotStart(false);
+        splash.perform();
     }
 
 
@@ -78,40 +106,42 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         facebookLogIn.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                Log.d(TAG, "facebook:onSuccess:" + loginResult);
+//                Log.d(TAG, "facebook:onSuccess:" + loginResult);
                 handleFacebookAccessToken(loginResult.getAccessToken());
             }
 
             @Override
             public void onCancel() {
-                Log.d(TAG, "facebook:onCancel");
+//                Log.d(TAG, "facebook:onCancel");
             }
 
             @Override
             public void onError(FacebookException error) {
-                Log.d(TAG, "facebook:onError", error);
+//                Log.d(TAG, "facebook:onError", error);
             }
         });
     }
 
     private void handleFacebookAccessToken(final AccessToken token) {
-        Log.d(TAG, "handleFacebookAccessToken:" + token);
+//        Log.d(TAG, "handleFacebookAccessToken:" + token);
 
         AuthCredential credential = FacebookAuthProvider.getCredential(token.getToken());
         fireBaseAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
+                        if (task.isSuccessful() && fireBaseAuth.getCurrentUser()!=null) {
                             // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithCredential:success");
+//                            Log.d(TAG, "signInWithCredential:success");
                             FirebaseUser user = fireBaseAuth.getCurrentUser();
-                            String email = fireBaseAuth.getCurrentUser().getEmail();
+                            String email = user.getEmail();
                             String uid = fireBaseAuth.getUid();
 //                            getFacebookUserData();
                             Map<String, Object> changedUser = new HashMap<>();
                             changedUser.put("uid", uid);
                             changedUser.put("email", email);
+                            changedUser.put("name",user.getDisplayName());
+                            //changedUser.put("token",token.getToken());
                             addUserDataToCollection(changedUser);
                         } else {
                             // If sign in fails, display a message to the user.
@@ -119,8 +149,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             Toast.makeText(MainActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                         }
-
-                        // ...
                     }
                 });
     }
@@ -161,7 +189,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignInResult(task);
         }else{
-            // Pass the activity result back to the Facebook SDK
+            // Pass the activity result background to the Facebook SDK
             callbackManager.onActivityResult(requestCode, resultCode, data);
         }
     }
@@ -180,24 +208,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     // START auth_with_google
-    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
-        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
-
+    private void firebaseAuthWithGoogle(final GoogleSignInAccount acct) {
+//        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
         AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
         fireBaseAuth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
+                        if (task.isSuccessful() && fireBaseAuth.getCurrentUser()!=null) {
                             // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithCredential:success");
-                            FirebaseUser user = fireBaseAuth.getCurrentUser();
+//                            Log.d(TAG, "signInWithCredential:success");
                             Map<String, Object> changedUser = new HashMap<>();
                             changedUser.put("uid", fireBaseAuth.getUid());
                             changedUser.put("email", fireBaseAuth.getCurrentUser().getEmail());
+                            //changedUser.put("token",acct.getIdToken());
+                            GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(getApplicationContext());
+                            if(account != null){
+                                String personName = account.getDisplayName();
+                                changedUser.put("name",personName);
+                            }
                             addUserDataToCollection(changedUser);
                         } else {
                             // If sign in fails, display a message to the user.
+                            Toast.makeText(MainActivity.this, "Authentication failed.",
+                                    Toast.LENGTH_SHORT).show();
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
                         }
 
@@ -214,26 +248,28 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         FirebaseUser currentUser = fireBaseAuth.getCurrentUser();
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
 
-        if (currentUser != null && currentUser.isEmailVerified() && account==null) {
-            String uid = currentUser.getUid();
-            Intent intent = new Intent(MainActivity.this, MainPager.class);
-
-            startActivity(intent);
-            finish();
-            Log.d(TAG, "already signed in user: " + uid);
-            return;
-        }
-
         // Check for existing Google Sign In account, if the user is already signed in
         // the GoogleSignInAccount will be non-null.
-       if (account != null && !account.isExpired()) {
+        if (account != null && !account.isExpired()) {
             String uid = account.getId();
             Intent intent = new Intent(MainActivity.this, MainPager.class);
 
             startActivity(intent);
             finish();
-            Log.d(TAG, "already signed in user: " + uid);
+//            Log.d(TAG, "already signed in user: " + uid);
             return;
+        }
+        if (currentUser != null) {
+            currentUser.reload();
+            if (currentUser.isEmailVerified()){
+                String uid = currentUser.getUid();
+                Intent intent = new Intent(MainActivity.this, MainPager.class);
+
+                startActivity(intent);
+                finish();
+//                Log.d(TAG, "already signed in user: " + uid);
+                return;
+            }
         }
 
         // Check for existing Facebook Sign In account, if the user is already signed in
@@ -245,7 +281,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             startActivity(intent);
             finish();
-            Log.d(TAG, "already signed in user: " + uid);
+//            Log.d(TAG, "already signed in user: " + uid);
         }
     }
 
@@ -255,14 +291,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
+                        Toast.makeText(MainActivity.this, "Successfully signed in.", Toast.LENGTH_LONG)
+                                .show();
                         moveToMainUserActivityIfAlreadyLoggedIn();
-                        Log.d(TAG, "User was inserted to to DB!");
+//                        Log.d(TAG, "User was inserted to to DB!");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing document", e);
+//                        Log.w(TAG, "Error writing document", e);
                     }
                 });
     }
@@ -274,11 +312,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         String emailText = ((EditText) findViewById(emailMainActivity)).getText().toString();
         String passwordText = ((EditText) findViewById(passwordMainActivity)).getText().toString();
-
-        if (emailText.isEmpty() || passwordText.isEmpty()) {
-            Toast.makeText(MainActivity.this, "Sign in failed.", Toast.LENGTH_LONG)
+        if (emailText.isEmpty()){
+            Toast.makeText(MainActivity.this, "Please enter your email.", Toast.LENGTH_LONG)
                     .show();
+            return;
+        }
 
+        if (passwordText.isEmpty()) {
+            Toast.makeText(MainActivity.this, "Please enter your password.", Toast.LENGTH_LONG)
+                    .show();
             return;
         }
 
@@ -288,17 +330,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
                             FirebaseUser user = fireBaseAuth.getCurrentUser();
-                            String uid = user.getUid();
-                            if(user.isEmailVerified()){
-                                Map<String, Object> changedUser = new HashMap<>();
-                                changedUser.put("uid", fireBaseAuth.getUid());
-                                changedUser.put("email", fireBaseAuth.getCurrentUser().getEmail());
-                                addUserDataToCollection(changedUser);
-                                Log.d(TAG, "successfully signed in user: " + uid);
-                            } else{
-                                Toast.makeText(MainActivity.this, "Authentication failed. Please verify your email.", Toast.LENGTH_LONG)
-                                        .show();
-                                sendUserEmailVerification(user);
+                            if(user!=null) {
+                                String uid = user.getUid();
+                                if (user.isEmailVerified()) {
+                                    Map<String, Object> changedUser = new HashMap<>();
+                                    changedUser.put("uid", fireBaseAuth.getUid());
+                                    String userMail = fireBaseAuth.getCurrentUser().getEmail();
+                                    changedUser.put("email", userMail);
+                                    //changedUser.put("token", fireBaseAuth.getCurrentUser().getIdToken(true));
+                                    if(userMail!=null){
+                                        changedUser.put("name", userMail.substring(0,userMail.indexOf("@")));
+                                    }
+                                    addUserDataToCollection(changedUser);
+//                                    Log.d(TAG, "successfully signed in user: " + uid);
+                                } else {
+                                    Toast.makeText(MainActivity.this, "Authentication failed. Please verify your email.", Toast.LENGTH_LONG)
+                                            .show();
+                                    sendUserEmailVerification(user);
+                                }
                             }
                         } else {
                             Toast.makeText(MainActivity.this, "Authentication failed.", Toast.LENGTH_LONG)
@@ -315,7 +364,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            Log.d(TAG, "Verification mail sent successfully");
+//                            Log.d(TAG, "Verification mail sent successfully");
 //                            finish();
                             Toast.makeText(MainActivity.this,
                                     "Verification email sent to " + user.getEmail(),

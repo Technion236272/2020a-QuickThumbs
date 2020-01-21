@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="icons">
+        <item>@drawable/single_game</item>
+        <item>@drawable/multiplayer_game</item>
+        <item>@drawable/play_with_friends</item>
+    </array>
+    <array name="colors">
+        <item>@android:color/holo_blue_light</item>
+        <item>@android:color/holo_red_light</item>
+        <item>@android:color/holo_green_dark</item>
+    </array>
+</resources>

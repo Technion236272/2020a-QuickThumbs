@@ -64,32 +64,37 @@ public class TextsActivity extends Fragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
 
+    }
+
+    @Override
+    public void onViewCreated (View view,
+                               Bundle savedInstanceState){
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
         howMuchToLoadEachScroll = 3;
         noMoreLoading =false;
 
-        personalListLoadingLayout = getView().findViewById(R.id.personalListLoadingLayout);
-        loadingText = getView().findViewById(R.id.personalListLoadingText);
-        textCard = getView().findViewById(R.id.textCard);
-        recyclerView = getView().findViewById(R.id.personalTextsRecyclerView);
+        personalListLoadingLayout = view.findViewById(R.id.personalListLoadingLayout);
+        loadingText = view.findViewById(R.id.personalListLoadingText);
+        textCard = view.findViewById(R.id.textCard);
+        recyclerView = view.findViewById(R.id.personalTextsRecyclerView);
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         recyclerView.setHasFixedSize(true);
         personalListLoadingLayout.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.INVISIBLE);
 
-        checkIfUserHasPersonalTexts();
+        checkIfUserHasPersonalTexts(view);
 
-        setAddTextButton();
+        setAddTextButton(view);
     }
 
-    private void setAddTextButton() {
-        addTextButton = getView().findViewById(R.id.addTextButton);
+    private void setAddTextButton(final View view) {
+        addTextButton = view.findViewById(R.id.addTextButton);
         addTextButton.setOnClickListener(new View.OnClickListener() {
                                              @Override
                                              public void onClick(View v) {
-                                                 Intent intent = new Intent(getActivity(), AddTextActivity.class);
+                                                 Intent intent = new Intent(view.getContext(), AddTextActivity.class);
                                                  startActivity(intent);
                                                  //overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
                                              }
@@ -99,16 +104,16 @@ public class TextsActivity extends Fragment {
 
 
 
-    private void checkIfUserHasPersonalTexts() {
-        db.collection("users").document(getUid())
+    private void checkIfUserHasPersonalTexts(final View view) {
+        db.collection("users").document(getUid(view))
                 .collection("texts").get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful() && task.getResult().getDocuments().size() != 0) {
                             Log.d(TAG, "collection is not empty!", task.getException());
-                            fetchPersonalTextsList();
-                            setRecyclerViewScroller();
+                            fetchPersonalTextsList(view);
+                            setRecyclerViewScroller(view);
                         } else {
                             Log.d(TAG, "no such collection", task.getException());
                             loadingText.setText(R.string.no_personal_texts);
@@ -117,9 +122,9 @@ public class TextsActivity extends Fragment {
                 });
     }
 
-    private String getUid() {
+    private String getUid(View view) {
         FirebaseUser currentUser = mAuth.getCurrentUser();
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(getActivity());
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(view.getContext());
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         if (account != null && currentUser == null){
             return account.getId();
@@ -130,7 +135,7 @@ public class TextsActivity extends Fragment {
         }
     }
 
-    private void setRecyclerViewScroller() {
+    private void setRecyclerViewScroller(final View view) {
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
 
             @Override
@@ -140,22 +145,19 @@ public class TextsActivity extends Fragment {
                     // Scrolling up
                     Log.i("RecyclerView scrolled: ", "scroll down!");
                     if(textsList.size() != 0 && !noMoreLoading){
-                        refillTextsCardsList(recyclerView);
+                        refillTextsCardsList(recyclerView, view);
                     }
                 } else if (dy < 0){
                     // Scrolling down
                     Log.i("RecyclerView scrolled: ", "scroll up!");
                 }
-                else if (dx<0){
-                    getActivity().finish();
-                    //overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-                }
+                else { }
             }
         });
     }
 
-    private void refillTextsCardsList(final RecyclerView recyclerView) {
-        db.collection("users").document(getUid()).
+    private void refillTextsCardsList(final RecyclerView recyclerView, View view) {
+        db.collection("users").document(getUid(view)).
                 collection("texts").orderBy("playCount", Query.Direction.DESCENDING).
                 startAfter(lastSnapShot).limit(howMuchToLoadEachScroll).get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
@@ -171,15 +173,15 @@ public class TextsActivity extends Fragment {
                 });
     }
 
-    private void fetchPersonalTextsList(){
-        db.collection("users").document(getUid()).collection("texts").
+    private void fetchPersonalTextsList(final View view){
+        db.collection("users").document(getUid(view)).collection("texts").
                 orderBy("playCount", Query.Direction.DESCENDING).limit(8).get()
                 .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
                     @Override
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             fillTextCardList(task);
-                            setTextAdaptor();
+                            setTextAdaptor(view);
                         } else {
                             Log.d(TAG, "Error getting documents: ", task.getException());
                         }
@@ -190,7 +192,7 @@ public class TextsActivity extends Fragment {
     private void fillTextCardList(@NonNull Task<QuerySnapshot> task) {
         for (DocumentSnapshot document:task.getResult()) {
             if ( document.getString("text") == null ) continue;
-            TextDataRow item = TextDataRow.createTextCardItem(document);
+            TextDataRow item = TextDataRow.createTextCardItem(document, null, -1, null);
             if (loadedRTextsIDs.get(document.getId()) == null ) {
                 loadedRTextsIDs.put(document.getId(),true);
                 textsList.add(item);
@@ -202,10 +204,10 @@ public class TextsActivity extends Fragment {
         }
     }
 
-    private void setTextAdaptor() {
-        TextAdaptor adapter = new TextAdaptor(textsList,getActivity());
+    private void setTextAdaptor(View view) {
+        TextAdaptor adapter = new TextAdaptor(textsList,view.getContext());
         recyclerView.setAdapter(adapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
         personalListLoadingLayout.setVisibility(View.INVISIBLE);
         recyclerView.setVisibility(View.VISIBLE);
     }

@@ -1,28 +1,33 @@
 package androidCourse.technion.quickthumbs.game;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import android.content.Intent;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
 
 import androidCourse.technion.quickthumbs.GameLoadingSplashScreenActivity;
 import androidCourse.technion.quickthumbs.MainUserActivity;
 import androidCourse.technion.quickthumbs.R;
+import androidCourse.technion.quickthumbs.multiplayerSearch.GameRoom;
 import androidCourse.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
 
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableString;
-import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.TextWatcher;
 import android.text.style.BackgroundColorSpan;
@@ -31,7 +36,9 @@ import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -49,27 +56,31 @@ import com.google.common.collect.ImmutableList;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import io.opencensus.trace.Span;
 
 import static androidCourse.technion.quickthumbs.FirestoreConstants.accuracyField;
 import static androidCourse.technion.quickthumbs.FirestoreConstants.CPMField;
@@ -91,6 +102,7 @@ import static androidCourse.technion.quickthumbs.FirestoreConstants.usersCollect
 import static com.google.firebase.firestore.SetOptions.merge;
 
 public class GameActivity extends AppCompatActivity {
+    Context applicationContext;
     private EditText currentWordEditor;
     private Boolean needClearance;
     private TextView gameTextView;
@@ -106,6 +118,15 @@ public class GameActivity extends AppCompatActivity {
     private TextView correctOutOfTotalPercentageTextView;
     private TextView comboDisplayer;
     private TextView pointsChangeIndicator;
+    private TextView multiPlayerCounter;
+    private TextView wpmCompareNumberView;
+    private TextView wpmCompareLineView;
+    private Button closingPodiumButton;
+    private ImageView onlineIndicator;
+    private TextView opponentNameView;
+    private RelativeLayout podiumScreen;
+
+    private List<Pair<TextView, TextView>> podiumPlaces;
 
     private boolean forwardCommand;
 
@@ -117,7 +138,8 @@ public class GameActivity extends AppCompatActivity {
     private GameWordStatus[] wordFlags;
     private int gameTextWordOffset;
 
-    private final BackgroundColorSpan colorBackGround = new BackgroundColorSpan(Color.rgb(255, 102, 0));
+    private final BackgroundColorSpan wordMarkerForCurrentUser = new BackgroundColorSpan(Color.rgb(255, 102, 0));
+    private final BackgroundColorSpan wordMarkerForOtherGameRoomUser = new BackgroundColorSpan(Color.GRAY);
 
     private long gameStartTimeStamp;    //changing, don't trust this value if you wish to get real starting time.
     private long gameStopTimeStamp;
@@ -131,6 +153,7 @@ public class GameActivity extends AppCompatActivity {
     private List<Integer> comboOptions;
     private int currentComboIndex;
     private int comboCounter;
+    private boolean passOnAfterTextChanged;
     private boolean isPreviousActionIsCorrectOrGameJustStarted;
     private boolean isVibrateOnMistakeOn = true;
 
@@ -149,18 +172,27 @@ public class GameActivity extends AppCompatActivity {
     MediaPlayer positiveMediaPlayer;
     MediaPlayer negativeMediaPlayer;
 
+    private DatabaseReference roomReference;
+    private String gameRoomKey;
+    private int currentPlayerIndexInRoom;
+    private int previousOtherPlayerIndex;
+    private long startingTimeStamp;
+    private Timer synchronizedMultiplayerCounter;
+    private List<Integer> roomPoints;
+
+    public static final int USER_NAME_MAX_SIZE = 10;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
+        applicationContext = getApplicationContext();
+
         initializeFields();
 
         setGameTextAndLogicAndEnding(gameTextView);
 
-
-        currentWordEditor.setActivated(false);
         gameLoadingLayout.setVisibility(View.VISIBLE);
         gamePlayingLayout.setVisibility(View.INVISIBLE);
 
@@ -170,10 +202,10 @@ public class GameActivity extends AppCompatActivity {
 
         gameCreationSequence();
         setRatingBarListener();
+        setActionBar();
     }
 
     public void gameCreationSequence() {
-
         String gameText = gameTextView.getText().toString();
         ss = new SpannableString(gameText);
         gameTextView.setText(ss, TextView.BufferType.SPANNABLE);
@@ -181,9 +213,13 @@ public class GameActivity extends AppCompatActivity {
         gamePlayingLayout.setVisibility(View.VISIBLE);
         gameLoadingLayout.setVisibility(View.INVISIBLE);
 
-        keyboardConfiguration(currentWordEditor);
-
-        setEditorLogic();
+        if (gameRoomKey == null) {
+            keyboardConfiguration(currentWordEditor);
+            setEditorLogic();
+        } else {
+            setCountDownAndGameCounter();
+            currentWordEditor.setFocusable(false);
+        }
 
         comboDisplayChange();
 
@@ -192,14 +228,276 @@ public class GameActivity extends AppCompatActivity {
         wordsMapper = setWordsMapper(words);
 
         currentWordIndex = -1;
-        moveMarkerToNextWord(colorBackGround);
+        moveMarkerToNextWord(wordMarkerForCurrentUser);
         currentWordIndex = 0;
+
+        if (gameRoomKey != null) {
+            onlineIndicator.setVisibility(View.VISIBLE);
+            moveUserMarkerToNextWord(wordMarkerForOtherGameRoomUser, 0, gameTextView);
+            setRealTimeListenerForRoomInformationChanges();
+            closingPodiumButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    podiumScreen.setVisibility(View.INVISIBLE);
+                }
+            });
+        }
 
         initializeWordFlagsAndPointsDefaultValue(words[0]);
         gameTextWordOffset = 0;
 
         setUpSounds();  //any future sound features should be added here;
+    }
 
+    private void setCountDownAndGameCounter() {
+        final boolean[] needToSetEditor = {true};
+        final Handler mHandler = new Handler();
+        synchronizedMultiplayerCounter = new Timer();
+        synchronizedMultiplayerCounter.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        int fixedAmountOfSecondsUntilMultiplayerGameStart = 10;
+                        int spentTimeInSeconds = (int) ((System.currentTimeMillis() - startingTimeStamp) / 1000);
+
+                        int timeLeftUntilGameStart = fixedAmountOfSecondsUntilMultiplayerGameStart - spentTimeInSeconds;
+                        timeLeftUntilGameStart = timeLeftUntilGameStart < 0 ? (-1) * timeLeftUntilGameStart : timeLeftUntilGameStart;
+                        multiPlayerCounter.setText(String.valueOf(timeLeftUntilGameStart));
+
+                        if (timeLeftUntilGameStart == 0 && needToSetEditor[0]) {
+                            currentWordEditor.setFocusableInTouchMode(true);
+                            keyboardConfiguration(currentWordEditor);
+                            setEditorLogic();
+
+                            gameStartTimeStamp = System.currentTimeMillis();
+                            setTimerUpdateGameStatsPresentation();
+
+                            needToSetEditor[0] = !needToSetEditor[0];
+                        }
+
+                    }
+                });
+            }
+        }, 0, 500);
+    }
+
+    private void setRealTimeListenerForRoomInformationChanges() {
+        final Handler mHandler = new Handler();
+        roomReference.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                if (mutableData.getValue() == null) {
+                    return Transaction.success(mutableData);
+                }
+
+                GameRoom gameRoom = mutableData.getValue(GameRoom.class);
+                boolean isOpponentOnline;
+                final String opponentName;
+
+                switch (currentPlayerIndexInRoom) {
+                    case 1:
+                        gameRoom.usr1Online = true;
+                        opponentName = gameRoom.user2;
+                        isOpponentOnline = gameRoom.usr2Online;
+
+                        break;
+                    case 2:
+                        gameRoom.usr2Online = true;
+                        isOpponentOnline = gameRoom.usr1Online;
+                        opponentName = gameRoom.user1;
+
+                        break;
+                    default:
+                        throw new IllegalStateException("Unexpected value: " + currentPlayerIndexInRoom);
+                }
+
+                final int min = Math.min(USER_NAME_MAX_SIZE, opponentName.length());
+                final int color = isOpponentOnline ? Color.GREEN : Color.GRAY;
+
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        Resources res = getResources();
+                        final Drawable drawable = res.getDrawable(R.drawable.circle_online_indication);
+                        drawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+                        onlineIndicator.setBackground(drawable);
+
+                        opponentNameView.setText(opponentName.subSequence(0, min));
+                    }
+                });
+
+                mutableData.setValue(gameRoom);
+
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
+
+            }
+        });
+
+        roomReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                if (!dataSnapshot.exists()) {
+                    return;
+                }
+
+                GameRoom room = dataSnapshot.getValue(GameRoom.class);
+                int toPosition;
+                boolean isOpponentOnline;
+                int currentPlayerPoints;
+
+                switch (currentPlayerIndexInRoom) {
+                    case 1:
+                        toPosition = room.location2;
+                        isOpponentOnline = room.usr2Online;
+                        currentPlayerPoints = room.usr1Points;
+
+                        break;
+                    case 2:
+                        toPosition = room.location1;
+                        isOpponentOnline = room.usr1Online;
+                        currentPlayerPoints = room.usr2Points;
+
+                        break;
+                    default:
+                        throw new IllegalStateException("Unexpected value: " + currentPlayerIndexInRoom);
+                }
+
+                int color = isOpponentOnline ? Color.GREEN : Color.GRAY;
+                Resources res = getResources();
+                final Drawable drawable = res.getDrawable(R.drawable.circle_online_indication);
+                drawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
+                onlineIndicator.setBackground(drawable);
+
+                ImmutableList<Integer> currentRoomPoints = ImmutableList.of(room.usr1Points, room.usr2Points);
+
+                if (!roomPoints.equals(currentRoomPoints)) { //some player (current player too) updated end points, and current player finished game.
+                    roomPoints = currentRoomPoints;
+
+                    if (gameTextWordStart == -1) {
+                        List<Pair<Integer, String>> allUsersResults = new ArrayList<>();
+                        allUsersResults.add(new Pair<>(room.usr1Points, room.user1));
+                        allUsersResults.add(new Pair<>(room.usr2Points, room.user2));
+
+                        List<Pair<Pair<Integer, String>, Boolean>> podiumResults = new ArrayList<>();
+                        for (Pair<Integer, String> p : allUsersResults) {
+                            if (p.first != -1) {
+                                boolean isCurrentUser = p.second.equals(MainUserActivity.localUserName);
+                                podiumResults.add(new Pair<>(p, isCurrentUser));
+                            }
+                        }
+
+                        Collections.sort(podiumResults, new Comparator<Pair<Pair<Integer, String>, Boolean>>() {
+                            @Override
+                            public int compare(Pair<Pair<Integer, String>, Boolean> o1, Pair<Pair<Integer, String>, Boolean> o2) {
+                                return o2.first.first - o1.first.first;
+                            }
+                        });
+
+                        updatePodium(podiumResults);
+                    }
+
+                    return;
+                }
+
+                TextView textToChange = gameTextWordStart == -1 ? gameReportText : gameTextView;
+
+                moveUserMarkerToNextWord(wordMarkerForOtherGameRoomUser, toPosition, textToChange);
+
+                previousOtherPlayerIndex++;
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void updatePodium(List<Pair<Pair<Integer, String>, Boolean>> podiumResults) {
+        int amountOfPlayersOnPodium = Math.min(3, podiumResults.size());
+
+        for (int i = 0; i < amountOfPlayersOnPodium; i++) {
+            Pair<Pair<Integer, String>, Boolean> pairBooleanPair = podiumResults.get(i);
+            Pair<Integer, String> p = pairBooleanPair.first;
+            Boolean isCurrentUser = pairBooleanPair.second;
+            Integer points = p.first;
+            String name = p.second;
+
+            Pair<TextView, TextView> viewPair = podiumPlaces.get(i);
+            TextView nameView = viewPair.first;
+            TextView pointsView = viewPair.second;
+
+            int colorPrimitive = isCurrentUser ? Color.GREEN : Color.BLACK;
+            ForegroundColorSpan color = new ForegroundColorSpan(colorPrimitive);
+
+            String nameToPresent = name.substring(0, Math.min(name.length(), USER_NAME_MAX_SIZE));
+            SpannableString ss = new SpannableString(nameToPresent);
+
+            ss.setSpan(color, 0, nameToPresent.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+            nameView.setText(ss);
+
+            pointsView.setText(String.valueOf(points));
+        }
+
+        if (podiumScreen.getVisibility() == View.INVISIBLE) {
+            podiumScreen.setVisibility(View.VISIBLE);
+        }
+
+        YoYo.with(Techniques.Landing)
+                .duration(1500)
+//                .onEnd()
+                .playOn(podiumScreen);
+
+        for (int i = 0; i < amountOfPlayersOnPodium; i++) {
+            Pair<TextView, TextView> viewPair = podiumPlaces.get(i);
+            TextView nameView = viewPair.first;
+//            TextView pointsView = viewPair.second;
+
+            Techniques techniques = i == 0 ? Techniques.Bounce : Techniques.Shake;
+
+            YoYo.with(techniques)
+                    .delay(2000)
+                    .duration(600)
+                    .repeat(100)
+                    .playOn(nameView);
+        }
+    }
+
+    private void updateRemoteUserPosition() {
+        roomReference.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                GameRoom room = mutableData.getValue(GameRoom.class);
+
+                switch (currentPlayerIndexInRoom) {
+                    case 1:
+                        room.location1++;
+
+                        break;
+                    case 2:
+                        room.location2++;
+
+                        break;
+                }
+
+                mutableData.setValue(room);
+
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
+
+            }
+        });
     }
 
     private void comboDisplayChange() {
@@ -264,24 +562,80 @@ public class GameActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        long inactiveDeltaTime = System.currentTimeMillis() - gameStopTimeStamp;
-        gameStartTimeStamp += inactiveDeltaTime;
+        if (gameRoomKey == null) {
+            long inactiveDeltaTime = System.currentTimeMillis() - gameStopTimeStamp;
+            gameStartTimeStamp += inactiveDeltaTime;
+        }
 
         setUpSounds();
     }
 
     @Override
     protected void onStop() {
-        super.onStop();
-
         gameStopTimeStamp = System.currentTimeMillis();
+        if (gameRoomKey != null) {
+            synchronizedMultiplayerCounter.cancel();
+            removeRoomIfNeeded();
+        }
+
+        super.onStop();
+    }
+
+    private void removeRoomIfNeeded() {
+        roomReference.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                if (mutableData.getValue() == null) {
+                    return Transaction.success(mutableData);
+                }
+
+                GameRoom gameRoom = mutableData.getValue(GameRoom.class);
+                boolean isOtherUserOnline;
+                switch (currentPlayerIndexInRoom) {
+                    case 1:
+                        isOtherUserOnline = gameRoom.usr2Online;
+
+                        break;
+                    case 2:
+                        isOtherUserOnline = gameRoom.usr1Online;
+
+                        break;
+                    default:
+                        throw new IllegalStateException("Unexpected value: " + currentPlayerIndexInRoom);
+                }
+
+                if (!isOtherUserOnline) {
+                    mutableData.setValue(null);
+                } else {
+                    switch (currentPlayerIndexInRoom) {
+                        case 1:
+                            gameRoom.usr1Online = false;
+
+                            break;
+                        case 2:
+                            gameRoom.usr2Online = false;
+
+                            break;
+                    }
+
+                    mutableData.setValue(gameRoom);
+                }
+
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
+
+            }
+        });
     }
 
     @Override
     protected void onPause() {
-        super.onPause();
-
         gameStopTimeStamp = System.currentTimeMillis();
+        super.onPause();
     }
 
     private List<Pair<String, Integer>> setWordsMapper(String[] words) {
@@ -301,7 +655,7 @@ public class GameActivity extends AppCompatActivity {
     private void setGameTextAndLogicAndEnding(TextView gameTextView) {
         Intent i = getIntent();
         if (i.hasExtra("text") && !changed) {
-            Log.d(TAG, "being set");
+//            Log.d(TAG, "being set");
             gameTextView.setText(i.getExtras().getString("text"));
             String id = i.getExtras().getString("id");
             String title = i.getExtras().getString("title");
@@ -313,8 +667,21 @@ public class GameActivity extends AppCompatActivity {
             String numberOfTimesPlayed = i.getExtras().getString("playCount");
             String bestScore = i.getExtras().getString("bestScore");
             String fastestSpeed = i.getExtras().getString("fastestSpeed");
+            String roomKey = i.getExtras().getString("roomKey");
+            int indexInRoom = i.getExtras().getInt("indexInRoom");
+            long startingTimeStampLocal = i.getExtras().getLong("startingTimeStamp", 0);
+
             selectedTextItem = new TextDataRow(id, title, theme, text, date, composer,
-                    rating, numberOfTimesPlayed, bestScore, fastestSpeed);
+                    rating, numberOfTimesPlayed, bestScore, fastestSpeed, false, false, roomKey, null, indexInRoom);
+
+            gameRoomKey = roomKey;
+            currentPlayerIndexInRoom = indexInRoom;
+            startingTimeStamp = startingTimeStampLocal;
+
+            if (gameRoomKey != null) {
+                roomReference = FirebaseDatabase.getInstance().getReference().child("searchAndGame").child("GameRooms").child(gameRoomKey);
+            }
+
             changed = true;
         }
         if (changed == true) {
@@ -327,14 +694,16 @@ public class GameActivity extends AppCompatActivity {
         comboCounter = 0;
         collectedPoints = 0;
         comboOptions = ImmutableList.of(1, 2, 4, 8, 10);
+        roomPoints = ImmutableList.of(-1, -1);
         currentComboIndex = 0;
         shouldStartTimer = true;
         correctKeysAmount = 0;
         gameTextWordStart = 0;
-        gameStartTimeStamp = 0;
         gameStopTimeStamp = 0;
+        previousOtherPlayerIndex = 0;
         needClearance = false;
         forwardCommand = true;
+        passOnAfterTextChanged = false;
         isPreviousActionIsCorrectOrGameJustStarted = true;
 
         currentWordEditor = findViewById(R.id.currentWord);
@@ -350,6 +719,20 @@ public class GameActivity extends AppCompatActivity {
         correctOutOfTotalPercentageTextView = findViewById(R.id.correctOutOfTotalPercentageTextView);
         comboDisplayer = findViewById(R.id.comboDisplayer);
         pointsChangeIndicator = findViewById(R.id.changeIndicator);
+        multiPlayerCounter = findViewById(R.id.multiPlayerCounter);
+        closingPodiumButton = findViewById(R.id.closingPodiumButton);
+        wpmCompareNumberView = findViewById(R.id.wpmCompareNumber);
+        wpmCompareLineView = findViewById(R.id.wpmCompareLine);
+        onlineIndicator = findViewById(R.id.onlineIndicator);
+        opponentNameView = findViewById(R.id.opponentName);
+
+        podiumScreen = findViewById(R.id.podiumScreen);
+
+        podiumPlaces = new ArrayList<>();
+
+        podiumPlaces.add(new Pair<TextView, TextView>((TextView) findViewById(R.id.placement1), (TextView) findViewById(R.id.placement1Points)));
+        podiumPlaces.add(new Pair<TextView, TextView>((TextView) findViewById(R.id.placement2), (TextView) findViewById(R.id.placement2Points)));
+        podiumPlaces.add(new Pair<TextView, TextView>((TextView) findViewById(R.id.placement3), (TextView) findViewById(R.id.placement3Points)));
 
         db = FirebaseFirestore.getInstance();
         mAuth = FirebaseAuth.getInstance();
@@ -360,19 +743,28 @@ public class GameActivity extends AppCompatActivity {
         currentWordEditor.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                Log.d(TAG, "beforeTextChanged start ...");
+//                Log.d(TAG, "beforeTextChanged start ...");
 
-                if (shouldStartTimer) {
+                if (shouldStartTimer && gameRoomKey == null) {
+                    gameStartTimeStamp = System.currentTimeMillis();
                     setTimerUpdateGameStatsPresentation();
                     shouldStartTimer = false;
                 }
 
-                Log.d(TAG, "beforeTextChanged finish ...");
+//                Log.d(TAG, "beforeTextChanged finish ...");
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                Log.d(TAG, "onTextChanged start ...");
+//                Log.d(TAG, "onTextChanged start ...");
+
+                if (!currentWordEditor.hasFocus()) {
+//                    Log.d(TAG, "onTextChanged finished because of s.clear() ...");
+                    passOnAfterTextChanged = true;
+                    currentWordEditor.requestFocus();
+
+                    return;
+                }
 
                 if (isAddedKey(before, count)) {
                     logicOnAddedKey(s, start);
@@ -381,12 +773,19 @@ public class GameActivity extends AppCompatActivity {
                     logicOnRemovingKey();
                 }
 
-                Log.d(TAG, "onTextChanged finish ...");
+//                Log.d(TAG, "onTextChanged finish ...");
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-                Log.d(TAG, "afterTextChanged start ...");
+//                Log.d(TAG, "afterTextChanged start ...");
+
+                if (passOnAfterTextChanged) {
+//                    Log.d(TAG, "afterTextChanged finished because of s.clear() ...");
+                    passOnAfterTextChanged = false;
+
+                    return;
+                }
 
                 if (forwardCommand) {
                     gameTextWordOffset++;
@@ -394,11 +793,12 @@ public class GameActivity extends AppCompatActivity {
                     if (!needClearance) {
                         paintGameTextBasedOnWordFlags();
                     } else {
+                        currentWordEditor.clearFocus();
                         s.clear();
                         needClearance = false;
 
                         if (currentWordIndex + 1 != wordsMapper.size()) {
-                            moveMarkerToNextWord(colorBackGround);
+                            moveMarkerToNextWord(wordMarkerForCurrentUser);
                             spaceKeyIncreaseCorrectKeysWhenFullyCorrectWordTyped();
                         }
 
@@ -410,6 +810,10 @@ public class GameActivity extends AppCompatActivity {
                         if (gameTextWordStart != -1) {
                             String currentExpectedWord = wordsMapper.get(currentWordIndex).first;
                             initializeWordFlagsAndPointsDefaultValue(currentExpectedWord);
+
+                            if (gameRoomKey != null) {
+                                updateRemoteUserPosition();
+                            }
 
                         } else {
                             finishGame();
@@ -426,11 +830,7 @@ public class GameActivity extends AppCompatActivity {
                     forwardCommand = true;
                 }
 
-                if (needClearance) {
-
-                }
-
-                Log.d(TAG, "afterTextChanged finish ...");
+//                Log.d(TAG, "afterTextChanged finish ...");
             }
 
         });
@@ -442,6 +842,8 @@ public class GameActivity extends AppCompatActivity {
         for (GameWordStatus status : wordFlags) {
             if (!status.equals(GameWordStatus.CORRECT) && !status.equals(GameWordStatus.CORRECT_BUT_BEEN_HERE_BEFORE)) {
                 giveExtraCorrectCharacterForSpacePress = false;
+
+                break;
             }
         }
 
@@ -530,7 +932,7 @@ public class GameActivity extends AppCompatActivity {
         if (pressedKey.equals(" ")) {
             if (currentWordIndex + 1 == wordsMapper.size()) {
                 Spannable gameTextSpannable = (Spannable) gameTextView.getText();
-                gameTextSpannable.removeSpan(colorBackGround);
+                gameTextSpannable.removeSpan(wordMarkerForCurrentUser);
             }
 
             needClearance = true;
@@ -551,12 +953,19 @@ public class GameActivity extends AppCompatActivity {
     private void finishGame() {
         gameTimer.cancel();
 
+        if (gameRoomKey != null) {
+            synchronizedMultiplayerCounter.cancel();
+            updateUserRealTimeData(collectedPoints);
+        }
+        String wpm = wpmTextView.getText().toString();
+        setWpmIndicationInReportScreen(wpm);
+
         closeKeyboard();
 
         gameReportLayout.setVisibility(View.VISIBLE);
         gamePlayingLayout.setVisibility(View.INVISIBLE);
 
-        gameReportText.setText(gameTextView.getText());
+        gameReportText.setText(gameTextView.getText(), TextView.BufferType.SPANNABLE);
 
         int totalCharacters = gameTextView.getText().toString().length();
 
@@ -566,6 +975,115 @@ public class GameActivity extends AppCompatActivity {
 
         correctOutOfTotalPercentageTextView.setText(correctPercentage + "%");
 
+
+        updateUserStatistics(correctPercentage);
+    }
+
+    public DocumentReference getUserDocument() {
+        AccessToken accessToken = AccessToken.getCurrentAccessToken();
+        GoogleSignInAccount googleAccount = GoogleSignIn.getLastSignedInAccount(applicationContext);
+        String users = "users";
+
+        if (mAuth.getCurrentUser() != null) {
+            return db.collection(users)
+                    .document(mAuth.getUid());
+        } else if (googleAccount != null) {
+            return db.collection(users)
+                    .document(googleAccount.getId());
+        } else {
+            return db.collection(users)
+                    .document(accessToken.getUserId());
+        }
+    }
+
+    private void setWpmIndicationInReportScreen(final String currentGameWpn) {
+        getUserDocument().collection("stats").document("statistics").get()
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful()) {
+                            DocumentSnapshot document = task.getResult();
+                            if (document.exists()) {
+//                                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+                                Double avgWpm = document.getDouble("avgWPM");
+                                setSpeedComparedNumber(currentGameWpn, String.valueOf(avgWpm));
+
+                            } else {
+//                                Log.d(TAG, "No such document - reading statistics");
+                            }
+                        } else {
+//                            Log.d(TAG, "reading statistics failed with ", task.getException());
+                        }
+                    }
+                });
+    }
+
+    private void setSpeedComparedNumber(String currentGameWpm, String userAverageWpm) {
+        Integer currentWpm = Integer.valueOf(currentGameWpm);
+        double wpmDouble = Double.parseDouble(userAverageWpm);
+        int previousWpnAverage = (int) wpmDouble;
+        int wpmCompareNumber = currentWpm - previousWpnAverage;
+        String displayedNumber = String.valueOf(Math.abs(wpmCompareNumber));
+        SpannableString spannableString = SpannableString.valueOf(displayedNumber);
+        ForegroundColorSpan color;
+        String textIndication;
+        Techniques techniques;
+
+        if (wpmCompareNumber >= 0) {
+            color = new ForegroundColorSpan(Color.GREEN);
+            textIndication = "Better than your average by ";
+            techniques = Techniques.Bounce;
+        } else {
+            color = new ForegroundColorSpan(Color.RED);
+            textIndication = "Worse than your average by ";
+            techniques = Techniques.Shake;
+        }
+
+        spannableString.setSpan(color, 0, displayedNumber.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+
+        wpmCompareNumberView.setText(spannableString);
+        wpmCompareLineView.setText(textIndication);
+
+        YoYo.with(techniques).repeat(1000).playOn(wpmCompareNumberView);
+    }
+
+    private void updateUserRealTimeData(final int collectedPoints) {
+        roomReference.runTransaction(new Transaction.Handler() {
+            @NonNull
+            @Override
+            public Transaction.Result doTransaction(@NonNull MutableData mutableData) {
+                if (mutableData.getValue() == null) {
+                    return Transaction.success(mutableData);
+                }
+
+                GameRoom gameRoom = mutableData.getValue(GameRoom.class);
+
+                switch (currentPlayerIndexInRoom) {
+                    case 1:
+                        gameRoom.usr1Points = collectedPoints;
+
+                        break;
+                    case 2:
+                        gameRoom.usr2Points = collectedPoints;
+
+                        break;
+                    default:
+                        throw new IllegalStateException("Unexpected value: " + currentPlayerIndexInRoom);
+                }
+
+                mutableData.setValue(gameRoom);
+
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(@Nullable DatabaseError databaseError, boolean b, @Nullable DataSnapshot dataSnapshot) {
+
+            }
+        });
+    }
+
+    private void updateUserStatistics(int correctPercentage) {
         ((TextView) (findViewById(R.id.reportWPMValue))).setText(wpmTextView.getText());
         ((TextView) (findViewById(R.id.reportCPMValue))).setText(cpmTextView.getText());
         ((TextView) (findViewById(R.id.reportPointsValue))).setText(pointTextView.getText());
@@ -589,7 +1107,7 @@ public class GameActivity extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             DocumentSnapshot document = task.getResult();
                             if (document.exists()) {
-                                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+//                                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
                                 Long numOfGames = document.getLong(numOfGamesField);
                                 Double newAvgAccuracy =
                                         calcNewAvgAfterAddingElement(document.getDouble(accuracyField), numOfGames, accuracy);
@@ -602,12 +1120,12 @@ public class GameActivity extends AppCompatActivity {
                                 writeToUserStatistics(numOfGames + 1, newAvgAccuracy, newAvgWPM, newAvgCPM, newTotalScore);
                                 writeGameResult(wpm, cpm, accuracy, points);
                             } else {
-                                Log.d(TAG, "No such document");
+//                                Log.d(TAG, "No such document");
                                 writeToUserStatistics(1, accuracy, wpm, cpm, points);
                                 writeGameResult(wpm, cpm, accuracy, points);
                             }
                         } else {
-                            Log.d(TAG, "get failed with ", task.getException());
+//                            Log.d(TAG, "get failed with ", task.getException());
                             writeToUserStatistics(1, accuracy, wpm, cpm, points);
                             writeGameResult(wpm, cpm, accuracy, points);
                         }
@@ -617,7 +1135,7 @@ public class GameActivity extends AppCompatActivity {
 
     private void writeGameResult(Double WPM, Double CPM, Double accuracy, Double points) {
         String theme = selectedTextItem.getThemeName();
-        String index = selectedTextItem.getID();
+        String index = selectedTextItem.getTextId();
         String timestamp = selectedTextItem.getDate();
 
         Map<String, Object> updatedStatistics = new HashMap<>();
@@ -640,7 +1158,7 @@ public class GameActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "user game result successfully written!");
+//                        Log.d(TAG, "user game result successfully written!");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -668,7 +1186,7 @@ public class GameActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "user average statistics successfully written!");
+//                        Log.d(TAG, "user average statistics successfully written!");
                     }
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -816,7 +1334,7 @@ public class GameActivity extends AppCompatActivity {
     private void increaseCombo() {
         isPreviousActionIsCorrectOrGameJustStarted = true;
 
-        if (comboCounter++ == comboThreshold) {
+        if (++comboCounter == comboThreshold) {
             comboCounter = 0;
 
             if (currentComboIndex < comboOptions.size() - 1) {
@@ -880,16 +1398,18 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void moveMarkerToNextWord(BackgroundColorSpan color) {
-        Pair<String, Integer> pair = wordsMapper.get(currentWordIndex + 1);
+        moveUserMarkerToNextWord(color, currentWordIndex + 1, gameTextView);
+    }
+
+    private void moveUserMarkerToNextWord(BackgroundColorSpan color, int toIndex, TextView textViewSpannableToUpdate) {
+        Pair<String, Integer> pair = wordsMapper.get(toIndex);
         Integer nextWordStartIndex = pair.second;
         String nextWord = pair.first;
 
         int lastIndex = nextWordStartIndex + nextWord.length();
 
-        Spannable gameTextSpannable = (Spannable) gameTextView.getText();
+        Spannable gameTextSpannable = (Spannable) textViewSpannableToUpdate.getText();
         gameTextSpannable.setSpan(color, nextWordStartIndex, lastIndex, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-
-//        gameTextView.setText(ss);
     }
 
     private int getNextStartWordIndex() {
@@ -915,8 +1435,6 @@ public class GameActivity extends AppCompatActivity {
         if (inputMethodManager != null) {
             inputMethodManager.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
         }
-
-        setActionBar();
     }
 
     private void setActionBar() {
@@ -940,7 +1458,7 @@ public class GameActivity extends AppCompatActivity {
             public void onRatingChanged(RatingBar ratingBar, final float rating,
                                         boolean fromUser) {
                 String theme = selectedTextItem.getThemeName();
-                String index = selectedTextItem.getID();
+                String index = selectedTextItem.getTextId();
                 String timestamp = selectedTextItem.getDate();
                 getUserStatsCollection().document(statisticsDocument).collection(gameResultsCollection)
                         .whereEqualTo(themeField, theme)
@@ -953,7 +1471,7 @@ public class GameActivity extends AppCompatActivity {
                                 if (task.isSuccessful()) {
                                     boolean ratedTextPreviously = false;
                                     for (QueryDocumentSnapshot document : task.getResult()) {
-                                        Log.d(TAG, document.getId() + " => " + document.getData());
+//                                        Log.d(TAG, document.getId() + " => " + document.getData());
                                         Double textRating = document.getDouble(textRatingField);
                                         if (textRating != null)
                                             ratedTextPreviously = true;
@@ -964,7 +1482,7 @@ public class GameActivity extends AppCompatActivity {
 
                                     }
                                 } else {
-                                    Log.d(TAG, "Error getting documents: ", task.getException());
+//                                    Log.d(TAG, "Error getting documents: ", task.getException());
                                 }
                             }
                         });
@@ -976,14 +1494,14 @@ public class GameActivity extends AppCompatActivity {
         Map<String, Object> ratingMap = new HashMap<>();
         ratingMap.put(textRatingField, rating);
         String theme = selectedTextItem.getThemeName();
-        String index = selectedTextItem.getID();
+        String index = selectedTextItem.getTextId();
         getUserStatsCollection().document(statisticsDocument).collection(gameResultsCollection)
                 .document(theme + "-" + index.toString() + "-" + gameTimeStamp.toString())
                 .set(ratingMap, merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "text rating successfully written into user game result!");
+//                        Log.d(TAG, "text rating successfully written into user game result!");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -997,7 +1515,7 @@ public class GameActivity extends AppCompatActivity {
 
     private void updateTextRatingInDatabase(final float rating) {
         String theme = selectedTextItem.getThemeName();
-        String index = selectedTextItem.getID();
+        String index = selectedTextItem.getTextId();
         String timestamp = selectedTextItem.getDate();
         final String composerUid = selectedTextItem.getComposer();
         db.collection("themes").document(theme).collection("texts")
@@ -1008,7 +1526,7 @@ public class GameActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, document.getId() + " => " + document.getData());
+//                                Log.d(TAG, document.getId() + " => " + document.getData());
                                 Double textRating = document.getDouble(textRatingField);
                                 Long numOfRatings = document.getLong(numOfRatingsField);
                                 if (textRating != null && numOfRatings != null) {
@@ -1023,52 +1541,62 @@ public class GameActivity extends AppCompatActivity {
                                 }
                             }
                         } else {
-                            Log.d(TAG, "Error getting text document to write rating: ", task.getException());
+//                            Log.d(TAG, "Error getting text document to write rating: ", task.getException());
                         }
                     }
                 });
     }
 
     private void updateComposerTextBestScoreAndWPM(final Double wpm, final Double score) {
-        db.collection("themes").document(selectedTextItem.getThemeName()).collection("texts")
-                .whereEqualTo("mainThemeID", selectedTextItem.getID())
+        db.collection("users").document(selectedTextItem.getComposer()).collection("texts")
+                .document(selectedTextItem.getTextId())
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                                Double bestScore = document.getDouble("best");
-                                Double bestWPM = document.getDouble("fastestSpeed");
-                                if (bestScore != null && bestWPM != null) {
-                                    if (bestScore < score)
-                                        writeBestScoreInComposerTextsCollection(score, document.getId());
-                                    if (bestWPM < wpm)
-                                        writeBestWPMInComposerTextsCollection(wpm, document.getId());
-                                } else {
-                                    writeBestScoreInComposerTextsCollection(score, document.getId());
-                                    writeBestWPMInComposerTextsCollection(wpm, document.getId());
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful() && task.getResult().exists()) {
+                            DocumentSnapshot document = task.getResult();
+//                            Log.d(TAG, document.getId() + " => " + document.getData());
+                            Double bestScore = document.getDouble("bestScore");
+                            Double bestWPM = document.getDouble("bestWpm");
+                            Long playCount = document.getLong("playCount");
+                            Map<String, Object> textStatistics = new HashMap<>();
+                            if (bestScore != null && bestWPM != null && playCount!=null) {
+                                if (bestScore < score){
+                                    textStatistics.put("bestScore",score);
+                                }else{
+                                    textStatistics.put("bestScore",bestScore);
                                 }
+                                if (bestWPM < wpm){
+                                    textStatistics.put("bestWpm", wpm);
+                                }else{
+                                    textStatistics.put("bestWpm",bestWPM);
+                                }
+                                textStatistics.put("playCount", playCount +1);
+                                writeTextStatisticsIntoComposerTextsCollection(textStatistics, document.getId());
+                            } else {
+                                textStatistics.put("bestScore",score);
+                                textStatistics.put("bestWpm", wpm);
+                                textStatistics.put("playCount", 1);
+                                writeTextStatisticsIntoComposerTextsCollection(textStatistics, document.getId());
                             }
                         } else {
-                            Log.d(TAG, "Error getting text document to write best score and wpm: ", task.getException());
+//                            Log.d(TAG, "Error getting text document to write best score and wpm: ", task.getException());
                         }
                     }
                 });
     }
 
-    private void writeBestScoreInComposerTextsCollection(Double currentScore, String documentId) {
-        Map<String, Object> temp = new HashMap<>();
-        temp.put("best", currentScore);
+    private void writeTextStatisticsIntoComposerTextsCollection(final Map<String, Object>  textStatistics, String documentId) {
         db.collection("users").document(selectedTextItem.getComposer())
                 .collection("texts")
                 .document(documentId)
-                .set(temp, SetOptions.merge())
+                .set(textStatistics, merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "best score successfully updated into composer collection!");
+                        updateTextStatisticsGlobally(textStatistics);
+//                        Log.d(TAG, "best score successfully updated into composer collection!");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -1079,25 +1607,38 @@ public class GameActivity extends AppCompatActivity {
                 });
     }
 
-    private void writeBestWPMInComposerTextsCollection(Double currentWPM, String documentId) {
-        Map<String, Object> temp = new HashMap<>();
-        temp.put("fastestSpeed", currentWPM);
-        db.collection("users").document(selectedTextItem.getComposer())
-                .collection("texts")
-                .document(documentId)
-                .set(temp, SetOptions.merge())
+    private void updateTextStatisticsGlobally(Map<String, Object>  textStatistics){
+        db.collection("themes").document(selectedTextItem.getThemeName()).collection("texts")
+                .document(selectedTextItem.getTextId())
+                .set(textStatistics, merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "best wpm successfully updated into composer collection!");
+//                        Log.d(TAG, "best score successfully updated into themes collection!");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing text best wpm into composer collection", e);
+                        Log.w(TAG, "Error writing text best score into themes collection", e);
                     }
                 });
+
+        db.collection("texts").document(selectedTextItem.getTextId())
+                .set(textStatistics, merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+//                        Log.d(TAG, "best score successfully updated into texts collection!");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.w(TAG, "Error writing text best score into texts collection", e);
+                    }
+                });
+
     }
 
     private void writeTextRatingInComposerTextsCollection(Long numOfRatings, Double newAvgRating, String documentId, String composerUid) {
@@ -1108,7 +1649,7 @@ public class GameActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "text rating successfully written into composer collection!");
+//                        Log.d(TAG, "text rating successfully written into composer collection!");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -1134,7 +1675,7 @@ public class GameActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "text rating successfully written into themes collection!");
+//                        Log.d(TAG, "text rating successfully written into themes collection!");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
@@ -1151,7 +1692,7 @@ public class GameActivity extends AppCompatActivity {
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "text rating successfully written into texts collection!");
+//                        Log.d(TAG, "text rating successfully written into texts collection!");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {

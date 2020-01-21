@@ -1,8 +1,12 @@
 package androidCourse.technion.quickthumbs.theme;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.CountDownTimer;
 import androidCourse.technion.quickthumbs.R;
+import androidCourse.technion.quickthumbs.Utils.CacheHandler;
+import androidCourse.technion.quickthumbs.personalArea.PersonalTexts.TextDataRow;
+
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,10 +23,15 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class ThemeAdaptor extends RecyclerView.Adapter<ThemeViewHolder> {
     List<ThemeDataRow> themes;
@@ -34,8 +43,9 @@ public class ThemeAdaptor extends RecyclerView.Adapter<ThemeViewHolder> {
     private FirebaseAuth mAuth;
     private CountDownTimer countDownTimer;
     private TextView timerTextView;
+    private CacheHandler cacheHandler;
 
-    public ThemeAdaptor(final List<ThemeDataRow> themes, final Context context, Map<String, Boolean> selected,
+    public ThemeAdaptor(final List<ThemeDataRow> themes, final Context context,
                         CountDownTimer timer, TextView timerTextView) {
         this.themes = themes;
         this.context = context;
@@ -43,30 +53,13 @@ public class ThemeAdaptor extends RecyclerView.Adapter<ThemeViewHolder> {
         this.timerTextView = timerTextView;
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-        selectedThemes=selected;
+//        selectedThemes=selected;
+        cacheHandler = new CacheHandler(context);
+        selectedThemes = cacheHandler.loadThemesFromSharedPreferences();
+
         countDownTimer=timer;
         this.timerTextView = timerTextView;
     }
-
-    private void updateUserTheme(boolean isChoosen,String selectedThemeName) {
-        Map<String, Object> selectedTheme = new HashMap<>();
-        selectedTheme.put("isChosen", isChoosen);
-        db.collection("users").document(mAuth.getUid()).collection("themes").document(selectedThemeName)
-                .set(selectedTheme, SetOptions.merge())
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d(TAG, "DocumentSnapshot successfully written!");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "Error writing document", e);
-                    }
-                });
-    }
-
 
     @NonNull
     @Override
@@ -101,7 +94,7 @@ public class ThemeAdaptor extends RecyclerView.Adapter<ThemeViewHolder> {
                 selectedThemes.put(themes.get(position).themeName,newValue);
 
                 //for the db
-                updateUserTheme(newValue,themes.get(position).themeName);
+                cacheHandler.saveThemesToSharedPreferences(selectedThemes);
 
                 int color = getCardColorBasedOnClicks(newValue);
                 ((CardView) v).setCardBackgroundColor(color);

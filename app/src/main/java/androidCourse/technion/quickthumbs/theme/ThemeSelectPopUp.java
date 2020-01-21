@@ -37,15 +37,14 @@ import java.util.Map;
 
 
 public class ThemeSelectPopUp {
-    private static final String TAG = AddTextActivity.class.getSimpleName();
-    private String[] themesNames={"Comedy","Music","Movies","Science","Games","Literature"};
+    private static final String TAG = ThemeSelectPopUp.class.getSimpleName();
     private FirebaseFirestore db;
     private FirebaseAuth mAuth;
-    private Map<String,Boolean> selectedThemes ;
     private RecyclerView recyclerView;
     private CountDownTimer timer;
     private TextView timerTextView;
     private View contextView;
+
     public void showPopupWindow(final View view, View callingLayout) {
         this.contextView = view;
         LayoutInflater inflater = (LayoutInflater) view.getContext()
@@ -73,7 +72,13 @@ public class ThemeSelectPopUp {
 
         popupWindow.showAtLocation(callingLayout, Gravity.CENTER,0,0);
 
-        getPersonalThemesData(view,popupWindow);
+//        getPersonalThemesData(view,popupWindow);
+
+        setCountDownTimer(popupWindow.getContentView(),popupWindow);
+
+        final List<ThemeDataRow> data = fillWithData();
+        themeAdaptorSet(data, view);
+
     }
 
     private void setCountDownTimer(final View popupView,final PopupWindow mPopupWindow) {
@@ -91,6 +96,7 @@ public class ThemeSelectPopUp {
 
             }
         };
+
         timer.start();
     }
 
@@ -104,41 +110,10 @@ public class ThemeSelectPopUp {
         });
     }
 
-    private void getPersonalThemesData(final View view, final PopupWindow popupView) {
-        final List<ThemeDataRow> data = fillWithData();
-        db.collection("users").document(getUid()).collection("themes").get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, document.getId() + " => " + document.getData());
-                                Boolean currentText = document.getBoolean("isChosen");
-                                selectedThemes.put(document.getId(),currentText);
-                            }
-                            setCountDownTimer(popupView.getContentView(),popupView);
-                            themeAdaptorSet(data, view);
-                            recyclerView.setVisibility(View.VISIBLE);
-                        } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
-                            for (int i=0 ; i<themesNames.length ; i++){
-                                //this is for the layout show
-                                selectedThemes.put(themesNames[i],true);
-                                //this is for the db
-                                Map<String, Object> currentTheme = new HashMap<>();
-                                currentTheme.put("isChosen", true);
-                                db.collection("users/" + getUid() + "/themes").document(themesNames[i]).set(currentTheme, SetOptions.merge());
-                            }
-                            setCountDownTimer(popupView.getContentView(),popupView);
-                            themeAdaptorSet(data,view);
-                            recyclerView.setVisibility(View.VISIBLE);
-                        }
-                    }
-                });
-    }
+
 
     private void themeAdaptorSet(List<ThemeDataRow> data, View view) {
-        ThemeAdaptor adapter = new ThemeAdaptor(data, view.getContext(), selectedThemes, timer, timerTextView);
+        ThemeAdaptor adapter = new ThemeAdaptor(data, view.getContext(), timer, timerTextView);
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext()));
     }
@@ -187,11 +162,11 @@ public class ThemeSelectPopUp {
         recyclerView = popupView.findViewById(R.id.themeRecycleView);
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-        selectedThemes = new HashMap<>();
-        for (String themesName : themesNames) {
-            //this is for the layout show
-            selectedThemes.put(themesName, false);
-        }
+//        selectedThemes = new HashMap<>();
+//        for (String themesName : themesNames) {
+//            //this is for the layout show
+//            selectedThemes.put(themesName, false);
+//        }
     }
 
     List<ThemeDataRow> fillWithData() {
