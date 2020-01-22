@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         setGoogleSignInConfigurations();
 
-        setFacebookSignInConfigurations();
+        //setFacebookSignInConfigurations();
 
         setButtonsListeners();
 
@@ -101,7 +101,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void setFacebookSignInConfigurations() {
         // Initialize Facebook Login button
         callbackManager = CallbackManager.Factory.create();
-        facebookLogIn = (LoginButton) findViewById(R.id.facebook_login_button);
+        //TODO if you bring back facebook, be sure to understand and solve the inflate exception of the login button
+        //facebookLogIn = (LoginButton) findViewById(R.id.facebook_login_button);
         facebookLogIn.setPermissions("email", "public_profile");
         facebookLogIn.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
