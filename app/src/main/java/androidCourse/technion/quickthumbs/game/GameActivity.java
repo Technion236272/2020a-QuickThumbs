@@ -180,6 +180,8 @@ public class GameActivity extends AppCompatActivity {
     private Timer synchronizedMultiplayerCounter;
     private List<Integer> roomPoints;
 
+    private TextView guidance;
+
     public static final int USER_NAME_MAX_SIZE = 10;
 
     @Override
@@ -728,6 +730,8 @@ public class GameActivity extends AppCompatActivity {
 
         podiumScreen = findViewById(R.id.podiumScreen);
 
+        guidance = findViewById(R.id.guidance);
+
         podiumPlaces = new ArrayList<>();
 
         podiumPlaces.add(new Pair<TextView, TextView>((TextView) findViewById(R.id.placement1), (TextView) findViewById(R.id.placement1Points)));
@@ -815,7 +819,11 @@ public class GameActivity extends AppCompatActivity {
                                 updateRemoteUserPosition();
                             }
 
+                            setGuidanceText(currentExpectedWord);
+
                         } else {
+                            turnOffGuidance();
+
                             finishGame();
                         }
                     }
@@ -834,6 +842,24 @@ public class GameActivity extends AppCompatActivity {
             }
 
         });
+    }
+
+    private void turnOffGuidance() {
+        guidance.setVisibility(View.INVISIBLE);
+    }
+
+    private void setGuidanceText(String currentExpectedWord) {
+        if (currentExpectedWord == wordsMapper.get(wordsMapper.size() - 1).first) {
+            guidance.setText("Press space to finish game");
+            guidance.setVisibility(View.VISIBLE);
+            guidance.setTextSize(17);
+            guidance.setBackground(getResources().getDrawable(R.color.secondaryLightColor));
+            guidance.setTextColor(getResources().getColor(R.color.secondaryTextColor));
+        } else {
+            guidance.setText("Press space to move to the next word");
+            guidance.setTextColor(getResources().getColor(R.color.secondaryColor));
+            guidance.setVisibility(View.VISIBLE);
+        }
     }
 
     private void spaceKeyIncreaseCorrectKeysWhenFullyCorrectWordTyped() {

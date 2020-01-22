@@ -92,8 +92,8 @@ import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE;
 import static android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO;
 
 public class ProfileActivity extends Fragment {
-    static int PReqCode = 1;
-    static int CReqCode = 2;
+    final static int PReqCode = 1;
+    final static int CReqCode = 2;
     static int REQUESCODE = 1;
     static int CAMERACODE = 2;
     private FirebaseFirestore db;
@@ -499,8 +499,11 @@ public class ProfileActivity extends Fragment {
                 != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.READ_EXTERNAL_STORAGE)) {
                 Toast.makeText(view.getContext(), "Please accept for required permission", Toast.LENGTH_SHORT).show();
+                requestPermissions(
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        PReqCode);
             } else {
-                ActivityCompat.requestPermissions(getActivity(),
+                requestPermissions(
                         new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
                         PReqCode);
             }
@@ -515,8 +518,12 @@ public class ProfileActivity extends Fragment {
                 != PackageManager.PERMISSION_GRANTED) {
             if (ActivityCompat.shouldShowRequestPermissionRationale(getActivity(), Manifest.permission.CAMERA)) {
                 Toast.makeText(view.getContext(), "Please accept for required permission", Toast.LENGTH_SHORT).show();
+                requestPermissions(
+                        new String[]{Manifest.permission.CAMERA, Manifest.permission.READ_EXTERNAL_STORAGE,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                        CReqCode);
             } else {
-                ActivityCompat.requestPermissions(getActivity(),
+                requestPermissions(
                         new String[]{Manifest.permission.CAMERA,Manifest.permission.READ_EXTERNAL_STORAGE,
                                 Manifest.permission.WRITE_EXTERNAL_STORAGE},
                         CReqCode);
@@ -524,6 +531,45 @@ public class ProfileActivity extends Fragment {
 
         } else {
             openCamera(view);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case CReqCode: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    cameraButton.setEnabled(true);
+                    cameraButton.performClick();
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+            case PReqCode: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    galleryButton.setEnabled(true);
+                    galleryButton.performClick();
+                    // permission was granted, yay! Do the
+                    // contacts-related task you need to do.
+                } else {
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+                return;
+            }
+
+            // other 'case' lines to check for other
+            // permissions this app might request.
         }
     }
 
@@ -579,15 +625,15 @@ public class ProfileActivity extends Fragment {
         return mediaFile;
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
-        if (requestCode == 0) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED
-                    && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
-                cameraButton.setEnabled(true);
-            }
-        }
-    }
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+//        if (requestCode == 0) {
+//            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED
+//                    && grantResults[1] == PackageManager.PERMISSION_GRANTED) {
+//                cameraButton.setEnabled(true);
+//            }
+//        }
+//    }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
