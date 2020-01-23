@@ -705,7 +705,7 @@ public class ProfileActivity extends Fragment {
         boolean isLoggedInOnFacebook = accessToken != null && !accessToken.isExpired();
         if (isLoggedInOnFacebook) {
             view.findViewById(R.id.logOutButton).setVisibility(View.INVISIBLE);
-            view.findViewById(R.id.facebook_log_out_button).setOnClickListener(
+            view.findViewById(R.id.facebook_login_button).setOnClickListener(
                     new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -714,7 +714,7 @@ public class ProfileActivity extends Fragment {
                     }
             );
         } else {
-            view.findViewById(R.id.facebook_log_out_button).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.facebook_login_button).setVisibility(View.INVISIBLE);
             view.findViewById(R.id.logOutButton).setOnClickListener(
                     new View.OnClickListener() {
                         @Override
