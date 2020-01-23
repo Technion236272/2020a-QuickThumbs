@@ -207,8 +207,10 @@ public class CacheHandler {
                 public void onSuccess(byte[] bytes) {
                     // Data for "images/island.jpg" is returns, use this as needed
                     Bitmap bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-                    savePictureOnSharedPrefrences("galleryProfilePicture", bitmap);
-                    profilePicture.setImageBitmap(bitmap);
+                    if(bitmap != null){ //added because I got null pointer exception that wasn't caught
+                        savePictureOnSharedPrefrences("galleryProfilePicture", bitmap);
+                        profilePicture.setImageBitmap(bitmap);
+                    }
 //                showMessage("picture was loaded from storage");
                 }
             }).addOnFailureListener(new OnFailureListener() {

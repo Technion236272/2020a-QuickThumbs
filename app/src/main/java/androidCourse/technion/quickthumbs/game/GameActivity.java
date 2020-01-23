@@ -39,6 +39,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -423,6 +424,11 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void updatePodium(List<Pair<Pair<Integer, String>, Boolean>> podiumResults) {
+        if(Build.VERSION.SDK_INT>=17) {
+            LinearLayout layout = findViewById(R.id.playersResultsLayout);
+            layout.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+        }
+
         int amountOfPlayersOnPodium = Math.min(3, podiumResults.size());
 
         for (int i = 0; i < amountOfPlayersOnPodium; i++) {
@@ -436,13 +442,18 @@ public class GameActivity extends AppCompatActivity {
             TextView nameView = viewPair.first;
             TextView pointsView = viewPair.second;
 
+            if(Build.VERSION.SDK_INT>=17){
+                nameView.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+                pointsView.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
+            }
+
             int colorPrimitive = isCurrentUser ? Color.GREEN : Color.BLACK;
             ForegroundColorSpan color = new ForegroundColorSpan(colorPrimitive);
 
-            String nameToPresent = name.substring(0, Math.min(name.length(), USER_NAME_MAX_SIZE));
-            SpannableString ss = new SpannableString(nameToPresent);
+            //String nameToPresent = name.substring(0, Math.min(name.length(), USER_NAME_MAX_SIZE));
+            SpannableString ss = new SpannableString(name);
 
-            ss.setSpan(color, 0, nameToPresent.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+            ss.setSpan(color, 0, name.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
             nameView.setText(ss);
 
             pointsView.setText(String.valueOf(points));
@@ -450,6 +461,11 @@ public class GameActivity extends AppCompatActivity {
 
         if (podiumScreen.getVisibility() == View.INVISIBLE) {
             podiumScreen.setVisibility(View.VISIBLE);
+        }
+
+        Button playAgainButton = findViewById(R.id.playAgainButton);
+        if(playAgainButton!= null){
+            playAgainButton.setVisibility(View.INVISIBLE);
         }
 
         YoYo.with(Techniques.Landing)

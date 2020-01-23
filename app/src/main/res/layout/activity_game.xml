@@ -74,8 +74,8 @@
                         android:layout_marginRight="5dp"
                         android:layout_marginBottom="10dp"
                         android:text="Better than your average by "
-                        android:textSize="19sp"
                         android:textColor="@color/primaryTextColor"
+                        android:textSize="19sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -86,8 +86,8 @@
                         android:layout_marginRight="10dp"
                         android:layout_toRightOf="@id/wpmCompareLine"
                         android:text="5"
-                        android:textSize="19sp"
                         android:textColor="@color/primaryTextColor"
+                        android:textSize="19sp"
                         android:textStyle="bold" />
 
 
@@ -98,8 +98,8 @@
                         android:layout_alignBaseline="@id/wpmCompareNumber"
                         android:layout_toRightOf="@id/wpmCompareNumber"
                         android:text="wpm"
-                        android:textSize="19sp"
                         android:textColor="@color/primaryTextColor"
+                        android:textSize="19sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -220,6 +220,7 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@id/reportLine"
                         android:layout_marginTop="10dp"
+                        android:layout_alignParentLeft="true"
                         android:padding="5sp"
                         android:text="@string/rateTheText"
                         android:textColor="@color/primaryTextColor"
@@ -231,6 +232,7 @@
                         android:layout_height="wrap_content"
                         android:layout_below="@id/rateText"
                         android:numStars="5"
+                        android:layout_alignParentLeft="true"
                         android:padding="5sp"
                         android:stepSize="0.5"
                         android:theme="@style/RatingBar" />
@@ -290,11 +292,10 @@
             android:orientation="vertical"
             android:visibility="visible">
 
-            <LinearLayout
+            <RelativeLayout
                 android:id="@+id/second"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentLeft="true"
                 android:layout_alignParentTop="true"
                 android:orientation="horizontal">
 
@@ -302,6 +303,7 @@
                     android:id="@+id/pointsHeadline"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
                     android:layout_marginLeft="10dp"
                     android:text="Points: "
                     android:textColor="@color/primaryTextColor"
@@ -312,6 +314,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0"
+                    android:layout_toRightOf="@id/pointsHeadline"
                     android:textColor="@color/primaryTextColor"
                     android:textSize="17sp" />
 
@@ -320,6 +323,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:padding="10dp"
+                    android:layout_toRightOf="@id/pointsValue"
                     android:textColor="@color/primaryTextColor"
                     android:textSize="15sp" />
 
@@ -328,6 +332,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="WPM: "
+                    android:layout_toRightOf="@id/changeIndicator"
                     android:textColor="@color/primaryTextColor"
                     android:textSize="17sp" />
 
@@ -337,6 +342,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginRight="10dp"
                     android:text="0"
+                    android:layout_toRightOf="@id/WPMHeadline"
                     android:textColor="@color/primaryTextColor"
                     android:textSize="17sp" />
 
@@ -345,6 +351,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="CPM: "
+                    android:layout_toRightOf="@id/WPMValue"
                     android:textColor="@color/primaryTextColor"
                     android:textSize="17sp" />
 
@@ -353,11 +360,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="0"
+                    android:layout_toRightOf="@id/CPMHeadline"
                     android:textColor="@color/primaryTextColor"
                     android:textSize="17sp" />
 
 
-            </LinearLayout>
+            </RelativeLayout>
 
             <ScrollView
                 android:layout_width="match_parent"
@@ -375,7 +383,8 @@
                         android:id="@+id/comboDisplayer"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_gravity="top|right"
+                        android:layout_gravity="top"
+                        android:layout_alignParentLeft="true"
                         android:padding="15sp"
                         android:text="X5"
                         android:textColor="@color/secondaryColor"
@@ -439,18 +448,19 @@
 
             <TextView
                 android:id="@+id/guidance"
-                android:visibility="invisible"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_above="@id/currentWord"
                 android:layout_marginLeft="10dp"
                 android:layout_marginRight="10dp"
                 android:gravity="left"
-                android:textColor="@color/secondaryLightColor"
-                android:text=""
                 android:paddingBottom="10dp"
+                android:text=""
                 android:textAlignment="center"
-                android:textSize="15sp" />
+                android:textColor="@color/secondaryLightColor"
+                android:textSize="15sp"
+                android:visibility="invisible" />
+
             <EditText
                 android:id="@+id/currentWord"
                 android:layout_width="match_parent"
@@ -494,6 +504,7 @@
                 android:id="@+id/placementAnnouncement"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_above="@id/podiumImageView"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:padding="10dp"
@@ -519,9 +530,11 @@
                 android:orientation="vertical">
 
                 <LinearLayout
+                    android:id="@+id/playersResultsLayout"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight=".48"
+                    android:gravity="left"
                     android:orientation="horizontal">
 
                     <LinearLayout
@@ -547,11 +560,12 @@
 
                             <TextView
                                 android:id="@+id/placement2"
-                                android:layout_width="wrap_content"
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_above="@id/placement2Points"
-                                android:layout_centerHorizontal="true"
+                                android:gravity="center"
                                 android:textColor="@color/secondaryColor"
+                                android:maxLines="1"
                                 android:textSize="22sp"
                                 android:textStyle="bold" />
 
@@ -581,11 +595,12 @@
 
                             <TextView
                                 android:id="@+id/placement1"
-                                android:layout_width="wrap_content"
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:layout_above="@id/placement1Points"
-                                android:layout_centerHorizontal="true"
+                                android:gravity="center"
                                 android:textColor="@color/secondaryColor"
+                                android:maxLines="1"
                                 android:textSize="24sp" />
 
 
@@ -644,8 +659,8 @@
                             android:layout_alignParentBottom="true"
                             android:layout_centerHorizontal="true"
                             android:layout_marginBottom="10dp"
-                            android:textColor="@color/primaryTextColor"
-                            android:background="@android:drawable/ic_menu_close_clear_cancel" />
+                            android:background="@drawable/ic_cancel_24dp"
+                            android:textColor="@color/primaryTextColor" />
                     </RelativeLayout>
 
                 </LinearLayout>
