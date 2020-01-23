@@ -74,7 +74,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         setGoogleSignInConfigurations();
 
-        //setFacebookSignInConfigurations();
+        setFacebookSignInConfigurations();
 
         setButtonsListeners();
 
@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         // Initialize Facebook Login button
         callbackManager = CallbackManager.Factory.create();
         //TODO if you bring back facebook, be sure to understand and solve the inflate exception of the login button
-        //facebookLogIn = (LoginButton) findViewById(R.id.facebook_login_button);
+        facebookLogIn = (LoginButton) findViewById(R.id.facebook_login_button);
         facebookLogIn.setPermissions("email", "public_profile");
         facebookLogIn.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
@@ -147,8 +147,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
-                            Toast.makeText(MainActivity.this, "Authentication failed.",
+                            Toast.makeText(MainActivity.this, "Authentication failed",
                                     Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, "If you already logged in with this email to the app,\n please log in with the login method you used before",
+                                    Toast.LENGTH_LONG).show();
                         }
                     }
                 });
@@ -233,6 +235,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                             // If sign in fails, display a message to the user.
                             Toast.makeText(MainActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
+                            Toast.makeText(MainActivity.this, "If you already logged in with this email to the app,\n please log in with the login method you used before",
+                                    Toast.LENGTH_LONG).show();
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
                         }
 
@@ -353,6 +357,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         } else {
                             Toast.makeText(MainActivity.this, "Authentication failed.", Toast.LENGTH_LONG)
                                     .show();
+                            Toast.makeText(MainActivity.this, "If you already logged in with this email to the app,\n please log in with the login method you used before",
+                                    Toast.LENGTH_LONG).show();
                             Log.w(TAG, "failed to sign in user", task.getException());
                         }
                     }

@@ -227,11 +227,11 @@
                 android:text="@string/LogOut" />
 
             <com.facebook.login.widget.LoginButton
-                android:id="@+id/facebook_log_out_button"
+                android:id="@+id/facebook_login_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@id/pager"
-                android:visibility="invisible"
+                android:visibility="visible"
                 android:layout_centerHorizontal="true"
                 android:layout_marginTop="10dp" />
 
