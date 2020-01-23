@@ -381,11 +381,12 @@ public class MainUserActivity extends Fragment {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                    Map<String, Object> data = task.getResult().getData();
-                    String name = (String) data.get("name");
-
-                    localUserName = name;
+                    if(task.getResult()!=null && task.getResult().getData()!=null){
+                        Map<String, Object> data = task.getResult().getData();
+                        String name = (String) data.get("name");
+                        localUserName = name;
 //                    Log.d(TAG, String.format("fetched user name -> %s", name));
+                    }
                 }
             }
         });
