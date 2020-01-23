@@ -17,7 +17,6 @@
         android:layout_width="match_parent"
         android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"
-
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
@@ -45,6 +44,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
                 android:layout_marginBottom="5sp"
                 android:text="Friend Name"
                 android:layout_marginLeft="5dp"
@@ -59,6 +59,7 @@
                 android:layout_below="@+id/friendName"
                 android:layout_marginLeft="5dp"
                 android:text="Total Score:"
+                android:layout_alignParentLeft="true"
                 android:textColor="@color/secondaryTextColor"
                 android:textSize="17sp" />
 
@@ -67,6 +68,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="5dp"
+                android:layout_alignParentLeft="true"
                 android:layout_marginBottom="5sp"
                 android:layout_below="@+id/friendTotalScoreHeader"
                 android:text="stats"
@@ -79,6 +81,7 @@
                 android:layout_height="?attr/actionBarSize"
                 android:layout_below="@id/friendName"
                 android:background="@color/transparent"
+                android:layout_alignParentLeft="true"
                 android:contentDescription="play With Him"
                 android:gravity="center"
                 app:srcCompat="@drawable/ic_account_plus_black_48dp" />
