@@ -424,7 +424,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void updatePodium(List<Pair<Pair<Integer, String>, Boolean>> podiumResults) {
-        if(Build.VERSION.SDK_INT>=17) {
+        if (Build.VERSION.SDK_INT >= 17) {
             LinearLayout layout = findViewById(R.id.playersResultsLayout);
             layout.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
         }
@@ -442,7 +442,7 @@ public class GameActivity extends AppCompatActivity {
             TextView nameView = viewPair.first;
             TextView pointsView = viewPair.second;
 
-            if(Build.VERSION.SDK_INT>=17){
+            if (Build.VERSION.SDK_INT >= 17) {
                 nameView.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
                 pointsView.setLayoutDirection(View.LAYOUT_DIRECTION_LTR);
             }
@@ -464,7 +464,7 @@ public class GameActivity extends AppCompatActivity {
         }
 
         Button playAgainButton = findViewById(R.id.playAgainButton);
-        if(playAgainButton!= null){
+        if (playAgainButton != null) {
             playAgainButton.setVisibility(View.INVISIBLE);
         }
 
@@ -1561,29 +1561,25 @@ public class GameActivity extends AppCompatActivity {
         String timestamp = selectedTextItem.getDate();
         final String composerUid = selectedTextItem.getComposer();
         db.collection("themes").document(theme).collection("texts")
-                .whereEqualTo("mainThemeID", index)
+                .document(index)
                 .get()
-                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                .addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                     @Override
-                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                        if (task.isSuccessful()) {
-                            for (QueryDocumentSnapshot document : task.getResult()) {
-//                                Log.d(TAG, document.getId() + " => " + document.getData());
-                                Double textRating = document.getDouble(textRatingField);
-                                Long numOfRatings = document.getLong(numOfRatingsField);
-                                if (textRating != null && numOfRatings != null) {
-                                    Double newAvgRating = (numOfRatings * textRating + rating) / (numOfRatings + 1);
-                                    writeTextRatingInThemesCollection(numOfRatings + 1, newAvgRating, document.getId());
-                                    writeTextRatingInTextsCollection(numOfRatings + 1, newAvgRating, document.getId());
-                                    writeTextRatingInComposerTextsCollection(numOfRatings + 1, newAvgRating, document.getId(), composerUid);
-                                } else {
-                                    writeTextRatingInThemesCollection((long) 1, (double) rating, document.getId());
-                                    writeTextRatingInTextsCollection((long) 1, (double) rating, document.getId());
-                                    writeTextRatingInComposerTextsCollection((long) 1, (double) rating, document.getId(), composerUid);
-                                }
+                    public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                        if (task.isSuccessful() && task.getResult()!=null) {
+                            DocumentSnapshot textDoc = task.getResult();
+                            Double textRating = textDoc.getDouble(textRatingField);
+                            Long numOfRatings = textDoc.getLong(numOfRatingsField);
+                            if (textRating != null && numOfRatings != null) {
+                                Double newAvgRating = (numOfRatings * textRating + rating) / (numOfRatings + 1);
+                                writeTextRatingInThemesCollection(numOfRatings + 1, newAvgRating, textDoc.getId());
+                                writeTextRatingInTextsCollection(numOfRatings + 1, newAvgRating, textDoc.getId());
+                                writeTextRatingInComposerTextsCollection(numOfRatings + 1, newAvgRating, textDoc.getId(), composerUid);
+                            } else {
+                                writeTextRatingInThemesCollection((long) 1, (double) rating, textDoc.getId());
+                                writeTextRatingInTextsCollection((long) 1, (double) rating, textDoc.getId());
+                                writeTextRatingInComposerTextsCollection((long) 1, (double) rating, textDoc.getId(), composerUid);
                             }
-                        } else {
-//                            Log.d(TAG, "Error getting text document to write rating: ", task.getException());
                         }
                     }
                 });
@@ -1603,21 +1599,21 @@ public class GameActivity extends AppCompatActivity {
                             Double bestWPM = document.getDouble("bestWpm");
                             Long playCount = document.getLong("playCount");
                             Map<String, Object> textStatistics = new HashMap<>();
-                            if (bestScore != null && bestWPM != null && playCount!=null) {
-                                if (bestScore < score){
-                                    textStatistics.put("bestScore",score);
-                                }else{
-                                    textStatistics.put("bestScore",bestScore);
+                            if (bestScore != null && bestWPM != null && playCount != null) {
+                                if (bestScore < score) {
+                                    textStatistics.put("bestScore", score);
+                                } else {
+                                    textStatistics.put("bestScore", bestScore);
                                 }
-                                if (bestWPM < wpm){
+                                if (bestWPM < wpm) {
                                     textStatistics.put("bestWpm", wpm);
-                                }else{
-                                    textStatistics.put("bestWpm",bestWPM);
+                                } else {
+                                    textStatistics.put("bestWpm", bestWPM);
                                 }
-                                textStatistics.put("playCount", playCount +1);
+                                textStatistics.put("playCount", playCount + 1);
                                 writeTextStatisticsIntoComposerTextsCollection(textStatistics, document.getId());
                             } else {
-                                textStatistics.put("bestScore",score);
+                                textStatistics.put("bestScore", score);
                                 textStatistics.put("bestWpm", wpm);
                                 textStatistics.put("playCount", 1);
                                 writeTextStatisticsIntoComposerTextsCollection(textStatistics, document.getId());
@@ -1629,7 +1625,7 @@ public class GameActivity extends AppCompatActivity {
                 });
     }
 
-    private void writeTextStatisticsIntoComposerTextsCollection(final Map<String, Object>  textStatistics, String documentId) {
+    private void writeTextStatisticsIntoComposerTextsCollection(final Map<String, Object> textStatistics, String documentId) {
         db.collection("users").document(selectedTextItem.getComposer())
                 .collection("texts")
                 .document(documentId)
@@ -1649,7 +1645,7 @@ public class GameActivity extends AppCompatActivity {
                 });
     }
 
-    private void updateTextStatisticsGlobally(Map<String, Object>  textStatistics){
+    private void updateTextStatisticsGlobally(Map<String, Object> textStatistics) {
         db.collection("themes").document(selectedTextItem.getThemeName()).collection("texts")
                 .document(selectedTextItem.getTextId())
                 .set(textStatistics, merge())
@@ -1729,7 +1725,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void writeTextRatingInTextsCollection(Long numOfRatings, Double newAvgRating, String documentId) {
-        db.collection("texts/").document(documentId)
+        db.collection("texts").document(documentId)
                 .set(getRatingMap(numOfRatings, newAvgRating), merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
