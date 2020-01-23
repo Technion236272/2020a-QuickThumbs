@@ -220,6 +220,11 @@ public class ProfileActivity extends Fragment {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful() && task.getResult() != null && task.getResult().size() != 0) {
                             for (QueryDocumentSnapshot friendDocument : task.getResult()) {
+                                if(friendDocument.getId().equals(userDocument.getId())){
+                                    Toast.makeText(fragmentView.getContext(), "You cannot send a friend request to yourself.", Toast.LENGTH_LONG).show();
+                                    clickable.setEnabled(true);
+                                    break;
+                                }
                                 addFriendRequestToSenderFriendsCollection(userDocument, friendDocument,
                                         email, clickable, fragmentView);
 //                                Log.d(TAG, "addFriendRequestToDatabaseIfEmailExists");
