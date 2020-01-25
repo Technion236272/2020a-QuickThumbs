@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         //Set custom image for background:
 //        splash.setBackgroundImage(getResources().getDrawable(R.mipmap.ic_launcher_foreground));
         //Set custom image for splash:
-        splash.setSplashImage(getResources().getDrawable(R.drawable.ic_launcher_foreground));
+        splash.setSplashImage(getResources().getDrawable(R.mipmap.ic_launcher_foreground));
         //Set custom color of splash image:
         splash.setSplashImageColor(getResources().getColor(R.color.primaryDarkColor));
         splash.create();
