@@ -455,11 +455,11 @@
                 android:layout_marginRight="10dp"
                 android:gravity="left"
                 android:paddingBottom="10dp"
-                android:text=""
+                android:text="Press space to move to the next word"
                 android:textAlignment="center"
                 android:textColor="@color/secondaryLightColor"
                 android:textSize="15sp"
-                android:visibility="invisible" />
+                android:visibility="visible" />
 
             <EditText
                 android:id="@+id/currentWord"

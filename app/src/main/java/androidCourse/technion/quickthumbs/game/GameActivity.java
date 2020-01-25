@@ -872,10 +872,12 @@ public class GameActivity extends AppCompatActivity {
             guidance.setTextSize(17);
             guidance.setBackground(getResources().getDrawable(R.color.secondaryLightColor));
             guidance.setTextColor(getResources().getColor(R.color.secondaryTextColor));
-        } else {
+        } else if (currentExpectedWord == wordsMapper.get(0).first) {
             guidance.setText("Press space to move to the next word");
             guidance.setTextColor(getResources().getColor(R.color.secondaryColor));
             guidance.setVisibility(View.VISIBLE);
+        } else {
+            guidance.setVisibility(View.INVISIBLE);
         }
     }
 
