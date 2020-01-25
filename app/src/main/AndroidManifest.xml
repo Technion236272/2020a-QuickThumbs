@@ -76,7 +76,7 @@
         <activity
             android:name="androidCourse.technion.quickthumbs.game.GameActivity"
             android:parentActivityName="androidCourse.technion.quickthumbs.MainUserActivity"
-            android:windowSoftInputMode="stateAlwaysVisible|adjustResize"
+            android:windowSoftInputMode="adjustResize"
             android:screenOrientation="portrait"/>
         <activity
             android:name="androidCourse.technion.quickthumbs.CreateAccountActivity"
