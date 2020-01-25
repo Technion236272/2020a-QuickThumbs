@@ -227,12 +227,12 @@ public class CacheHandler {
     }
 
     void getProfilePicture(String uid, final NotificationCompat.Builder builder) {
-        StorageReference storageRef = storage.getReference().child("users");
-        StorageReference userStorage = storageRef.child(uid);
-        StorageReference profilePictureRef = userStorage.child("/profilePicture.JPEG");
+        try {
+            StorageReference storageRef = storage.getReference().child("users");
+            StorageReference userStorage = storageRef.child(uid);
+            StorageReference profilePictureRef = userStorage.child("/profilePicture.JPEG");
 
-        final long ONE_MEGABYTE = 1024 * 1024;
-        try{
+            final long ONE_MEGABYTE = 1024 * 1024;
             profilePictureRef.getBytes(ONE_MEGABYTE).addOnSuccessListener(new OnSuccessListener<byte[]>() {
                 @Override
                 public void onSuccess(byte[] bytes) {
@@ -340,41 +340,45 @@ public class CacheHandler {
 
     // update user photo and name
     private static void storeProfilePhoto(final String source, Bitmap pickedImgBitmap, ImageView profilePicture) {
-        StorageReference storageRef = storage.getReference().child("users");
-        StorageReference userStorage = storageRef.child(getUid());
-        StorageReference profilePictureRef = userStorage.child("/profilePicture.JPEG");
+        try {
+            StorageReference storageRef = storage.getReference().child("users");
+            StorageReference userStorage = storageRef.child(getUid());
+            StorageReference profilePictureRef = userStorage.child("/profilePicture.JPEG");
 
-        // Get the data from an ImageView as bytes
+            // Get the data from an ImageView as bytes
 //        profilePicture.setDrawingCacheEnabled(true);
 //        profilePicture.buildDrawingCache();
-        Bitmap bitmap = ((BitmapDrawable) profilePicture.getDrawable()).getBitmap();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            Bitmap bitmap = ((BitmapDrawable) profilePicture.getDrawable()).getBitmap();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
 //        pickedImgBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        byte[] data = baos.toByteArray();
+            byte[] data = baos.toByteArray();
 
-        // Create the file metadata
-        StorageMetadata metadata = new StorageMetadata.Builder()
-                .setCustomMetadata("source", source)
-                .build();
+            // Create the file metadata
+            StorageMetadata metadata = new StorageMetadata.Builder()
+                    .setCustomMetadata("source", source)
+                    .build();
 
-        // Upload file and metadata to the path 'users/user_id/profilePicture.JPEG'
-        uploadTask = profilePictureRef.putBytes(data, metadata);
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                // Handle unsuccessful uploads
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
-                SharedPreferences sharedpreferences = context.getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sharedpreferences.edit();
-                editor.putBoolean("isLoadedToStorage", true);
+            // Upload file and metadata to the path 'users/user_id/profilePicture.JPEG'
+            uploadTask = profilePictureRef.putBytes(data, metadata);
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    // Handle unsuccessful uploads
+                }
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
+                    SharedPreferences sharedpreferences = context.getSharedPreferences(MyPREFERENCES, Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = sharedpreferences.edit();
+                    editor.putBoolean("isLoadedToStorage", true);
 //                showMessage("Profile picture uploaded successfully!");
-            }
-        });
+                }
+            });
+        } catch (Exception e) {
+
+        }
 
     }
 
