@@ -64,13 +64,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        setOpeningSplashScreen();
 
         FirebaseApp.initializeApp(this);
         fireBaseAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        moveToMainUserActivityIfAlreadyLoggedIn();
+        boolean isLoggedIn = moveToMainUserActivityIfAlreadyLoggedIn();
+
+        if (isLoggedIn) {
+            return;
+        }
+
+        setOpeningSplashScreen();
 
         setGoogleSignInConfigurations();
 
@@ -249,7 +254,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         startActivity(intent);
     }
 
-    private void moveToMainUserActivityIfAlreadyLoggedIn() {
+    private boolean moveToMainUserActivityIfAlreadyLoggedIn() {
         FirebaseUser currentUser = fireBaseAuth.getCurrentUser();
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
 
@@ -262,7 +267,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             startActivity(intent);
             finish();
 //            Log.d(TAG, "already signed in user: " + uid);
-            return;
+            return true;
         }
         if (currentUser != null) {
             currentUser.reload();
@@ -273,7 +278,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivity(intent);
                 finish();
 //                Log.d(TAG, "already signed in user: " + uid);
-                return;
+                return true;
             }
         }
 
@@ -287,7 +292,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             startActivity(intent);
             finish();
 //            Log.d(TAG, "already signed in user: " + uid);
+            return true;
         }
+        return false;
     }
 
     private void addUserDataToCollection(Map<String, Object> changedUser) {

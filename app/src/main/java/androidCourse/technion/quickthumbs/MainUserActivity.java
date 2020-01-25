@@ -796,11 +796,11 @@ public class MainUserActivity extends Fragment {
     private void setOpeningSplashScreen() {
         AppOpeningSplashScreen.Builder splash = new AppOpeningSplashScreen.Builder(getActivity());
         //        Set custom color of background:
-        splash.setBackgroundColor(getResources().getColor(R.color.primaryColor));
+        splash.setBackgroundImage(getResources().getDrawable(R.drawable.background));
         //Set custom image for background:
 //        splash.setBackgroundImage(getResources().getDrawable(R.mipmap.ic_launcher_foreground));
         //Set custom image for splash:
-        splash.setSplashImage(getResources().getDrawable(R.drawable.ic_launcher_foreground));
+        splash.setSplashImage(getResources().getDrawable(R.mipmap.ic_launcher_foreground));
         //Set custom color of splash image:
         splash.setSplashImageColor(getResources().getColor(R.color.primaryDarkColor));
         splash.create();
