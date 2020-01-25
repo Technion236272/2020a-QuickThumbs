@@ -53,6 +53,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.common.collect.ImmutableList;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
@@ -122,7 +123,7 @@ public class GameActivity extends AppCompatActivity {
     private TextView multiPlayerCounter;
     private TextView wpmCompareNumberView;
     private TextView wpmCompareLineView;
-    private Button closingPodiumButton;
+    private FloatingActionButton closingPodiumButton;
     private ImageView onlineIndicator;
     private TextView opponentNameView;
     private RelativeLayout podiumScreen;
