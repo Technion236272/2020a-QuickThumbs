@@ -472,4 +472,9 @@ public class GameLoadingSplashScreenActivity extends AppCompatActivity {
 
         return i;
     }
+
+    @Override
+    public void finish() {
+//        super.finish();
+    }
 }

@@ -138,8 +138,8 @@ public class FriendAdaptor extends FirestoreRecyclerAdapter<FriendItem, FriendVi
     private void closeOtherMultiPlayerCalls() {
         Class<?> c = MainUserActivity.class;
         try {
-            Method method = c.getDeclaredMethod("setCloseMultiplayerSerchButtonListener", null);
-            method.invoke(mainUserActivityInstance, null);
+            Method method = c.getDeclaredMethod("setCloseMultiplayerSerchButtonListener");
+            method.invoke(mainUserActivityInstance);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
