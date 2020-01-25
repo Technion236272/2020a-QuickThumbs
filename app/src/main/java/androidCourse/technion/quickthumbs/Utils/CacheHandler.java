@@ -99,12 +99,12 @@ public class CacheHandler {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful()) {
                             for (QueryDocumentSnapshot document : task.getResult()) {
-                                Log.d(TAG, document.getId() + " => " + document.getData());
+//                                Log.d(TAG, document.getId() + " => " + document.getData());
                                 Boolean currentText = document.getBoolean("isChosen");
                                 selectedThemes.put(document.getId(), currentText);
                             }
                         } else {
-                            Log.d(TAG, "Error getting documents: ", task.getException());
+//                            Log.d(TAG, "Error getting documents: ", task.getException());
                             for (int i = 0; i < themesNames.length; i++) {
                                 //this is for the layout show
                                 selectedThemes.put(themesNames[i], true);
@@ -334,7 +334,7 @@ public class CacheHandler {
         byte[] b = baos.toByteArray();
         String imageEncoded = Base64.encodeToString(b, Base64.DEFAULT);
 
-        Log.d("Image Log:", imageEncoded);
+//        Log.d("Image Log:", imageEncoded);
         return imageEncoded;
     }
 

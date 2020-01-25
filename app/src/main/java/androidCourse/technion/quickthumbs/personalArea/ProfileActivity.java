@@ -260,7 +260,7 @@ public class ProfileActivity extends Fragment {
                                 clickable.setEnabled(true);
                             }
                         } else {
-                            Log.d(TAG, "Failed for unexpected reason");
+//                            Log.d(TAG, "Failed for unexpected reason");
                             Toast.makeText(fragmentView.getContext(), "Failed for unexpected reason", Toast.LENGTH_LONG).show();
                             clickable.setEnabled(true);
                         }
@@ -285,14 +285,14 @@ public class ProfileActivity extends Fragment {
                                 //I don't have a request from that user, so should continue ...
                                 addFriendRequestIfNotAlreadyFriends(userDocumentId, friendDocument,
                                         email, clickable, fragmentView);
-                                Log.d(TAG, "addFriendRequestIfNoPreviousRequestsExist success");
+//                                Log.d(TAG, "addFriendRequestIfNoPreviousRequestsExist success");
                             } else {
                                 Toast.makeText(fragmentView.getContext(), "You already sent a request", Toast.LENGTH_LONG).show();
                                 email.clear();
                                 clickable.setEnabled(true);
                             }
                         } else {
-                            Log.d(TAG, "Failed for unexpected reason");
+//                            Log.d(TAG, "Failed for unexpected reason");
                             Toast.makeText(fragmentView.getContext(), "Failed for unexpected reason", Toast.LENGTH_LONG).show();
                             clickable.setEnabled(true);
                         }
@@ -341,13 +341,13 @@ public class ProfileActivity extends Fragment {
                     @Override
                     public void onSuccess(Void aVoid) {
 //                        new CacheHandler.FriendsUpdateFrindsList().execute();
-                        Log.d(TAG, "addFriendRequest friend document set successfully");
+//                        Log.d(TAG, "addFriendRequest friend document set successfully");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "addFriendRequest Error setting friend document", e);
+//                        Log.w(TAG, "addFriendRequest Error setting friend document", e);
                     }
                 });
     }
@@ -610,7 +610,7 @@ public class ProfileActivity extends Fragment {
         // Create the storage directory if it does not exist
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
-                Log.d("MyCameraApp", "failed to create directory");
+//                Log.d("MyCameraApp", "failed to create directory");
                 return null;
             }
         }
@@ -755,17 +755,17 @@ public class ProfileActivity extends Fragment {
                         if (task.isSuccessful()) {
                             DocumentSnapshot document = task.getResult();
                             if (document.exists()) {
-                                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+//                                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
                                 Double avgAccuracy = document.getDouble("avgAccuracy");
                                 Double avgWPM = document.getDouble("avgWPM");
                                 Double avgCPM = document.getDouble("avgCPM");
                                 Double totalScore = document.getDouble("TotalScore");
                                 setStatisticsTextViews(view, avgAccuracy, avgWPM, avgCPM, totalScore);
                             } else {
-                                Log.d(TAG, "No such document - reading statistics");
+//                                Log.d(TAG, "No such document - reading statistics");
                             }
                         } else {
-                            Log.d(TAG, "reading statistics failed with ", task.getException());
+//                            Log.d(TAG, "reading statistics failed with ", task.getException());
                         }
                     }
                 });
