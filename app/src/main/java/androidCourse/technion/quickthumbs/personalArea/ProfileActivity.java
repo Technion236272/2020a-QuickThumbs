@@ -18,6 +18,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -678,10 +679,14 @@ public class ProfileActivity extends Fragment {
 //                    matrix.postScale(0.5f, 0.5f);
 //                    Bitmap bitmap = Bitmap.createBitmap(bitmapOriginal, 100, 100, 100, 100, matrix, true);
                     Bitmap shrinkBitmap = cacheHandler.ShrinkBitmap(bitmapOriginal, 200, 200);
-                    cacheHandler.savePictureOnSharedPrefrences("galleryProfilePicture", shrinkBitmap);
-                    profilePicture.setImageBitmap(Bitmap.createScaledBitmap(shrinkBitmap, 200, 200, false));
+                    Matrix mat = new Matrix();
+                    mat.postRotate(90);
+                    Bitmap image_to_upload = Bitmap.createBitmap(shrinkBitmap, 0, 0, shrinkBitmap.getWidth(), shrinkBitmap.getHeight(), mat, true);
 
-                    Bitmap bmpCopy = shrinkBitmap.copy(shrinkBitmap.getConfig(), true);
+                    cacheHandler.savePictureOnSharedPrefrences("galleryProfilePicture", image_to_upload);
+                    profilePicture.setImageBitmap(Bitmap.createScaledBitmap(image_to_upload, 200, 200, false));
+
+                    Bitmap bmpCopy = image_to_upload.copy(image_to_upload.getConfig(), true);
                     CacheHandler.MyTaskParams myTaskParams = new CacheHandler.MyTaskParams("gallery", bmpCopy, profilePicture);
                     new CacheHandler.UploadToStorage().execute(myTaskParams);
                 } catch (FileNotFoundException e) {
