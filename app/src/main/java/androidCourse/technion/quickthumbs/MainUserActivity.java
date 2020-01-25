@@ -247,9 +247,9 @@ public class MainUserActivity extends Fragment {
                             //TODO: implement pop up friends list
                             if (friendUid != null) {
 //                                new MainUserActivity.FetchRandomTextForFriendsRoom().execute(myparam);
-                            }else{
+                            } else {
                                 GameInvitePopUp invitePopUp = new GameInvitePopUp();
-                                invitePopUp.showPopupWindow(fragmentViewForButton, fragmentViewForButton.findViewById(R.id.RelativeLayout1),friendAdaptor);
+                                invitePopUp.showPopupWindow(fragmentViewForButton, fragmentViewForButton.findViewById(R.id.RelativeLayout1), friendAdaptor);
                             }
                         }
                         break;
@@ -381,11 +381,12 @@ public class MainUserActivity extends Fragment {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                    Map<String, Object> data = task.getResult().getData();
-                    String name = (String) data.get("name");
-
-                    localUserName = name;
+                    if (task.getResult() != null && task.getResult().getData() != null) {
+                        Map<String, Object> data = task.getResult().getData();
+                        String name = (String) data.get("name");
+                        localUserName = name;
 //                    Log.d(TAG, String.format("fetched user name -> %s", name));
+                    }
                 }
             }
         });
@@ -604,23 +605,23 @@ public class MainUserActivity extends Fragment {
                     rippleBackground.stopRippleAnimation();
 
                     GameRoom gameRoom = dataSnapshot.getValue(GameRoom.class);
-                    String textId = gameRoom.textId;
+                    if (gameRoom != null) {
+                        String textId = gameRoom.textId;
+                        int indexForCurrentUser = 2;
+                        int targetAmount = 2;
+                        amountOfPlayerView.setText(String.format("%s out of %s in room ...", indexForCurrentUser, targetAmount));
 
-                    int indexForCurrentUser = 2;
-                    int targetAmount = 2;
-                    amountOfPlayerView.setText(String.format("%s out of %s in room ...", indexForCurrentUser, targetAmount));
-
-                    Context context = getActivity().getApplicationContext();
-                    Intent i = new Intent(context, GameLoadingSplashScreenActivity.class);
-                    i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
-                    i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    i.putExtra("id", textId);
-                    i.putExtra("roomKey", roomKey);
-                    i.putExtra("indexInRoom", indexForCurrentUser);
-                    i.putExtra("startingTimeStamp", System.currentTimeMillis());
-                    context.startActivity(i);
+                        Context context = getActivity().getApplicationContext();
+                        Intent i = new Intent(context, GameLoadingSplashScreenActivity.class);
+                        i.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                        i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                        i.putExtra("id", textId);
+                        i.putExtra("roomKey", roomKey);
+                        i.putExtra("indexInRoom", indexForCurrentUser);
+                        i.putExtra("startingTimeStamp", System.currentTimeMillis());
+                        context.startActivity(i);
+                    }
                 } else {
-
 //                    Log.d(TAG, "Friend enter game should not fail!!, might be connectivity issues or any other unexpected problem");
                 }
             }
@@ -772,7 +773,7 @@ public class MainUserActivity extends Fragment {
     @Override
     public void onStop() {
         super.onStop();
-        if(friendAdaptor!= null){
+        if (friendAdaptor != null) {
             friendAdaptor.stopListening();
         }
     }
@@ -786,7 +787,7 @@ public class MainUserActivity extends Fragment {
         AccessToken accessToken = AccessToken.getCurrentAccessToken();
         boolean isLoggedIn = accessToken != null && !accessToken.isExpired();
         if (checkIfUserLoggedIn(currentUser, account, isLoggedIn)) return;
-        if(friendAdaptor!= null){
+        if (friendAdaptor != null) {
             friendAdaptor.startListening();
         }
         //the part where i insert the user to the db just ot make sure he's there in case no user has been made
@@ -795,11 +796,11 @@ public class MainUserActivity extends Fragment {
     private void setOpeningSplashScreen() {
         AppOpeningSplashScreen.Builder splash = new AppOpeningSplashScreen.Builder(getActivity());
         //        Set custom color of background:
-        splash.setBackgroundColor(getResources().getColor(R.color.primaryColor));
+        splash.setBackgroundImage(getResources().getDrawable(R.drawable.background));
         //Set custom image for background:
 //        splash.setBackgroundImage(getResources().getDrawable(R.mipmap.ic_launcher_foreground));
         //Set custom image for splash:
-        splash.setSplashImage(getResources().getDrawable(R.drawable.ic_launcher_foreground));
+        splash.setSplashImage(getResources().getDrawable(R.mipmap.ic_launcher_foreground));
         //Set custom color of splash image:
         splash.setSplashImageColor(getResources().getColor(R.color.primaryDarkColor));
         splash.create();
@@ -966,7 +967,7 @@ public class MainUserActivity extends Fragment {
     @Override
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
-        if(friendAdaptor!= null){
+        if (friendAdaptor != null) {
             friendAdaptor.startListening();
         }
     }
@@ -974,12 +975,10 @@ public class MainUserActivity extends Fragment {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        if(friendAdaptor!= null){
+        if (friendAdaptor != null) {
             friendAdaptor.stopListening();
         }
     }
-
-
 
 
 }

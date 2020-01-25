@@ -20,7 +20,7 @@
             android:focusable="true"
             android:clickable="true"
             android:minHeight="?attr/actionBarSize"
-            android:gravity="center_vertical"
+            android:gravity="left"
             android:orientation="horizontal"
             android:layout_width="match_parent"
             android:weightSum="1"
@@ -32,7 +32,7 @@
                 android:layout_width="0dp"
                 android:layout_weight="0.2"
                 android:layout_height="match_parent"
-                android:gravity="start"
+                android:gravity="left"
                 android:contentDescription="@string/starsIcon"
                 android:scaleType="fitXY"/>
 
@@ -57,7 +57,7 @@
                 android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
                 android:layout_gravity="center"
-                android:gravity="start"
+                android:gravity="left"
                 android:contentDescription="@string/starsIcon"
                 android:src="@drawable/ic_stars_24dp"
                 android:scaleType="center"/>
@@ -67,7 +67,7 @@
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:layout_gravity="center"
-                    android:gravity="start"
+                    android:gravity="left"
                     android:contentDescription="@string/starsIcon"
                     android:src="@drawable/ic_stars_24dp"
                     android:scaleType="center"/>
@@ -77,7 +77,7 @@
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:layout_gravity="center"
-                    android:gravity="start"
+                    android:gravity="left"
                     android:contentDescription="@string/starsIcon"
                     android:src="@drawable/ic_stars_24dp"
                     android:scaleType="center"/>
@@ -87,7 +87,7 @@
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:layout_gravity="center"
-                    android:gravity="start"
+                    android:gravity="left"
                     android:contentDescription="@string/starsIcon"
                     android:src="@drawable/ic_stars_24dp"
                     android:scaleType="center"/>
@@ -97,7 +97,7 @@
                     android:layout_height="wrap_content"
                     android:layout_width="wrap_content"
                     android:layout_gravity="center"
-                    android:gravity="start"
+                    android:gravity="left"
                     android:contentDescription="@string/starsIcon"
                     android:src="@drawable/ic_stars_24dp"
                     android:scaleType="center"/>

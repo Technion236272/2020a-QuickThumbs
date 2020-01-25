@@ -33,7 +33,7 @@ public class NotificationActivity extends AppCompatActivity {
         context = this;
         Bundle extras = getIntent().getExtras();
 
-        Log.d(TAG, "NotificationActivity - onCreate - extras: " + extras);
+//        Log.d(TAG, "NotificationActivity - onCreate - extras: " + extras);
 
         if (extras == null) {
             context.finish();
@@ -43,7 +43,7 @@ public class NotificationActivity extends AppCompatActivity {
         for (String key : extras.keySet()) {
             Object value = extras.get(key);
             messageValues.put(key, value);
-            Log.d(TAG, "Extras received at onNewIntent:  Key: " + key + " Value: " + value);
+//            Log.d(TAG, "Extras received at onNewIntent:  Key: " + key + " Value: " + value);
         }
         if(messageValues.get("notification_id")!= null){
             NotificationManager notificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
@@ -75,7 +75,7 @@ public class NotificationActivity extends AppCompatActivity {
             boolean answer = (boolean) extras.get("answer");
             if (answer) {
                 friendsDatabaseHandler.addFriend((String) extras.getString("from"), getApplicationContext());
-                Log.d(TAG, "friend is " + extras.getString("from"));
+//                Log.d(TAG, "friend is " + extras.getString("from"));
                 Intent intent = new Intent(this, MainPager.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                 startActivity(intent);

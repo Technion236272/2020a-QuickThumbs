@@ -18,6 +18,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -220,6 +221,11 @@ public class ProfileActivity extends Fragment {
                     public void onComplete(@NonNull Task<QuerySnapshot> task) {
                         if (task.isSuccessful() && task.getResult() != null && task.getResult().size() != 0) {
                             for (QueryDocumentSnapshot friendDocument : task.getResult()) {
+                                if(friendDocument.getId().equals(userDocument.getId())){
+                                    Toast.makeText(fragmentView.getContext(), "You cannot send a friend request to yourself.", Toast.LENGTH_LONG).show();
+                                    clickable.setEnabled(true);
+                                    break;
+                                }
                                 addFriendRequestToSenderFriendsCollection(userDocument, friendDocument,
                                         email, clickable, fragmentView);
 //                                Log.d(TAG, "addFriendRequestToDatabaseIfEmailExists");
@@ -254,7 +260,7 @@ public class ProfileActivity extends Fragment {
                                 clickable.setEnabled(true);
                             }
                         } else {
-                            Log.d(TAG, "Failed for unexpected reason");
+//                            Log.d(TAG, "Failed for unexpected reason");
                             Toast.makeText(fragmentView.getContext(), "Failed for unexpected reason", Toast.LENGTH_LONG).show();
                             clickable.setEnabled(true);
                         }
@@ -279,14 +285,14 @@ public class ProfileActivity extends Fragment {
                                 //I don't have a request from that user, so should continue ...
                                 addFriendRequestIfNotAlreadyFriends(userDocumentId, friendDocument,
                                         email, clickable, fragmentView);
-                                Log.d(TAG, "addFriendRequestIfNoPreviousRequestsExist success");
+//                                Log.d(TAG, "addFriendRequestIfNoPreviousRequestsExist success");
                             } else {
                                 Toast.makeText(fragmentView.getContext(), "You already sent a request", Toast.LENGTH_LONG).show();
                                 email.clear();
                                 clickable.setEnabled(true);
                             }
                         } else {
-                            Log.d(TAG, "Failed for unexpected reason");
+//                            Log.d(TAG, "Failed for unexpected reason");
                             Toast.makeText(fragmentView.getContext(), "Failed for unexpected reason", Toast.LENGTH_LONG).show();
                             clickable.setEnabled(true);
                         }
@@ -335,13 +341,13 @@ public class ProfileActivity extends Fragment {
                     @Override
                     public void onSuccess(Void aVoid) {
 //                        new CacheHandler.FriendsUpdateFrindsList().execute();
-                        Log.d(TAG, "addFriendRequest friend document set successfully");
+//                        Log.d(TAG, "addFriendRequest friend document set successfully");
                     }
                 })
                 .addOnFailureListener(new OnFailureListener() {
                     @Override
                     public void onFailure(@NonNull Exception e) {
-                        Log.w(TAG, "addFriendRequest Error setting friend document", e);
+//                        Log.w(TAG, "addFriendRequest Error setting friend document", e);
                     }
                 });
     }
@@ -604,7 +610,7 @@ public class ProfileActivity extends Fragment {
         // Create the storage directory if it does not exist
         if (!mediaStorageDir.exists()) {
             if (!mediaStorageDir.mkdirs()) {
-                Log.d("MyCameraApp", "failed to create directory");
+//                Log.d("MyCameraApp", "failed to create directory");
                 return null;
             }
         }
@@ -673,10 +679,14 @@ public class ProfileActivity extends Fragment {
 //                    matrix.postScale(0.5f, 0.5f);
 //                    Bitmap bitmap = Bitmap.createBitmap(bitmapOriginal, 100, 100, 100, 100, matrix, true);
                     Bitmap shrinkBitmap = cacheHandler.ShrinkBitmap(bitmapOriginal, 200, 200);
-                    cacheHandler.savePictureOnSharedPrefrences("galleryProfilePicture", shrinkBitmap);
-                    profilePicture.setImageBitmap(Bitmap.createScaledBitmap(shrinkBitmap, 200, 200, false));
+                    Matrix mat = new Matrix();
+                    mat.postRotate(90);
+                    Bitmap image_to_upload = Bitmap.createBitmap(shrinkBitmap, 0, 0, shrinkBitmap.getWidth(), shrinkBitmap.getHeight(), mat, true);
 
-                    Bitmap bmpCopy = shrinkBitmap.copy(shrinkBitmap.getConfig(), true);
+                    cacheHandler.savePictureOnSharedPrefrences("galleryProfilePicture", image_to_upload);
+                    profilePicture.setImageBitmap(Bitmap.createScaledBitmap(image_to_upload, 200, 200, false));
+
+                    Bitmap bmpCopy = image_to_upload.copy(image_to_upload.getConfig(), true);
                     CacheHandler.MyTaskParams myTaskParams = new CacheHandler.MyTaskParams("gallery", bmpCopy, profilePicture);
                     new CacheHandler.UploadToStorage().execute(myTaskParams);
                 } catch (FileNotFoundException e) {
@@ -700,7 +710,7 @@ public class ProfileActivity extends Fragment {
         boolean isLoggedInOnFacebook = accessToken != null && !accessToken.isExpired();
         if (isLoggedInOnFacebook) {
             view.findViewById(R.id.logOutButton).setVisibility(View.INVISIBLE);
-            view.findViewById(R.id.facebook_log_out_button).setOnClickListener(
+            view.findViewById(R.id.facebook_login_button).setOnClickListener(
                     new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -709,7 +719,7 @@ public class ProfileActivity extends Fragment {
                     }
             );
         } else {
-            view.findViewById(R.id.facebook_log_out_button).setVisibility(View.INVISIBLE);
+            view.findViewById(R.id.facebook_login_button).setVisibility(View.INVISIBLE);
             view.findViewById(R.id.logOutButton).setOnClickListener(
                     new View.OnClickListener() {
                         @Override
@@ -745,17 +755,17 @@ public class ProfileActivity extends Fragment {
                         if (task.isSuccessful()) {
                             DocumentSnapshot document = task.getResult();
                             if (document.exists()) {
-                                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
+//                                Log.d(TAG, "DocumentSnapshot data: " + document.getData());
                                 Double avgAccuracy = document.getDouble("avgAccuracy");
                                 Double avgWPM = document.getDouble("avgWPM");
                                 Double avgCPM = document.getDouble("avgCPM");
                                 Double totalScore = document.getDouble("TotalScore");
                                 setStatisticsTextViews(view, avgAccuracy, avgWPM, avgCPM, totalScore);
                             } else {
-                                Log.d(TAG, "No such document - reading statistics");
+//                                Log.d(TAG, "No such document - reading statistics");
                             }
                         } else {
-                            Log.d(TAG, "reading statistics failed with ", task.getException());
+//                            Log.d(TAG, "reading statistics failed with ", task.getException());
                         }
                     }
                 });
